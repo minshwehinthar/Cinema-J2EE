@@ -8,7 +8,7 @@
 %>
 <jsp:include page="JSPHeader.jsp"/>
 <!-- Footer -->
-<footer class="border-t backdrop-blur-sm shadow-sm bg-white text-gray-800">
+<footer class="backdrop-blur-sm shadow-sm bg-white text-gray-800">
     <div class="container mx-auto p-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
 

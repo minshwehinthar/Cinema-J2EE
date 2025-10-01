@@ -2,19 +2,21 @@
 <%@ page import="java.util.List"%>
 <%@ page import="com.demo.model.FoodItem"%>
 <%@ page import="com.demo.dao.FoodDAO"%>
+
 <jsp:include page="layout/JSPHeader.jsp"/>
-<main class="bg-gray-50 min-h-screen font-sans">
+
+<body class="flex flex-col min-h-screen bg-gray-50 font-sans">
 
   <!-- Header -->
   <jsp:include page="layout/header.jsp"/>
 
-  <!-- Container -->
-  <div class="container mx-auto px-4 py-12">
+  <!-- Main Content -->
+  <main class="flex-grow container mx-auto px-4 py-12">
 
     <!-- Page Title -->
     <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-12">Our Menu</h1>
 
-    <!-- Grid -->
+    <!-- Food Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
       <%
         FoodDAO dao = new FoodDAO();
@@ -24,12 +26,11 @@
       %>
 
       <!-- Food Card -->
-      <div class="bg-white rounded-2xl overflow-hidden flex flex-col">
+      <div class="bg-white rounded-2xl overflow-hidden flex flex-col shadow-sm">
 
         <!-- Image -->
         <div class="flex justify-center items-center h-52 p-4">
-          <img src="<%=f.getImage()%>" alt="<%=f.getName()%>" 
-               class="max-h-full object-contain">
+          <img src="<%=f.getImage()%>" alt="<%=f.getName()%>" class="max-h-full object-contain">
         </div>
 
         <!-- Content -->
@@ -50,19 +51,16 @@
               boolean halfStar = (f.getRating() - fullStars) >= 0.5;
               int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-              // Full stars
               for(int i=0; i<fullStars; i++) { %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.921-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.176 0l-3.385 2.46c-.785.57-1.84-.197-1.54-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.097 9.401c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.974z"/>
                 </svg>
             <% } 
-              // Half star
               if(halfStar) { %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.921-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-.588-.236V2.927z"/>
                 </svg>
             <% } 
-              // Empty stars
               for(int i=0; i<emptyStars; i++) { %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.921-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.176 0l-3.385 2.46c-.785.57-1.84-.197-1.54-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.097 9.401c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.974z"/>
@@ -90,9 +88,13 @@
         <p class="col-span-full text-center text-gray-500 text-lg">No food items found!</p>
       <% } %>
     </div>
-  </div>
-  
-  <jsp:include page="layout/footer.jsp"/>
+  </main>
 
-</main>
+  <!-- Footer -->
+  <footer class="bg-white text-gray-700">
+    <jsp:include page="layout/footer.jsp"/>
+  </footer>
+
+</body>
+
 <jsp:include page="layout/JSPFooter.jsp"/>
