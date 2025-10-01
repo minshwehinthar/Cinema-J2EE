@@ -1,122 +1,61 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html lang="en">
+	pageEncoding="UTF-8"%>
+<jsp:include page="layout/JSPHeader.jsp" />
+<jsp:include page="layout/header.jsp" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinezy Contact</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-blue-100 text-gray-900 font-sans min-h-screen flex flex-col">
-
- <header class="bg-blue-800 p-2 shadow-lg">
-        <nav class="flex justify-between items-center container mx-auto">
-            <div class="logo text-white text-sm font-semibold">
-                <a href="#">Cinezy</a>
-            </div>
-            <ul class="flex space-x-4 text-white text-xs">
-                <li><a href="#" class="hover:text-yellow-300">Home</a></li>
-                <li><a href="#" class="hover:text-yellow-300">Movies</a></li>
-                <li><a href="#" class="hover:text-yellow-300">Cinemas</a></li>
-                <li><a href="#" class="hover:text-yellow-300">Food</a></li>
-                <li><a href="#" class="hover:text-yellow-300">FAQ</a></li>
-                <li><a href="#" class="hover:text-yellow-300">Reviews</a></li>
-                <li><a href="AboutUs.jsp" class="hover:text-yellow-300">About us</a></li>
-                <li><a href="Contact.jsp" class="hover:text-yellow-300">Contact</a></li>
-            </ul>
-            <div class="user-profile flex items-center space-x-2">
-                <img src="profile.jpg" alt="Profile" class="w-8 h-8 rounded-full">
-                <span class="text-white text-xs">Shin</span>
-                <a href="#" class="text-yellow-300 hover:text-yellow-400 text-xs">Logout</a>
-            </div>
-        </nav>
-    </header>
-    
-    <main class="max-w-6xl mx-auto mt-0 px-4 pt-10 pb-10">
-    <div class="grid md:grid-cols-2 gap-8">
-      
-      
-      <div class="bg-blue rounded-2xl border border-white/10 shadow-2xl p-8">
-        <h1 class="text-4xl font-extrabold text-gray-800 mb-4">Contact Us</h1>
-        <p class="text-gray-700 mb-6">
-          Need support, want to report a bug, or discuss a partnership?  
-          Send us a message and our team will get back to you as soon as possible.You can also reach us through the following contact methods:
-        </p>
-          <ul class="space-y-4">
-                <li class="flex items-center text-gray-700">
-                    <span class="text-xl mr-3">📞</span>
-                    <span class="text-lg">+1 (800) 123-4567</span>
-                </li>
-                <li class="flex items-center text-gray-700">
-                    <span class="text-xl mr-3">✉️</span>
-                    <span class="text-lg">support@Cinezy.com</span>
-                </li>
-                <li class="flex items-center text-gray-700">
-                    <span class="text-xl mr-3">📍</span>
-                    <span class="text-lg">123 Cinema Street, Hpa-an, Myanmar</span>
-                    </li>
-                    </ul>
-      </div>
-
-      
-      <div class="bg-blue rounded-2xl border border-white/10 shadow-2xl p-8">
-        <form id="contactForm" class="space-y-4" novalidate>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label for="name" class="block text-sm font-semibold mb-1">Name </label>
-              <input id="name" name="name" required placeholder="Name"
-                class="w-full p-3 rounded-lg bg-black/60 border border-gray-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"/>
-            </div>
-            <div>
-              <label for="email" class="block text-sm font-semibold mb-1">Email </label>
-              <input id="email" name="email" type="email" required placeholder="user@email.com"
-                class="w-full p-3 rounded-lg bg-black/60 border border-gray-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"/>
-            </div>
-          </div>
-          <div>
-            <label for="subject" class="block text-sm font-semibold mb-1">Subject </label>
-
-
-<input id="subject" name="subject" required placeholder="Bug report / Partnership / Other"
-              class="w-full p-3 rounded-lg bg-black/60 border border-gray-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"/>
-          </div>
-          <div>
-            <label for="message" class="block text-sm font-semibold mb-1">Message </label>
-            <textarea id="message" name="message" required rows="5" placeholder="Write your message here..."
-              class="w-full p-3 rounded-lg bg-black/60 border border-gray-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none"></textarea>
-          </div>
-          <button type="submit"
-            class="w-full py-3 rounded-lg font-bold text-black bg-blue-500 shadow-lg hover:scale-[1.02] transition">
-            Send Message
-          </button>
-          <p id="status" class="text-sm text-center mt-2"></p>
-        </form>
-      </div>
-
-    </div>
-  </main>
-
-        
-<footer class="bg-blue-800 text-white p-4 mt-auto">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="text-center text-sm">
-                <p>© 2025 Cinezy. All rights reserved.</p>
-                <p>Your ultimate movie companion — discover films, share reviews, and <br>
-                 connect with cinema lovers worldwide.</p>
-            </div>
-            <div class="space-x-6 text-center text-sm">
-                <a href="#" class="text-white hover:text-yellow-300">Home</a>
-                <a href="#" class="text-white hover:text-yellow-300">Movies</a>
-                <a href="#" class="text-white hover:text-yellow-300">Cinemas</a>
-                <a href="#" class="text-white hover:text-yellow-300">Food</a>
-                <a href="#" class="text-white hover:text-yellow-300">FAQ</a>
-            </div>
-        </div>
-    </footer>
-
-</body>
-
-</html>
+<section class="bg-gray-50 py-16">
+	<div
+		class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12">
+		<!-- Left Column: Info + Form -->
+		<div class="space-y-8">
+			<!-- Contact Info -->
+			<div class="space-y-4">
+				<div>
+					<p class="text-sm font-medium text-gray-500">Email</p>
+					<p class="text-lg font-semibold text-gray-800">consulting@gmail.com</p>
+				</div>
+				<div>
+					<p class="text-sm font-medium text-gray-500">Phone</p>
+					<p class="text-lg font-semibold text-gray-800">+1 (123)
+						456-7890</p>
+				</div>
+				<div>
+					<p class="text-sm font-medium text-gray-500">Office</p>
+					<p class="text-lg font-semibold text-gray-800">456 Business
+						Ave, New York</p>
+				</div>
+			</div>
+			<!-- Contact Form -->
+			<form action="#" method="POST" class="space-y-6">
+				<div>
+					<label for="name" class="block text-sm font-medium text-gray-700">Full
+						name</label> <input type="text" id="name" name="name" required
+						class="mt-2 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white" />
+				</div>
+				<div>
+					<label for="email" class="block text-sm font-medium text-gray-700">Email
+						address</label> <input type="email" id="email" name="email" required
+						class="mt-2 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white" />
+				</div>
+				<div>
+					<label for="message"
+						class="block text-sm font-medium text-gray-700">Message</label>
+					<textarea id="message" name="message" rows="5" required
+						class="mt-2 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white"></textarea>
+				</div>
+				<button type="submit"
+					class="inline-flex justify-center rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-700 transition">
+					Send Message</button>
+			</form>
+		</div>
+		<!-- Right Column: Map -->
+		<div class="w-full h-full min-h-[450px]">
+			<iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3818.7914305922754!2d97.59359387610498!3d16.836699983959676!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30c2c63bf4d73df9%3A0x786f61bd777d5fa6!2sUCSH%20(HpaAn)!5e0!3m2!1sen!2smm!4v1759307170386!5m2!1sen!2smm" 
+        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
+      </iframe>
+		</div>
+	</div>
+</section>
+<jsp:include page="layout/footer.jsp" />
+<jsp:include page="layout/JSPFooter.jsp" />
