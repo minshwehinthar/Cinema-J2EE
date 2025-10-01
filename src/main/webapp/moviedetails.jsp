@@ -1,78 +1,98 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.demo.dao.MoviesDao" %>
 <%@ page import="com.demo.model.Movies" %>
+<%@ page import="com.demo.dao.MoviesDao" %>
+<jsp:include page="layout/JSPHeader.jsp"></jsp:include>
+<jsp:include page="layout/header.jsp"></jsp:include>
 
 <%
-    String movieIdParam = request.getParameter("movie_id");
-    if (movieIdParam == null) {
-        out.println("<p class='text-red-600'>No movie selected.</p>");
-        return;
+    int movie_id = 0;
+    if(request.getParameter("movie_id") != null){
+        movie_id = Integer.parseInt(request.getParameter("movie_id"));
     }
 
-    int movieId = Integer.parseInt(movieIdParam);
     MoviesDao dao = new MoviesDao();
-    Movies movie = dao.getMovieById(movieId);
+    Movies movie = dao.getMovieById(movie_id);
 
-    if (movie == null) {
-        out.println("<p class='text-red-600'>Movie not found.</p>");
-        return;
-    }
+    if(movie == null){
+%>
+    <h2 class="text-center text-2xl mt-20">Movie not found.</h2>
+<%
+    } else {
+        String posterUrl = "GetMoviesPosterServlet?movie_id=" + movie.getMovie_id();
+        String trailerUrl = "GetMoviesTrailerServlet?movie_id=" + movie.getMovie_id();
+        String status = movie.getStatus() != null ? movie.getStatus() : "";
+        boolean isNowShowing = "now-showing".equalsIgnoreCase(status);
 %>
 
-<jsp:include page="layout/JSPHeader.jsp"/>
-
-<section class="bg-gray-50 min-h-screen py-12">
+<section class="py-16 bg-gray-50 relative">
     <div class="container mx-auto px-4">
-        <div class="bg-white rounded-2xl shadow-lg p-8 flex flex-col md:flex-row gap-8">
-            
+        
+        <a href="movies.jsp" class="absolute top-6 left-8 flex items-center">
+            <img src="assets/images/back.png" alt="Back" class="w-10 h-10 hover:opacity-100 transition">
+        </a>
+
+        <div class="flex flex-col lg:flex-row gap-8 mt-10">
             <!-- Poster -->
-            <div class="flex-shrink-0 md:w-1/3">
-                <img src="GetMoviesPosterServlet?movie_id=<%= movie.getMovie_id() %>"
-                     alt="<%= movie.getTitle() %> Poster"
-                     class="w-full h-auto rounded-xl object-cover"
-                     onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster';"/>
+            <div class="lg:w-5/12 w-full flex justify-center">
+                <img class="w-[300px] h-[450px] object-cover rounded-2xl shadow-2xl"
+                     src="<%= posterUrl %>" 
+                     alt="<%= movie.getTitle() %> Poster"/>
             </div>
 
-            <!-- Movie Details -->
-            <div class="flex-1">
-                <h1 class="text-4xl font-bold text-indigo-700 mb-4"><%= movie.getTitle() %></h1>
+            <!-- Movie Info -->
+            <div class="lg:w-7/12 w-full">
+                <h1 class="mb-6 text-4xl md:text-5xl font-bold font-heading leading-tight">
+                    <%= movie.getTitle() %>
+                </h1>
 
-                <div class="mb-4">
-                    <span class="px-3 py-1 text-xs font-semibold rounded-md uppercase <%= "now-showing".equalsIgnoreCase(movie.getStatus()) ? "bg-green-600 text-white" : "bg-yellow-600 text-white" %>">
-                        <%= movie.getStatus().equalsIgnoreCase("now-showing") ? "Now Showing" : "Coming Soon" %>
-                    </span>
+                <div class="mb-6 text-gray-700 space-y-2">
+                    <p><strong>Status:</strong> <%= movie.getStatus() != null ? movie.getStatus() : "N/A" %></p>
+                    <p><strong>Duration:</strong> <%= movie.getDuration() != null ? movie.getDuration() : "N/A" %></p>
+                    <p><strong>Director:</strong> <%= movie.getDirector() != null ? movie.getDirector() : "N/A" %></p>
+                    <p><strong>Cast:</strong> <%= movie.getCasts() != null ? movie.getCasts() : "N/A" %></p>
+                    <p><strong>Genres:</strong> <%= movie.getGenres() != null ? movie.getGenres() : "N/A" %></p>
                 </div>
 
-                <p class="mb-2"><strong>Duration:</strong> <%= movie.getDuration() != null ? movie.getDuration() : "-" %></p>
-                <p class="mb-2"><strong>Director:</strong> <%= movie.getDirector() != null ? movie.getDirector() : "-" %></p>
-                <p class="mb-2"><strong>Casts:</strong> <%= movie.getCasts() != null ? movie.getCasts() : "-" %></p>
-                <p class="mb-2"><strong>Genres:</strong> <%= movie.getGenres() != null ? movie.getGenres() : "-" %></p>
-                <p class="mb-4"><strong>Synopsis:</strong> <%= movie.getSynopsis() != null ? movie.getSynopsis() : "-" %></p>
+                <p class="mb-8 text-lg leading-relaxed text-gray-700">
+                    <%= movie.getSynopsis() != null ? movie.getSynopsis() : "No synopsis available." %>
+                </p>
 
-                <!-- Trailer Video -->
-                <%
-                    byte[] trailerBytes = dao.getTrailerById(movieId);
-                    if (trailerBytes != null && trailerBytes.length > 0) {
-                %>
-                <video controls class="w-full rounded-xl mb-4">
-                    <source src="GetMoviesTrailerServlet?movie_id=<%= movie.getMovie_id() %>" type="<%= movie.getTrailertype() %>">
-                    Your browser does not support the video tag.
-                </video>
-                <% } else { %>
-                    <p class="text-gray-500 italic">No trailer available.</p>
-                <% } %>
+                <div class="flex flex-wrap gap-4">
+                    <% if(isNowShowing) { %>
+                        <!-- Only show Get Tickets if Now Showing -->
+                        <a href="GetMovieTheatersServlet?movie_id=<%= movie.getMovie_id() %>" 
+                           class="py-3 px-6 text-white font-semibold border border-indigo-700 rounded-xl shadow-xl bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200 inline-block text-center">
+                           Get Tickets
+                        </a>
+                    <% } %>
 
-                <!-- Action Buttons -->
-                <div class="flex gap-4 mt-6">
-                    <a href="editMovie.jsp?movieId=<%= movie.getMovie_id() %>"
-                       class="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">Edit</a>
-                    <a href="PickMovieServlet?movie_id=<%= movie.getMovie_id() %>"
-                       class="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition">Pick Movie</a>
+                    <!-- Always show trailer -->
+                    <button class="movie-trailer-btn py-3 px-6 font-semibold border border-indigo-600 rounded-xl bg-white text-indigo-600 shadow hover:bg-indigo-50 transition ease-in-out duration-200 inline-block text-center">
+        Watch Trailer
+    </button>
                 </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Trailer Popup -->
+    <div class="trailer-popup hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="relative bg-white rounded-2xl p-6 max-w-4xl w-full mx-4">
+            <button class="trailer-close absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+            <h3 class="text-2xl font-bold mb-4">
+                <%= movie.getTitle() %> - Official Trailer
+            </h3>
+            <div class="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+                <iframe class="w-full h-full rounded-lg"
+                        src="<%= trailerUrl %>"
+                        title="Movie Trailer"
+                        frameborder="0"
+                        allowfullscreen>
+                </iframe>
             </div>
         </div>
     </div>
 </section>
 
-<jsp:include page="layout/JSPFooter.jsp"/>
+<% } %>
+<jsp:include page="layout/footer.jsp"></jsp:include>
+<jsp:include page="layout/JSPFooter.jsp"></jsp:include>

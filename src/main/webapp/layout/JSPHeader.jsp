@@ -22,6 +22,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+
+
+<script src="${pageContext.request.contextPath}/assets/js/movies1.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/movies2.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/moviedetails1.js"></script>
+
+
+
 <!-- Icon -->
 
 <style>

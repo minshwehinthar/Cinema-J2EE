@@ -1,14 +1,21 @@
 package com.demo.controller;
 
-import com.demo.dao.UserDAO;
-import com.demo.model.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import com.demo.dao.UserDAO;
+import com.demo.model.User;
+
+/**
+ * Servlet implementation class LoginServlet
+ */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -32,9 +39,13 @@ public class LoginServlet extends HttpServlet {
 
             // Redirect based on role
             String role = user.getRole();
-            if ("admin".equals(role) || "theateradmin".equals(role)) {
-                response.sendRedirect("index.jsp"); // Admin / theater admin dashboard
-            } else {
+            if ("admin".equals(role)) {
+                response.sendRedirect("index.jsp"); // Admin 
+            } else if("theateradmin".equals(role)) {
+            		int theaterId = dao.getTheaterIdByUserId(user.getUserId());
+                session.setAttribute("theater_id", theaterId);
+            		response.sendRedirect("theateradminpickmovies.jsp");
+            }else {
                 response.sendRedirect("index-user.jsp"); // Regular user dashboard
             }
 
