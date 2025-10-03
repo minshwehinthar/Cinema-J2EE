@@ -14,6 +14,7 @@
 <h1 class="text-3xl font-bold mb-5">Golden Gate Cinema</h1>
 
 <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
+	<h1 class="text-3xl font-bold mb-5 text-center">Golden Gate Cinema</h1>
 
     <form id="registerForm" action="register" method="post" class="space-y-4">
 

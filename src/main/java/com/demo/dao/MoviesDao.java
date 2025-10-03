@@ -114,6 +114,24 @@ public class MoviesDao {
 	    
 	    return mov;
 	}
+	
+	public boolean deleteMovie(int movieId) {
+	    boolean success = false;
+	    MyConnection conObj = new MyConnection();
+	    Connection con = conObj.getConnection();
+	    try {
+	        PreparedStatement pstm = con.prepareStatement("DELETE FROM movies WHERE movie_id = ?");
+	        pstm.setInt(1, movieId);
+	        int rowsAffected = pstm.executeUpdate();
+	        if (rowsAffected > 0) {
+	            success = true;
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return success;
+	}
+
 
 
 	

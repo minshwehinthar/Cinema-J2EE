@@ -1,9 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="jakarta.servlet.http.HttpSession" %>
 
-<jsp:include page="layout/JSPHeader.jsp"></jsp:include>
-<jsp:include page="layout/header.jsp"></jsp:include>
-
+<jsp:include page="layout/JSPHeader.jsp"/>
 <%
     
     Integer theaterId = (Integer) session.getAttribute("theater_id");
@@ -51,6 +49,4 @@
     </div>
   </div>
 </section>
-
-<jsp:include page="layout/footer.jsp"></jsp:include>
-<jsp:include page="layout/JSPFooter.jsp"></jsp:include>
+<jsp:include page="layout/JSPFooter.jsp"/>

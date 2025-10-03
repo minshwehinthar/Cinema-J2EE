@@ -1,63 +1,51 @@
-<%@ page import="com.demo.dao.SeatPriceDao" %>
-<%@ page import="java.util.ArrayList" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    com.demo.model.User user = (com.demo.model.User) session.getAttribute("user");
+    if (user == null || !"admin".equals(user.getRole())) {
+        response.sendRedirect("login.jsp?msg=unauthorized");
+        return;
+    }
 
-<jsp:include page="layout/JSPHeader.jsp"></jsp:include>
-<jsp:include page="layout/header.jsp"></jsp:include>
+    Integer theaterId = (Integer) session.getAttribute("theater_id");
+    if (theaterId == null) {
+        response.sendRedirect("create-theater-admin.jsp?msg=noTheater");
+        return;
+    }
+%>
 
-<section class="bg-gray-50 min-h-screen py-16">
-  <div class="container mx-auto px-4 max-w-lg">
+<jsp:include page="layout/JSPHeader.jsp"/>
+<div class="flex min-h-screen">
+    <jsp:include page="layout/sidebar.jsp"/>
+    <div class="flex-1 sm:ml-64">
+        <jsp:include page="layout/AdminHeader.jsp"/>
 
-    <h1 class="text-4xl font-bold text-indigo-700 mb-8 text-center">Add Seats</h1>
+        <div class="max-w-2xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-xl">
+            <h2 class="text-2xl font-bold mb-6 text-center">Add Seats for Theater</h2>
 
-    <% 
-        String msg = request.getParameter("msg");
-        if ("success".equals(msg)) { 
-    %>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-center">
-            Seats added successfully!
+            <form action="AddSeatsServlet" method="post" class="space-y-4">
+                <input type="hidden" name="theater_id" value="<%= theaterId %>"/>
+
+                <label>Seats per Row:</label>
+                <input type="number" name="seatsPerRow" min="1" value="8" required />
+
+                <label>Normal Rows:</label>
+                <input type="number" name="normalRows" min="0" value="2" required />
+
+                <label>VIP Rows:</label>
+                <input type="number" name="vipRows" min="0" value="2" required />
+
+                <label>Couple Rows:</label>
+                <input type="number" name="coupleRows" min="0" value="1" required />
+
+                <label>Seats in Couple Row (1 seat = 2 columns):</label>
+                <input type="number" name="coupleSeats" min="1" value="4" required />
+
+                <button type="submit"
+                        class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+                    Add Seats
+                </button>
+            </form>
         </div>
-    <% } else if ("error".equals(msg)) { %>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
-            Error occurred while adding seats. Please try again.
-        </div>
-    <% } %>
-
-    <form action="AddSeatsServlet" method="post" class="bg-white p-6 rounded-2xl shadow-lg space-y-4">
-
-        <input type="hidden" name="theater_id" value="<%= session.getAttribute("theater_id") %>">
-
-        <div>
-            <label class="font-medium text-gray-700">Seat Type</label>
-            <select name="seat_type" class="border rounded-lg p-2 w-full" required>
-                <%
-                    SeatPriceDao priceDao = new SeatPriceDao();
-                    ArrayList<String> seatTypes = priceDao.getAllSeatTypes(); // returns ["Normal","VIP","Couple"]
-                    for(String type : seatTypes) {
-                %>
-                    <option value="<%= type %>"><%= type %></option>
-                <%
-                    }
-                %>
-            </select>
-        </div>
-
-        <div>
-            <label class="font-medium text-gray-700">Rows (e.g., A,B,C)</label>
-            <input type="text" name="rows" placeholder="A,B,C" class="border rounded-lg p-2 w-full" required>
-        </div>
-
-        <div>
-            <label class="font-medium text-gray-700">Seats per Row</label>
-            <input type="number" name="seats_per_row" min="1" max="20" class="border rounded-lg p-2 w-full" required>
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-semibold">
-            Add Seats
-        </button>
-
-    </form>
-  </div>
-</section>
-
-<jsp:include page="layout/footer.jsp"></jsp:include>
-<jsp:include page="layout/JSPFooter.jsp"></jsp:include>
+    </div>
+</div>
+<jsp:include page="layout/JSPFooter.jsp"/>

@@ -1,86 +1,213 @@
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<script src="addMovies.js"></script>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.demo.model.User" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null || !"admin".equals(user.getRole())) {
+        response.sendRedirect("login.jsp?msg=unauthorized");
+        return;
+    }
+%>
+
+<script src="https://unpkg.com/feather-icons"></script>
+
+<jsp:include page="layout/JSPHeader.jsp" />
+
+<div class="flex min-h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <jsp:include page="layout/sidebar.jsp" />
+
+    <!-- Main content -->
+    <div class="flex-1 sm:ml-64">
+        <jsp:include page="/layout/AdminHeader.jsp" />
+
+        <div class="flex justify-center">
+            <div class="w-full max-w-8xl p-10">
+                <h2 class="text-3xl font-bold mb-10 text-center text-gray-800">➕ Add New Movie</h2>
+
+                <% String msg = request.getParameter("msg"); %>
+                <% if ("success".equals(msg)) { %>
+                    <p class="text-green-600 mb-6 text-center font-semibold">✅ Movie added successfully!</p>
+                <% } else if ("error".equals(msg)) { %>
+                    <p class="text-red-600 mb-6 text-center font-semibold">❌ Error adding movie. Try again.</p>
+                <% } %>
+
+                <form action="AddMoviesServlet" method="post" enctype="multipart/form-data"
+                      class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+                    <!-- Column 1: Movie Info -->
+                    <div class="flex flex-col gap-6">
+                        <label class="font-medium text-gray-700">Movie Title</label>
+                        <input type="text" name="title" placeholder="Enter movie title"
+                               class="p-4 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+
+                        <label class="font-medium text-gray-700">Status</label>
+                        <select name="status" class="p-4 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+                            <option value="now-showing" selected>Now Showing</option>
+                            <option value="coming-soon">Coming Soon</option>
+                        </select>
+                        
+                        <label class="font-medium text-gray-700">Cast Members</label>
+                        <textarea name="casts" rows="4" placeholder="Enter cast members separated by commas"
+                                  class="p-4 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"></textarea>
+                        
+ <!-- Trailer Preview (16:9 ratio) -->
+                        <div class="w-full flex justify-center">
+                            <div class="w-full sm:w-64 aspect-video">
+                                <video id="trailerPreview" class="w-full h-full rounded-2xl border border-gray-200 shadow-lg" controls>
+                                    <source src="" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </div>
+
+                        <!-- Trailer Upload -->
+                        <div class="w-full flex justify-center">
+                            <label for="trailerUpload"
+                                   class="flex items-center gap-3 cursor-pointer bg-indigo-50 text-indigo-700 font-medium p-3 rounded-xl hover:bg-indigo-100 transition-all">
+                                <i data-feather="video"></i> Upload Trailer
+                            </label>
+                            <input type="file" name="trailer" id="trailerUpload" class="hidden" accept="video/*" required>
+                        </div>
+                       
+                    </div>
+
+                    <!-- Column 2: Cast, Genre, Synopsis -->
+                    <div class="flex flex-col gap-6">
+						<!-- Duration (3 inputs in a row) -->
+<label class="font-medium text-gray-700">Duration</label>
+<div class="flex gap-4">
+    <input type="number" name="hours" placeholder="Hr" min="1" max="24"
+           class="no-spinner w-20 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+
+    <input type="number" name="minutes" placeholder="Min" min="0" max="59"
+           class="no-spinner w-20 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+
+    <input type="number" name="seconds" placeholder="Sec" min="0" max="59"
+           class="no-spinner w-20 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+</div>
+
+<!-- Hidden field to hold final formatted duration -->
+<input type="hidden" name="duration" id="durationField" required>
+						
+
+                        <label class="font-medium text-gray-700">Director</label>
+                        <input type="text" name="director" placeholder="Director Name"
+                               class="p-4 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+                               
+                       
+                        <label class="font-medium text-gray-700">Synopsis</label>
+                        <textarea name="synopsis" rows="4" placeholder="Movie synopsis"
+                                  class="p-4 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"></textarea>
+                                  
+                                   <label class="font-medium text-gray-700">Genres</label>
+                        <input type="text" name="genres" placeholder="Enter genres"
+                               class="p-4 w-full border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                               
+                               
+                                  
+                    </div>
+
+                    <!-- Column 3: Poster & Trailer Preview -->
+                    <div class="flex flex-col gap-6 items-start">
+                    
 
 
-<div class="max-w-2xl mx-auto p-6">
-  <div class="bg-white rounded-xl shadow-lg p-8">
-    <h2 class="mb-6 text-3xl font-bold font-heading text-gray-900">Add Movie</h2>
-    <form class="space-y-6" action="AddMoviesServlet" method="post" enctype="multipart/form-data">
-     
-      <div>
-        <label class="block mb-2 text-gray-900 font-semibold leading-normal">Movie Title</label>
-        <input class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" name="title" type="text" required placeholder="Enter movie title"/>
-      </div>
-      
-          
-	<div>
-	  <label class="block mb-2 text-gray-900 font-semibold leading-normal">Status</label>
-	  <select class="px-4 py-3.5 w-full text-gray-700 font-medium bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" name="status" >
-	    <option value="now-showing" selected>Now Showing</option>
-	    <option value="coming-soon">Coming Soon</option>
-	  </select>
-	</div>
+                        <!-- Poster Preview (2:3 ratio) -->
+                        <div class="w-full flex justify-center">
+                            <div class="w-80 aspect-[2/3]">
+                                <img id="posterPreview" src="assets/img/cart_empty.png" alt="Poster Preview"
+                                     class="w-full h-full object-cover rounded-2xl border border-gray-200 shadow-lg">
+                            </div>
+                        </div>
 
-      
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-2 text-gray-900 font-semibold leading-normal">Duration</label>
-          <input class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" type="text" placeholder="e.g., 2h30min" name="duration" required/>
+                        <!-- Poster Upload -->
+                        <div class="w-full flex justify-center">
+                            <label for="posterUpload"
+                                   class="flex items-center gap-3 cursor-pointer bg-indigo-50 text-indigo-700 font-medium p-3 rounded-xl hover:bg-indigo-100 transition-all">
+                                <i data-feather="camera"></i> Upload Poster
+                            </label>
+                            <input type="file" name="poster" id="posterUpload" class="hidden" accept="image/*" required>
+                        </div>
+
+                        
+
+                        <!-- Submit Button -->
+                        <div class="w-full flex justify-center">
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white p-3 px-10 rounded-2xl hover:bg-indigo-700 shadow-lg transition-all font-semibold mt-4">
+                                Add Movie
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
         </div>
-        <div>
-          <label class="block mb-2 text-gray-900 font-semibold leading-normal">Director</label>
-          <input class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" type="text" placeholder="Enter director name" name="director" required/>
-        </div>
-      </div>
-      
-      
-      <div>
-        <label class="block mb-2 text-gray-900 font-semibold leading-normal">Cast Members</label>
-        <textarea class="p-4 w-full h-32 font-medium text-gray-500 placeholder-gray-500 bg-white bg-opacity-50 outline-none border border-gray-300 resize-none rounded-lg focus:ring focus:ring-indigo-300" placeholder="Enter cast members separated by commas" name="casts" required></textarea>
-      </div>
-      
-      
-      <div>
-        <label class="block mb-2 text-gray-900 font-semibold leading-normal">Genres</label>
-        <input class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" type="text" placeholder="Enter Genre" name="genres" required/>
-        </div>
-      
-      
-      <div>
-        <label class="block mb-2 text-gray-900 font-semibold leading-normal">Synopsis</label>
-        <textarea class="p-4 w-full h-32 font-medium text-gray-500 placeholder-gray-500 bg-white bg-opacity-50 outline-none border border-gray-300 resize-none rounded-lg focus:ring focus:ring-indigo-300" placeholder="Enter Synopsis" name="synopsis" required></textarea>
-      </div>
-  
 
+        <script>
+            feather.replace();
 
-	<div>
-	  <label class="block mb-2 text-gray-900 font-semibold leading-normal">Movie Poster</label>
-	  <div class="flex items-center space-x-4">
-	    <div class="flex-1">
-	      <input class="poster-input px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" type="file" name="poster" required/>
-	    </div>
-	  </div>
-	</div>
+            // Poster preview
+            const posterInput = document.getElementById('posterUpload');
+            const posterPreview = document.getElementById('posterPreview');
+            posterInput.addEventListener('change', () => {
+                if (posterInput.files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = e => posterPreview.src = e.target.result;
+                    reader.readAsDataURL(posterInput.files[0]);
+                } else {
+                    posterPreview.src = 'assets/img/cart_empty.png';
+                }
+            });
 
-      <div>
-        <label class="block mb-2 text-gray-900 font-semibold leading-normal">Trailer</label>
-        <div class="flex items-center space-x-4">
-          <div class="flex-1">
-            <input class="poster-input px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" type="file" name="trailer" required/>
-          </div>
-        </div>
-      </div>
-      
-      
-      <div class="pt-4">
-        <div class="md:inline-block w-full md:w-auto">
-          <button class="py-4 px-6 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200" type="submit">Add Movie</button>
-        </div>
-      </div>
-      </form>
-      </div>
-   
-   
-  </div>
- 
+            // Trailer preview
+            const trailerInput = document.getElementById('trailerUpload');
+            const trailerPreview = document.getElementById('trailerPreview');
+            trailerInput.addEventListener('change', () => {
+                if (trailerInput.files.length > 0) {
+                    const file = trailerInput.files[0];
+                    const url = URL.createObjectURL(file);
+                    trailerPreview.src = url;
+                    trailerPreview.load();
+                } else {
+                    trailerPreview.src = "";
+                }
+            });
+        </script>
+        <style>
+    /* Hide spinner in Chrome, Safari, Edge */
+    input[type=number].no-spinner::-webkit-outer-spin-button,
+    input[type=number].no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Hide spinner in Firefox */
+    input[type=number].no-spinner {
+        -moz-appearance: textfield;
+    }
+</style>
+        <script>
+    const form = document.querySelector("form");
+    const durationField = document.getElementById("durationField");
+
+    form.addEventListener("submit", (e) => {
+        const hrs = form.hours.value || 0;
+        const mins = form.minutes.value || 0;
+        const secs = form.seconds.value || 0;
+
+        let duration = "";
+        if (hrs > 0) duration += hrs + "h ";
+        if (mins > 0) duration += mins + "m ";
+        if (secs > 0) duration += secs + "s";
+
+        durationField.value = duration.trim();
+    });
+</script>
+        
+
+    </div>
+</div>
+
+<jsp:include page="layout/JSPFooter.jsp" />

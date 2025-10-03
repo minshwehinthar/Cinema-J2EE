@@ -105,6 +105,13 @@ public class TheaterMoviesDao {
 	            m.setMovie_id(rs.getInt("movie_id"));
 	            m.setTitle(rs.getString("title"));
 	            m.setStatus(rs.getString("status"));
+	            m.setDuration(rs.getString("duration"));
+	            m.setDirector(rs.getString("director"));
+	            m.setCasts(rs.getString("casts"));
+	            m.setGenres(rs.getString("genres"));
+	            m.setSynopsis(rs.getString("synopsis")); // ✅ FIX
+	            m.setPostertype(rs.getString("postertype"));
+	            m.setTrailertype(rs.getString("trailertype"));
 	            list.add(m);
 	        }
 	    } catch (SQLException e) {
@@ -113,6 +120,7 @@ public class TheaterMoviesDao {
 
 	    return list;
 	}
+
 
 
 	

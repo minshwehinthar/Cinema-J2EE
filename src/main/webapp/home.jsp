@@ -20,7 +20,11 @@
             <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
             <h3 class="text-xl mb-2">Speed up your car</h3>
             <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-            <a href="#" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded inline-block w-[120px]">Shop Now</a>
+            <div class="flex gap-3">
+            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
+            
+            </div>
           </div>
         </div>
 
@@ -32,7 +36,11 @@
             <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
             <h3 class="text-xl mb-2">Explore the range</h3>
             <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-            <a href="#" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded inline-block w-[120px]">Shop Now</a>
+                    <div class="flex gap-3">
+            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
+            
+            </div>
           </div>
         </div>
 
@@ -44,8 +52,12 @@
             <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
             <h3 class="text-xl mb-2">Find your dream car</h3>
             <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-            <a href="#" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded inline-block w-[120px]">Shop Now</a>
-          </div>
+                    <div class="flex gap-3">
+            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
+            
+            </div>
+             </div>
         </div>
       </div>
 
@@ -157,6 +169,56 @@
 
   </div>
 </section>
+
+<section class="bg-gray-50 py-16">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center">
+      
+      <!-- Feature 1 -->
+      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
+        <div class="flex justify-center mb-4">
+          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-2xl">
+            🚚
+          </span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Free Delivery</h3>
+        <p class="text-gray-600 mt-2">
+          Nam liber tempor cum soluta nobis <br> eleifend option congue.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
+        <div class="flex justify-center mb-4">
+          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
+            💵
+          </span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Money Guarantee</h3>
+        <p class="text-gray-600 mt-2">
+          Nam liber tempor cum soluta nobis <br> eleifend option congue.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
+        <div class="flex justify-center mb-4">
+          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-2xl">
+            🎧
+          </span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800">Online Support</h3>
+        <p class="text-gray-600 mt-2">
+          Nam liber tempor cum soluta nobis <br> eleifend option congue.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
 <!-- Testimonials Section -->
 <section class="bg-gray-900 py-16">
   <div class="max-w-6xl mx-auto px-6 text-center text-white">
@@ -245,6 +307,12 @@
     },
   });
 </script>
+
+
+
+
+
+
 <section class="max-w-7xl mx-auto px-6 py-12">
   <!-- Tabs -->
   <div class="border-b border-gray-200 mb-8">
@@ -657,7 +725,7 @@ thumbnails.forEach(thumb => {
                 
                 <!-- Monday -->
                 <div class="tab-content hidden" id="mon-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Mon Movie 1" class="w-full h-auto rounded-lg">
@@ -676,7 +744,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Tuesday -->
                 <div class="tab-content hidden" id="tue-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb1-270x340.jpg" alt="Tue Movie 1" class="w-full h-auto rounded-lg">
@@ -695,7 +763,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Wednesday (Today) -->
                 <div class="tab-content" id="wed-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Locked in" class="w-full h-auto rounded-lg">
@@ -714,7 +782,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Thursday -->
                 <div class="tab-content hidden" id="thu-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-7-270x340.jpg" alt="Thu Movie 1" class="w-full h-auto rounded-lg">
@@ -733,7 +801,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Friday -->
                 <div class="tab-content hidden" id="fri-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb1-270x340.jpg" alt="Fri Movie 1" class="w-full h-auto rounded-lg">
@@ -752,7 +820,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Saturday -->
                 <div class="tab-content hidden" id="sat-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-7-270x340.jpg" alt="Sat Movie 1" class="w-full h-auto rounded-lg">
@@ -771,7 +839,7 @@ thumbnails.forEach(thumb => {
 
                 <!-- Sunday -->
                 <div class="tab-content hidden" id="sun-content">
-                    <div class="movie-card bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="movie-card bg-white  overflow-hidden mb-6">
                         <div class="md:flex">
                             <div class="md:w-1/4 p-4">
                                 <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Sun Movie 1" class="w-full h-auto rounded-lg">
