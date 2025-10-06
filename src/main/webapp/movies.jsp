@@ -24,28 +24,56 @@
 
             <!-- Status Filter Buttons -->
             <div class="flex gap-2 flex-wrap justify-end mt-3">
-                <button class="nav-btn px-4 py-2 border border-black bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition" data-filter="all">All Movies</button>
-                <button class="nav-btn px-4 py-2 border border-black bg-white text-black text-sm font-medium rounded-md hover:bg-gray-100 transition" data-filter="now-showing">Now Showing</button>
-                <button class="nav-btn px-4 py-2 border border-black bg-white text-black text-sm font-medium rounded-md hover:bg-gray-100 transition" data-filter="coming-soon">Coming Soon</button>
-            </div>
-
-            <!-- Theater Filter Buttons -->
-            <%
-                TheaterDAO theaterDao = new TheaterDAO();
-                ArrayList<Theater> theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
-            %>
-            <div class="flex gap-2 flex-wrap justify-end mt-3">
-               
-                <button class="theater-btn px-3 py-1 border border-black bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition" data-theater="all">All</button>
-                <% for(Theater t : theaters) { %>
-                    <button class="theater-btn px-3 py-1 border border-black bg-white text-black text-sm font-medium rounded-md hover:bg-gray-100 transition"
-                            data-theater="<%= t.getTheaterId() %>">
-                        <%= t.getName() %>
-                    </button>
-                <% } %>
+                <button class="nav-btn px-4 py-2 border  bg-red-600 text-white text-sm font-medium rounded-md transition" data-filter="all">All</button>
+                <button class="nav-btn px-4 py-2 border border-black bg-white text-black text-sm font-medium rounded-md transition" data-filter="now-showing">Now Showing</button>
+                <button class="nav-btn px-4 py-2 border border-black bg-white text-black text-sm font-medium rounded-md transition" data-filter="coming-soon">Coming Soon</button>
             </div>
         </div>
     </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebar-toggle"
+        class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">
+        =
+    </button>
+
+    <!-- Right Sidebar for Theater Filters -->
+    <%
+        TheaterDAO theaterDao = new TheaterDAO();
+        ArrayList<Theater> theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
+    %>
+    <aside id="right-sidebar"
+        class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-semibold text-gray-800">Filter by Theater</h3>
+            <button id="sidebar-close"
+                class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
+        </div>
+
+        <ul class="space-y-1 overflow-hidden">
+            <li class="theater-btn px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold" data-theater="all">
+                Show All Theaters
+            </li>
+
+            <%
+                if (theaters != null && theaters.size() > 0) {
+                    for (Theater t : theaters) {
+            %>
+            <li class="theater-btn px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition"
+                data-theater="<%=t.getTheaterId()%>">
+                <span class="block font-medium"><%=t.getName()%></span>
+                <span class="block text-xs text-gray-500"><%=t.getLocation()%></span>
+            </li>
+            <%
+                    }
+                } else {
+            %>
+            <p class="text-gray-500 text-sm mt-3">No theaters available.</p>
+            <%
+                }
+            %>
+        </ul>
+    </aside>
 
     <!-- Movies Grid -->
     <div class="max-w-8xl mx-auto">
@@ -58,44 +86,32 @@
                     String status = m.getStatus();
                     ArrayList<Theater> movieTheaters = dao.getTheatersByMovie(m.getMovie_id());
                     String theaterIds = "";
-                    String theaterNames = "";
                     for(Theater t : movieTheaters) {
                         if(!theaterIds.isEmpty()) theaterIds += ",";
                         theaterIds += t.getTheaterId();
-
-                        if(!theaterNames.isEmpty()) theaterNames += ", ";
-                        theaterNames += t.getName();
                     }
 
-                    // Set badge color based on status
                     String badgeClass = "bg-gray-700 text-white";
                     if ("now-showing".equalsIgnoreCase(status)) {
-                        badgeClass = "bg-green-500 text-white"; // green
+                        badgeClass = "bg-green-500 text-white";
                     } else if ("coming-soon".equalsIgnoreCase(status)) {
-                        badgeClass = "bg-orange-300 text-black"; // yellow
+                        badgeClass = "bg-orange-300 text-black";
                     }
             %>
-            <!-- Movie Card -->
             <div class="movie-card group relative overflow-hidden rounded-xl shadow-md border border-gray-200"
                  data-status="<%= status != null ? status : "" %>"
                  data-title="<%= m.getTitle() != null ? m.getTitle().toLowerCase() : "" %>"
                  data-theaters="<%= theaterIds %>">
                  
                 <a href="moviedetails.jsp?movie_id=<%= m.getMovie_id() %>" class="block relative">
-                    <!-- Poster Image with realistic ratio -->
                     <img src="GetMoviesPosterServlet?movie_id=<%= m.getMovie_id() %>" 
                          class="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105" />
-
-                    <!-- Overlay Info with blur -->
                     <div class="absolute bottom-0 left-0 w-full bg-black/40 backdrop-blur-xs p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <h3 class="text-white font-bold text-lg truncate"><%= m.getTitle() != null ? m.getTitle() : "Untitled" %></h3>
+                        <h3 class="text-white font-bold text-lg truncate"><%= m.getTitle() %></h3>
                         <p class="text-gray-300 text-sm truncate"><%= m.getDuration() %></p>
                         <p class="text-gray-200 text-xs line-clamp-3 mt-1">
-    <%= (m.getSynopsis() != null && !m.getSynopsis().trim().isEmpty()) 
-            ? m.getSynopsis() 
-            : "No synopsis available." %>
-</p>
-
+                            <%= (m.getSynopsis() != null && !m.getSynopsis().trim().isEmpty()) ? m.getSynopsis() : "No synopsis available." %>
+                        </p>
                         <span class="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full uppercase <%= badgeClass %>">
                             <%= status != null ? status : "Unknown" %>
                         </span>
@@ -117,6 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const navButtons = document.querySelectorAll(".nav-btn");
     const theaterButtons = document.querySelectorAll(".theater-btn");
     const movieCards = document.querySelectorAll(".movie-card");
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const rightSidebar = document.getElementById('right-sidebar');
 
     let activeFilter = "all";
     let activeTheater = "all";
@@ -138,39 +156,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function setActive(buttons, clicked) {
+    // ✅ Separate setActive for status filter (red)
+    function setActiveStatus(buttons, clicked) {
         buttons.forEach(btn => {
-            btn.classList.remove("bg-black","text-white");
-            btn.classList.add("bg-white","text-black");
+            btn.classList.remove("bg-red-600", "text-white", "border-red-600");
+            btn.classList.add("bg-white", "text-black", "border-black");
         });
-        clicked.classList.remove("bg-indigo-600","text-black");
-        clicked.classList.remove("bg-white","text-black");
-        
-        clicked.classList.add("bg-black","text-white");
+        clicked.classList.remove("bg-white", "text-black", "border-black");
+        clicked.classList.add("bg-red-600", "text-white", "border-red-600");
     }
 
-    // Debounced search
+    // ✅ Separate setActive for theater filter (light red)
+    function setActiveTheater(buttons, clicked) {
+        buttons.forEach(btn => {
+            btn.classList.remove("bg-red-100", "text-red-700", "font-semibold");
+            btn.classList.add("bg-white", "text-gray-700", "font-normal");
+        });
+        clicked.classList.remove("bg-white", "text-gray-700", "font-normal");
+        clicked.classList.add("bg-red-100", "text-red-700", "font-semibold");
+    }
+
     searchInput.addEventListener("input", () => {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(filterMovies, 500);
     });
 
-    // Status filter buttons
     navButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-            setActive(navButtons, btn);
+            setActiveStatus(navButtons, btn);
             activeFilter = btn.dataset.filter;
             filterMovies();
         });
     });
 
-    // Theater filter buttons
     theaterButtons.forEach(btn => {
         btn.addEventListener("click", () => {
-            setActive(theaterButtons, btn);
+            setActiveTheater(theaterButtons, btn);
             activeTheater = btn.dataset.theater;
             filterMovies();
         });
+    });
+
+    // Sidebar toggle
+    sidebarToggle.addEventListener('click', () => {
+        const isOpen = !rightSidebar.classList.contains('translate-x-full');
+        rightSidebar.classList.toggle('translate-x-full');
+        sidebarToggle.textContent = isOpen ? '-' : '=';
+    });
+
+    // Close sidebar by clicking outside
+    document.addEventListener('click', (e) => {
+        if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
+            rightSidebar.classList.add('translate-x-full');
+            sidebarToggle.textContent = '=';
+        }
     });
 });
 </script>

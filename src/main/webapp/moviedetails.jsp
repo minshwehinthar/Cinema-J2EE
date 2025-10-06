@@ -23,6 +23,7 @@ String status = movie.getStatus() != null ? movie.getStatus() : "";
 boolean isNowShowing = "now-showing".equalsIgnoreCase(status);
 %>
 
+
 <section class="py-8">
 	<div class="max-w-8xl mx-auto">
 		<!-- Breadcrumb -->
@@ -194,16 +195,26 @@ trailerPopup.addEventListener('click', (e) => {
 </script>
 <script>
 const getTicketsBtn = document.querySelector('a[href*="GetMovieTheatersServlet"]');
-<%
-    boolean isLoggedIn = session.getAttribute("user") != null;
-%>
-const isLoggedIn = <%=isLoggedIn%>; // true if user is logged in
+if (getTicketsBtn) {
+    <% boolean isLoggedIn = session.getAttribute("user") != null; %>
+    const isLoggedIn = <%=isLoggedIn%>; // true if user is logged in
 
-getTicketsBtn.addEventListener('click', function(event) {
-    if (!isLoggedIn) {
-        event.preventDefault(); // stop link navigation
-        alert("You need to login first!");
-        window.location.href = "login.jsp";
-    }
-});
+    getTicketsBtn.addEventListener('click', function(event) {
+        if (!isLoggedIn) {
+            event.preventDefault(); // Stop normal navigation
+
+            const goLogin = confirm("You need to login first to get tickets.\n\nPress OK to go to login, or Cancel to stay here.");
+
+            if (goLogin) {
+                // Save current URL for redirect after login
+                const currentURL = window.location.href;
+                sessionStorage.setItem("redirectAfterLogin", currentURL);
+                // Go to login page
+                window.location.href = "login.jsp?msg=please_login";
+            } 
+            // If Cancel → do nothing, stay on page
+        }
+    });
+}
 </script>
+

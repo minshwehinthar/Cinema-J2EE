@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import com.demo.model.Movies;
@@ -132,6 +133,78 @@ public class MoviesDao {
 	    return success;
 	}
 
+
+	public int updateMovie(int movieId, String title, String status, String duration,
+            String director, String casts, String genres, String synopsis,
+            Part posterPart, Part trailerPart) throws IOException {
+int row = 0;
+MyConnection conObj = new MyConnection();
+Connection con = conObj.getConnection();
+InputStream posterStream = (posterPart != null && posterPart.getSize() > 0) ? posterPart.getInputStream() : null;
+InputStream trailerStream = (trailerPart != null && trailerPart.getSize() > 0) ? trailerPart.getInputStream() : null;
+
+try {
+String sql = "UPDATE movies SET title=?, status=?, duration=?, director=?, casts=?, genres=?, synopsis=?";
+
+if (posterStream != null) sql += ", poster=?, postertype=?";
+if (trailerStream != null) sql += ", trailer=?, trailertype=?";
+sql += " WHERE movie_id=?";
+
+PreparedStatement pstm = con.prepareStatement(sql);
+int idx = 1;
+pstm.setString(idx++, title);
+pstm.setString(idx++, status);
+pstm.setString(idx++, duration);
+pstm.setString(idx++, director);
+pstm.setString(idx++, casts);
+pstm.setString(idx++, genres);
+pstm.setString(idx++, synopsis);
+
+if (posterStream != null) {
+ pstm.setBlob(idx++, posterStream);
+ pstm.setString(idx++, posterPart.getContentType());
+}
+if (trailerStream != null) {
+ pstm.setBlob(idx++, trailerStream);
+ pstm.setString(idx++, trailerPart.getContentType());
+}
+
+pstm.setInt(idx++, movieId);
+
+row = pstm.executeUpdate();
+} catch (SQLException e) {
+e.printStackTrace();
+}
+return row;
+}
+	public LocalDate[] getMovieDates(int theaterId, int movieId) {
+	    LocalDate[] dates = new LocalDate[2];
+	    String sql = "SELECT start_date, end_date FROM showtimes WHERE theater_id=? AND movie_id=?";
+	    try (Connection con = MyConnection.getConnection();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+	        ps.setInt(1, theaterId);
+	        ps.setInt(2, movieId);
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next()) {
+	            java.sql.Date start = rs.getDate("start_date");
+	            java.sql.Date end = rs.getDate("end_date");
+
+	            // Check for null
+	            if (start == null || end == null) {
+	                return null; // or handle differently
+	            }
+
+	            dates[0] = start.toLocalDate();
+	            dates[1] = end.toLocalDate();
+	            return dates;
+	        } else {
+	            return null; // no rows found
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
 
 
 	

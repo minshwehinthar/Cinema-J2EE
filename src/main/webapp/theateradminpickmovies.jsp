@@ -1,9 +1,9 @@
 <%@ page import="com.demo.model.Movies" %>
-<%@ page import="com.demo.dao.MoviesDao" %>
+<%@ page import="com.demo.dao.TheaterMoviesDao" %>
 <%@ page import="java.util.ArrayList" %>
 
 <jsp:include page="layout/JSPHeader.jsp"/>
-<div class="flex min-h-screen bg-gray-100">
+<div class="flex min-h-screen bg-white">
 
     <!-- Sidebar -->
     <jsp:include page="layout/sidebar.jsp"/>
@@ -13,11 +13,55 @@
         <jsp:include page="layout/AdminHeader.jsp"/>
 
         <div class="p-8 max-w-8xl">
-            <h1 class="text-4xl font-bold mb-8 text-indigo-700 text-center">Pick Movies for Your Theater</h1>
+         <!-- Breadcrumb -->
+		<nav class="text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+			<ol class="list-none p-0 inline-flex">
+				<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+            <li><span class="mx-2">/</span></li>
+            
+            
+				<li class="flex items-center text-gray-900 font-semibold">Pick Movie
+				</li>
+			</ol>
+		</nav>
+            <h1 class="text-4xl font-bold mb-8 text-gray-900 text-center">Select Movie</h1>
+
+            <%-- Session check --%>
+            <%
+                Integer theaterId = (Integer) session.getAttribute("theater_id");
+                if (theaterId == null) {
+            %>
+            <p class="text-center text-red-600 text-lg">Theater not found. Please login again.</p>
+            <% 
+                } else { 
+                    TheaterMoviesDao dao = new TheaterMoviesDao();
+                    ArrayList<Movies> moviesList = dao.getAvailableMoviesForTheater(theaterId);
+
+                    if (moviesList.isEmpty()) {
+            %>
+            <div class="flex justify-center mt-8">
+    <div class="bg-white shadow-lg rounded-2xl p-6 flex items-center gap-4 border-l-4 border-red-500 max-w-md">
+        <!-- Icon -->
+        <svg class="w-10 h-10 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+        </svg>
+
+        <!-- Text -->
+        <div class="flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-800">No Movies Available</h3>
+            <p class="text-gray-600">All movies have already been added to your theater. Check back later for new releases.</p>
+        </div>
+    </div>
+</div>
+
+            <%
+                    } else {
+            %>
 
             <%-- Top Category Section --%>
-            <div class="flex gap-4 overflow-x-auto mb-6">
-                <button class="category-btn px-4 py-2 border rounded-md font-semibold" data-status="all">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 overflow-x-auto">
+               	<div>
+               	<button class="category-btn px-4 py-2 border rounded-md font-semibold" data-status="all">
                     All
                 </button>
                 <button class="category-btn px-4 py-2 border rounded-md font-semibold" data-status="now-showing">
@@ -26,14 +70,17 @@
                 <button class="category-btn px-4 py-2 border rounded-md font-semibold" data-status="coming-soon">
                     Coming Soon
                 </button>
+                
+               	</div>
+               	<div>
+                	<a href="addTimeslots.jsp" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Add Timeslot</a>
+                	
+                </div>
             </div>
 
             <%-- Movie Grid --%>
             <div id="moviesGrid" class="grid grid-cols-10 gap-6">
                 <%
-                    MoviesDao dao = new MoviesDao();
-                    ArrayList<Movies> moviesList = dao.getAllMovies();
-
                     for (Movies m : moviesList) {
                         String movieStatus = m.getStatus() != null ? m.getStatus().toLowerCase() : "now-showing";
                 %>
@@ -79,22 +126,19 @@
                     <p class="text-gray-800"><span class="font-semibold">Duration:</span> <span id="detailDuration"></span></p>
 
                     <%-- Trailer Section --%>
-                    <!-- Trailer Section -->
-<div class="mt-4">
-<!--     <h3 class="font-semibold text-gray-800 mb-2">Trailer</h3> -->
-    <div class="w-72 h-42 aspect-video rounded-xl overflow-hidden border border-gray-200">
-        <video id="detailTrailer" controls class="w-full h-full object-cover">
-            <source src="" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-</div>
-
+                    <div class="mt-4">
+                        <div class="w-72 h-42 aspect-video rounded-xl overflow-hidden border border-gray-200">
+                            <video id="detailTrailer" controls class="w-full h-full object-cover">
+                                <source src="" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Column 3: Date Form -->
                 <div>
-                    <form id="pickMovieForm" action="PickMovieServlet" method="post" class="flex flex-col gap-4" onsubmit="return validateDates(this)">
+                    <form id="PickMovieServlet" action="PickMovieServlet" method="post" class="flex flex-col gap-4" onsubmit="return validateDates(this)">
                         <input type="hidden" name="movie_id" id="formMovieId"/>
                         <input type="hidden" name="status" id="formMovieStatus"/>
 
@@ -119,7 +163,11 @@
                 </div>
                 
             </div>
-            
+
+            <% 
+                    } // end else movies available
+                } // end else theaterId not null
+            %>
         </div>
     </div>
 </div>
@@ -155,21 +203,15 @@
                 }
             });
 
-            // Show/hide no-movies message
             noMoviesMessage.classList.toggle('hidden', anyVisible);
-
-            // Hide detail section and remove highlight
             movieDetailSection.classList.add('hidden');
             movieCards.forEach(c => c.classList.remove('ring-4', 'ring-indigo-500'));
 
-            // ---- Handle Active/Inactive Category Design ----
             categoryButtons.forEach(b => {
                 if(b === btn){
-                    // Active: red background, red border, white text
                     b.classList.add('bg-red-500', 'border-red-500', 'text-white');
                     b.classList.remove('border-gray-300', 'text-gray-700', 'bg-white');
                 } else {
-                    // Inactive: gray border only
                     b.classList.add('border-gray-300', 'text-gray-700', 'bg-white');
                     b.classList.remove('bg-red-500', 'border-red-500', 'text-white');
                 }
@@ -177,7 +219,6 @@
         });
     });
 
-    // Show 3-column details when movie clicked
     movieCards.forEach(card => {
         card.addEventListener('click', function() {
             detailPosterImg.src = card.querySelector('img').src;
@@ -188,7 +229,6 @@
             detailGenres.textContent = card.dataset.movieGenres;
             detailDuration.textContent = card.dataset.movieDuration;
 
-            // Set trailer source dynamically
             const trailerSrc = "GetMoviesTrailerServlet?movie_id=" + card.dataset.movieId;
             detailTrailer.querySelector('source').src = trailerSrc;
             detailTrailer.load();
@@ -197,8 +237,6 @@
             formMovieStatus.value = card.dataset.movieStatus;
 
             movieDetailSection.classList.remove('hidden');
-
-            // Highlight selected movie
             movieCards.forEach(c => c.classList.remove('ring-4', 'ring-red-500'));
             card.classList.add('ring-4', 'ring-red-500');
         });
@@ -216,14 +254,11 @@
         return true;
     }
 
-    // Optional: Set default active on page load
     window.addEventListener('DOMContentLoaded', () => {
         if(categoryButtons.length > 0){
-            categoryButtons[0].click(); // make "All" active by default
+            categoryButtons[0].click();
         }
     });
 </script>
-
-
 
 <jsp:include page="layout/JSPFooter.jsp"/>

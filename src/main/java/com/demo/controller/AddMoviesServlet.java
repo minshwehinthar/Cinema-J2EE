@@ -52,7 +52,7 @@ public class AddMoviesServlet extends HttpServlet {
 		MoviesDao dao = new MoviesDao();
 		int row = dao.addMovies(title, status, duration, director, casts, genres, synopsis, posterPart, trailerPart);
 		if(row>0) {
-			response.sendRedirect("addMovies.jsp");
+			response.sendRedirect("moviesList.jsp");
 		}
 	}
 }

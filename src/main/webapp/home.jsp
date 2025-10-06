@@ -1,70 +1,105 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"%>
+<%@ page import="com.demo.dao.*" %>
+<%@ page import="com.demo.model.*" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.time.LocalDate" %>
+<%
+MoviesDao moviesDao = new MoviesDao();
+TheaterMoviesDao theaterMoviesDao = new TheaterMoviesDao();
+TheaterDAO theaterDAO = new TheaterDAO();
+ReviewDAO reviewDAO = new ReviewDAO();
+FoodDAO foodDAO = new FoodDAO();
+
+// Fetch data from database
+ArrayList<Movies> allMovies = moviesDao.getAllMovies();
+ArrayList<Movies> pickedMovies = theaterMoviesDao.getMoviesPickedByTheaters();
+ArrayList<Movies> comingSoonMovies = theaterMoviesDao.getComingSoonMovies();
+List<Theater> allTheaters = theaterDAO.getAllTheaters();
+List<Review> allReviews = reviewDAO.getAllReviews();
+List<FoodItem> allFoods = foodDAO.getAllFoods();
+
+// Create filtered lists for better organization
+List<Movies> nowShowingMovies = new ArrayList<>();
+List<Movies> comingSoonMoviesList = new ArrayList<>();
+
+// Debug: Check what's in pickedMovies
+System.out.println("=== DEBUG: All picked movies ===");
+for (Movies movie : pickedMovies) {
+    System.out.println("Movie: " + movie.getTitle() + " | Status: " + movie.getStatus());
+}
+
+// Filter movies properly
+for (Movies movie : pickedMovies) {
+    if ("now-showing".equalsIgnoreCase(movie.getStatus())) {
+        nowShowingMovies.add(movie);
+    } else if ("coming-soon".equalsIgnoreCase(movie.getStatus())) {
+        comingSoonMoviesList.add(movie);
+    }
+}
+
+System.out.println("Now showing count: " + nowShowingMovies.size());
+System.out.println("Coming soon count: " + comingSoonMoviesList.size());
+%>
+
 <jsp:include page="layout/JSPHeader.jsp" />
 <jsp:include page="layout/header.jsp" />
 
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- Banner Section -->
 <section class="">
   <div class="w-full mx-auto">
-    <!-- Swiper container -->
     <div class="swiper banner-slider">
       <div class="swiper-wrapper">
         <!-- Slide 1 -->
-        <div class="swiper-slide relative ">
-          <img src="http://plaza.roadthemes.com/aero/pub/media/Plazathemes/bannerslider/images/b/a/banner7-21.jpg" 
-               alt="Slide 1" class="object-contain">
+        <div class="swiper-slide relative">
+        <img src="https://images.unsplash.com/photo-1731004270606-d39d246c1e01?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+               alt="Slide 1" class="object-cover w-full h-[800px] overflow-hidden">
+          
           <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
-            <h3 class="text-xl mb-2">Speed up your car</h3>
-            <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
+            <h2 class="text-3xl font-bold mb-2">Experience the Magic of Cinema</h2>
+            <h3 class="text-xl mb-2">Blockbuster Movies Await</h3>
+            <p class="mb-4 max-w-lg">Book your tickets now and enjoy the latest blockbusters in our premium theaters with state-of-the-art sound and projection.</p>
             <div class="flex gap-3">
-            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
-<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
-            
+              <a href="movies.jsp" class="bg-red-600 border border-red-600 hover:bg-red-700 hover:border-red-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+              <a href="foods.jsp" class="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
             </div>
           </div>
         </div>
 
         <!-- Slide 2 -->
         <div class="swiper-slide relative">
-          <img src="http://plaza.roadthemes.com/aero/pub/media/Plazathemes/bannerslider/images/b/a/banner7-22.jpg" 
-               alt="Slide 2" class="object-contain">
+          <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+               alt="Slide 2" class="object-cover w-full h-[800px] overflow-hidden">
           <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
-            <h3 class="text-xl mb-2">Explore the range</h3>
-            <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-                    <div class="flex gap-3">
-            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
-<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
-            
-            </div>
-          </div>
+            <h2 class="text-3xl font-bold mb-2">Premium Cinema Experience</h2>
+            <h3 class="text-xl mb-2">Comfort & Luxury Combined</h3>
+            <p class="mb-4 max-w-lg">Enjoy our recliner seats, Dolby Atmos sound, and crystal-clear 4K projection for an unforgettable movie experience.</p>
+            <div class="flex gap-3">
+              <a href="movies.jsp" class="bg-red-600 border border-red-600 hover:bg-red-700 hover:border-red-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+              <a href="foods.jsp" class="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
+            </div>          </div>
         </div>
 
         <!-- Slide 3 -->
         <div class="swiper-slide relative">
-          <img src="http://plaza.roadthemes.com/aero/pub/media/Plazathemes/bannerslider/images/b/a/banner7-23.jpg" 
-               alt="Slide 3" class=" object-contain">
+          <img src="https://plus.unsplash.com/premium_photo-1681487691813-347cdd6f453c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8" 
+               alt="Slide 3" class="object-cover w-full h-[800px] overflow-hidden">
           <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Typi non habent claritatem insitam</h2>
-            <h3 class="text-xl mb-2">Find your dream car</h3>
-            <p class="mb-4 max-w-lg">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.</p>
-                    <div class="flex gap-3">
-            <a href="movies.jsp" class="bg-orange-500 border border-orange-500 hover:bg-orange-700 hover:border-orange-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
-<a href="foods.jsp" class="border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
-            
+            <h2 class="text-3xl font-bold mb-2">Delicious Snacks & Drinks</h2>
+            <h3 class="text-xl mb-2">Complete Your Movie Night</h3>
+            <p class="mb-4 max-w-lg">From classic popcorn to gourmet snacks, we have everything you need to make your movie experience perfect.</p>
+            <div class="flex gap-3">
+              <a href="movies.jsp" class="bg-red-600 border border-red-600 hover:bg-red-700 hover:border-red-700 duration-500 px-4 py-2 rounded inline-block w-[121px]">Buy Ticket</a>
+              <a href="foods.jsp" class="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white duration-500 px-4 py-2 rounded inline-block w-[117px]">Shop Now</a>
             </div>
-             </div>
+          </div>
         </div>
       </div>
-
-      <!-- Pagination -->
       <div class="swiper-pagination mt-4"></div>
-
- 
     </div>
   </div>
 </section>
@@ -74,208 +109,180 @@
     slidesPerView: 1,
     spaceBetween: 20,
     loop: true,
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false,
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
+    autoplay: { delay: 3000, disableOnInteraction: false },
+    pagination: { el: '.swiper-pagination', clickable: true },
   });
 </script>
 
-
-
-
-
+<!-- ✅ FIXED "Now Showing" Section - Only shows "now-showing" movies -->
 <section class="bg-gray-50 py-16">
-  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
-    <!-- Card 1 -->
-    <article class="relative group rounded-xl overflow-hidden shadow-lg">
-      <!-- Thumbnail -->
-      <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-27-copyright-485x665.jpg" 
-           alt="Inferno" 
-           class="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-110">
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <!-- Info -->
-      <div class="absolute bottom-4 left-4 right-4 text-white space-y-2">
-        <h5 class="text-xl font-semibold"><a href="https://filmax.themerex.net/inferno/" class="hover:underline">Inferno</a></h5>
-        <p class="text-sm">Adventure</p>
-        <div class="flex gap-4 text-sm">
-          <a href="https://player.vimeo.com/video/154709932" target="_blank" class="px-3 py-1 bg-red-600 rounded hover:bg-red-700">Watch Trailer</a>
-          <a href="https://filmax.themerex.net/inferno/" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-900">More Info</a>
-        </div>
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">Now Showing</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <%
+      int movieCount = 0;
+      for (Movies movie : nowShowingMovies) {
+          if (movieCount >= 4) break;
+      %>
+      <div class="movie-card group relative overflow-hidden rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+        <a href="moviedetails.jsp?movie_id=<%= movie.getMovie_id() %>" class="block relative">
+          <img src="GetMoviesPosterServlet?movie_id=<%= movie.getMovie_id() %>"
+               class="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105" 
+               alt="<%= movie.getTitle() %>" />
+          <div class="absolute bottom-0 left-0  bg-black/40 backdrop-blur-xs w-full bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <h3 class="text-white font-bold text-lg truncate"><%= movie.getTitle() %></h3>
+            <p class="text-gray-300 text-sm truncate"><%= movie.getDuration() %> • <%= movie.getGenres() != null ? movie.getGenres() : "Movie" %></p>
+            <p class="text-gray-200 text-xs mt-2 line-clamp-3">
+              <%= (movie.getSynopsis() != null && !movie.getSynopsis().trim().isEmpty()) ? 
+                  (movie.getSynopsis().length() > 100 ? movie.getSynopsis().substring(0, 100) + "..." : movie.getSynopsis()) 
+                  : "No synopsis available." %>
+            </p>
+            <span class="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full uppercase bg-green-500 text-white">
+              Now Showing
+            </span>
+          </div>
+        </a>
       </div>
-    </article>
-
-    <!-- Card 2 -->
-    <article class="relative group rounded-xl overflow-hidden shadow-lg">
-      <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-25-copyright-485x665.jpg" 
-           alt="Band of Brothers" 
-           class="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-110">
-      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <div class="absolute bottom-4 left-4 right-4 text-white space-y-2">
-        <h5 class="text-xl font-semibold"><a href="https://filmax.themerex.net/band-of-brothers/" class="hover:underline">Band of Brothers</a></h5>
-        <p class="text-sm">Adventure</p>
-        <div class="flex gap-4 text-sm">
-          <a href="https://player.vimeo.com/video/38903952" target="_blank" class="px-3 py-1 bg-red-600 rounded hover:bg-red-700">Watch Trailer</a>
-          <a href="https://filmax.themerex.net/band-of-brothers/" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-900">More Info</a>
-        </div>
-      </div>
-    </article>
-
-    <!-- Card 3 -->
-    <article class="relative group rounded-xl overflow-hidden shadow-lg">
-      <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-29-copyright-485x665.jpg" 
-           alt="Gladiator" 
-           class="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-110">
-      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <div class="absolute bottom-4 left-4 right-4 text-white space-y-2">
-        <h5 class="text-xl font-semibold"><a href="https://filmax.themerex.net/gladiator/" class="hover:underline">Gladiator</a></h5>
-        <p class="text-sm">Action • Adventure</p>
-        <div class="flex gap-4 text-sm">
-          <a href="https://player.vimeo.com/video/154709932" target="_blank" class="px-3 py-1 bg-red-600 rounded hover:bg-red-700">Watch Trailer</a>
-          <a href="https://filmax.themerex.net/gladiator/" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-900">More Info</a>
-        </div>
-      </div>
-    </article>
-
-    <!-- Card 4 -->
-    <article class="relative group rounded-xl overflow-hidden shadow-lg">
-      <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-23-copyright-485x665.jpg" 
-           alt="Pirates Bay" 
-           class="w-full h-[400px] object-cover transition-transform duration-300 group-hover:scale-110">
-      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <div class="absolute bottom-4 left-4 right-4 text-white space-y-2">
-        <h5 class="text-xl font-semibold"><a href="https://filmax.themerex.net/pirates-bay-2/" class="hover:underline">Pirates Bay</a></h5>
-        <p class="text-sm">Action • Adventure</p>
-        <div class="flex gap-4 text-sm">
-          <a href="https://player.vimeo.com/video/146428114" target="_blank" class="px-3 py-1 bg-red-600 rounded hover:bg-red-700">Watch Trailer</a>
-          <a href="https://filmax.themerex.net/pirates-bay-2/" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-900">More Info</a>
-        </div>
-      </div>
-    </article>
-
-  </div>
-</section>
-
-<section class="bg-gray-50 py-16">
-  <div class="max-w-6xl mx-auto px-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center">
+      <%
+          movieCount++;
+      }
       
-      <!-- Feature 1 -->
-      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
-        <div class="flex justify-center mb-4">
-          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-2xl">
-            🚚
-          </span>
+      // Show message if no now showing movies
+      if (nowShowingMovies.isEmpty()) {
+      %>
+        <div class="col-span-4 text-center py-12">
+          <div class="bg-white rounded-xl shadow-md p-8 max-w-md mx-auto">
+            <div class="text-6xl mb-4">🎬</div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">No Movies Currently Showing</h3>
+            <p class="text-gray-600">Check back soon for upcoming movies!</p>
+            <a href="movies.jsp" class="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-300">
+              Browse All Movies
+            </a>
+          </div>
         </div>
-        <h3 class="text-xl font-semibold text-gray-800">Free Delivery</h3>
-        <p class="text-gray-600 mt-2">
-          Nam liber tempor cum soluta nobis <br> eleifend option congue.
-        </p>
-      </div>
-
-      <!-- Feature 2 -->
-      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
-        <div class="flex justify-center mb-4">
-          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
-            💵
-          </span>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-800">Money Guarantee</h3>
-        <p class="text-gray-600 mt-2">
-          Nam liber tempor cum soluta nobis <br> eleifend option congue.
-        </p>
-      </div>
-
-      <!-- Feature 3 -->
-      <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition">
-        <div class="flex justify-center mb-4">
-          <span class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-2xl">
-            🎧
-          </span>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-800">Online Support</h3>
-        <p class="text-gray-600 mt-2">
-          Nam liber tempor cum soluta nobis <br> eleifend option congue.
-        </p>
-      </div>
-
+      <%
+      }
+      %>
     </div>
+    
+    <% if (!nowShowingMovies.isEmpty() && nowShowingMovies.size() > 4) { %>
+    <div class="text-center mt-8">
+      <a href="movies.jsp?filter=now-showing" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-300 inline-block">
+        View All Now Showing Movies
+      </a>
+    </div>
+    <% } %>
   </div>
 </section>
 
+<!-- ✅ COMING SOON Section -->
+<section class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">Coming Soon</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <%
+      int comingSoonCount = 0;
+      for (Movies movie : comingSoonMoviesList) {
+          if (comingSoonCount >= 4) break;
+      %>
+      <div class="movie-card group relative overflow-hidden rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+        <a href="moviedetails.jsp?movie_id=<%= movie.getMovie_id() %>" class="block relative">
+          <img src="GetMoviesPosterServlet?movie_id=<%= movie.getMovie_id() %>"
+               class="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105" 
+               alt="<%= movie.getTitle() %>" />
+          <div class="absolute bottom-0 left-0  bg-black/40 backdrop-blur-xs w-full bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <h3 class="text-white font-bold text-lg truncate"><%= movie.getTitle() %></h3>
+            <p class="text-gray-300 text-sm truncate"><%= movie.getDuration() %> • <%= movie.getGenres() != null ? movie.getGenres() : "Movie" %></p> 
+            <p class="text-gray-200 text-xs mt-2 line-clamp-3">
+              <%= (movie.getSynopsis() != null && !movie.getSynopsis().trim().isEmpty()) ? 
+                  (movie.getSynopsis().length() > 100 ? movie.getSynopsis().substring(0, 100) + "..." : movie.getSynopsis()) 
+                  : "No synopsis available." %>
+            </p>
+            <span class="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full uppercase bg-orange-400 text-white">
+              Coming Soon
+            </span>
+          </div>
+        </a>
+      </div>
+      <%
+          comingSoonCount++;
+      }
+      
+      // Show message if no coming soon movies
+      if (comingSoonMoviesList.isEmpty()) {
+      %>
+        <div class="col-span-4 text-center py-12">
+          <div class="bg-gray-50 rounded-xl shadow-md p-8 max-w-md mx-auto">
+            <div class="text-6xl mb-4">📅</div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">No Upcoming Movies</h3>
+            <p class="text-gray-600">New movies will be announced soon!</p>
+          </div>
+        </div>
+      <%
+      }
+      %>
+    </div>
+    
+    <% if (!comingSoonMoviesList.isEmpty() && comingSoonMoviesList.size() > 4) { %>
+    <div class="text-center mt-8">
+      <a href="movies.jsp?filter=coming-soon" class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-lg font-semibold transition duration-300 inline-block">
+        View All Coming Soon
+      </a>
+    </div>
+    <% } %>
+  </div>
+</section>
 
+<!-- OUR THEATERS Section - Modern White Design -->
+<section class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12 text-gray-900">Our Theaters</h2>
 
-<!-- Testimonials Section -->
-<section class="bg-gray-900 py-16">
-  <div class="max-w-6xl mx-auto px-6 text-center text-white">
-    <h2 class="text-3xl font-bold mb-10">What People Say</h2>
-
-    <!-- Swiper -->
-    <div class="swiper testimonials-slider">
+    <div class="swiper theaters-slider">
       <div class="swiper-wrapper">
+        <%
+        int theaterCount = 0;
+        for (Theater t : allTheaters) {
+            if (theaterCount >= 6) break;
+        %>
+<div class="swiper-slide">
+  <div class="block border border-gray-200 rounded-lg overflow-hidden hover:border-red-600 transition-colors duration-200">
 
-        <!-- Slide 1 -->
+    <!-- Theater Poster -->
+    <div class="overflow-hidden">
+      <img src="GetTheatersPosterServlet?theater_id=<%= t.getTheaterId() %>" 
+           alt="<%= t.getName() %>" 
+           class="w-full h-56 object-cover transform transition-transform duration-300 hover:scale-105"/>
+    </div>
+
+    <!-- Theater Info -->
+    <div class="p-4 text-center">
+      <h3 class="font-semibold text-lg text-gray-900 mb-1"><%= t.getName() %></h3>
+      <p class="text-gray-600 text-sm"><%= t.getLocation() != null ? t.getLocation() : "City Center" %></p>
+    </div>
+
+  </div>
+</div>
+
+        <%
+            theaterCount++;
+        }
+        
+        if (allTheaters.isEmpty()) {
+        %>
         <div class="swiper-slide">
-          <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/1test-copyright-105x105.jpg" 
-                 alt="Martin Moore" 
-                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
-            <p class="italic mb-4">“ I appreciate the high quality of your products guys! ”</p>
-            <h4 class="font-semibold">Martin Moore</h4>
-            <span class="text-sm text-gray-400">Film Expert</span>
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-center h-full">
+            
+            <h3 class="text-xl font-bold text-gray-800 mb-2">No Theaters Available</h3>
+            <p class="text-gray-600 mb-4">Our theater locations will be updated soon.</p>
+            <div class="bg-gray-100 text-gray-500 py-2 px-4 rounded-lg font-semibold">
+              Coming Soon
+            </div>
           </div>
         </div>
-
-        <!-- Slide 2 -->
-        <div class="swiper-slide">
-          <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/2test-copyright-105x105.jpg" 
-                 alt="Andrea Garcia" 
-                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
-            <p class="italic mb-4">“ Everything is great about this website, we liked it. ”</p>
-            <h4 class="font-semibold">Andrea Garcia</h4>
-            <span class="text-sm text-gray-400">Film Expert</span>
-          </div>
-        </div>
-
-        <!-- Slide 3 -->
-        <div class="swiper-slide">
-          <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/3test-copyright-105x105.jpg" 
-                 alt="Mike Stevens" 
-                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
-            <p class="italic mb-4">“ This was fun for all of my friends. Thank you so much! ”</p>
-            <h4 class="font-semibold">Mike Stevens</h4>
-            <span class="text-sm text-gray-400">Film Expert</span>
-          </div>
-        </div>
-
-        <!-- Slide 4 -->
-        <div class="swiper-slide">
-          <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2018/01/team-11-copyright-105x105.jpg" 
-                 alt="Lisa Morrison" 
-                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
-            <p class="italic mb-4">“ It was so much fun for all of my friends and family. ”</p>
-            <h4 class="font-semibold">Lisa Morrison</h4>
-            <span class="text-sm text-gray-400">Film Expert</span>
-          </div>
-        </div>
-
+        <%
+        }
+        %>
       </div>
 
       <!-- Pagination -->
@@ -284,651 +291,435 @@
   </div>
 </section>
 
-<!-- SwiperJS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
-  const swiper = new Swiper(".testimonials-slider", {
+  // Initialize theaters slider
+  const theatersSwiper = new Swiper(".theaters-slider", {
     slidesPerView: 1,
     spaceBetween: 20,
     loop: true,
+    autoplay: { delay: 3500, disableOnInteraction: false },
+    pagination: { el: ".swiper-pagination", clickable: true },
+    breakpoints: { 
+      640: { slidesPerView: 2 }, 
+      1024: { slidesPerView: 3 } 
+    },
+  });
+</script>
+
+<!-- 🍕 POPULAR FOOD ITEMS Section - Dynamic from Database -->
+<section class="food-category-section bg-gradient-to-br from-orange-50 to-red-50 py-16 relative">
+  <!-- Decorative Shapes -->
+  <div class="absolute top-10 left-10 w-20 h-20 opacity-20">
+    <span class="text-6xl">🍅</span>
+  </div>
+  <div class="absolute bottom-10 right-10 w-24 h-24 opacity-20 rotate-45">
+    <span class="text-6xl">🍔</span>
+  </div>
+  <div class="absolute top-1/4 right-20 w-16 h-16 opacity-15">
+    <span class="text-5xl">🥤</span>
+  </div>
+  
+  <div class="container max-w-7xl mx-auto px-6 relative z-10">
+    <div class="row flex flex-wrap items-center mb-12">
+      <div class="col-md-7 col-9">
+        <div class="section-title">
+          <span class="text-red-600 font-semibold text-lg uppercase tracking-wider block mb-2 wow fadeInUp">
+            Delicious, Every Bite Tastes Amazing
+          </span>
+          <h2 class="text-4xl font-bold text-gray-800 wow fadeInUp" data-wow-delay=".3s">
+            Popular Food Items
+          </h2>
+        </div>
+      </div>
+      <!-- <div class="col-md-5 ps-0 col-3 text-end wow fadeInUp" data-wow-delay=".5s">
+        <div class="array-button flex gap-3 justify-end">
+          <button class="food-items-prev w-12 h-12 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center text-orange-600 hover:bg-orange-600 hover:text-white">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <button class="food-items-next w-12 h-12 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center text-orange-600 hover:bg-orange-600 hover:text-white">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div> -->
+    </div>
+    
+    <div class="swiper food-items-slider">
+      <div class="swiper-wrapper">
+        <%
+        int foodDisplayCount = 0;
+        for(FoodItem food : allFoods) {
+            if(foodDisplayCount >= 12) break; // Limit to 12 items for display
+            
+            // Get appropriate emoji based on food type
+            String foodEmoji = "🍽️";
+            if (food.getFoodType() != null) {
+                switch(food.getFoodType().toLowerCase()) {
+                    case "popcorn": foodEmoji = "🍿"; break;
+                    case "pizza": foodEmoji = "🍕"; break;
+                    case "burger": foodEmoji = "🍔"; break;
+                    case "french fries": foodEmoji = "🍟"; break;
+                    case "soft drinks": foodEmoji = "🥤"; break;
+                    case "ice cream": foodEmoji = "🍦"; break;
+                    case "hot dogs": foodEmoji = "🌭"; break;
+                    case "nachos": foodEmoji = "🌮"; break;
+                    case "candy": foodEmoji = "🍬"; break;
+                    case "coffee": foodEmoji = "☕"; break;
+                    case "sandwich": foodEmoji = "🥪"; break;
+                    case "cookie": foodEmoji = "🍪"; break;
+                    case "donut": foodEmoji = "🍩"; break;
+                    case "cake": foodEmoji = "🍰"; break;
+                }
+            }
+        %>
+        <div class="swiper-slide">
+          <div class="food-item-card bg-white rounded-2xl  hover:bg-red-50 transition-all duration-300 transform hover:scale-95 border border-gray-100">
+            <!-- Rating Badge -->
+            
+            
+            <!-- Food Image Container -->
+            <div class="food-item-image relative h-48 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center p-6">
+              <!-- Decorative Elements -->
+              <div class="absolute top-2 left-2 w-8 h-8 opacity-20">
+                <span class="text-2xl">🌿</span>
+              </div>
+              <div class="absolute bottom-2 right-2 w-8 h-8 opacity-20 rotate-45">
+                <span class="text-2xl">🌿</span>
+              </div>
+              
+              <!-- Food Image or Emoji -->
+              <div class="relative z-10 text-center w-full h-full flex items-center justify-center">
+                <% if(food.getImage() != null && !food.getImage().isEmpty()) { %>
+                  <img src="<%= food.getImage() %>" 
+                       alt="<%= food.getName() %>" 
+                       class="max-w-full max-h-32 object-contain transform hover:scale-110 transition-transform duration-300">
+                <% } else { %>
+                  <div class="text-6xl transform hover:scale-110 transition-transform duration-300">
+                    <%= foodEmoji %>
+                  </div>
+                <% } %>
+              </div>
+              
+              <!-- Floating Shape -->
+              <div class="absolute bottom-0 left-0 w-full h-4 bg-white/30 rounded-t-full"></div>
+            </div>
+            
+            <!-- Content Section -->
+            <div class="food-item-content text-center p-6 relative">
+              <!-- Food Type Badge -->
+              <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+                <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                  <%= food.getFoodType() != null ? food.getFoodType() : "Snack" %>
+                </span>
+              </div>
+              
+              <h3 class="text-xl font-bold text-gray-800 mt-4 mb-2 truncate">
+                <a href="foods.jsp" class="hover:text-orange-600 transition-colors duration-300">
+                  <%= food.getName() %>
+                </a>
+              </h3>
+              
+              <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                <%= food.getDescription() != null && !food.getDescription().trim().isEmpty() ? 
+                    food.getDescription() : "Delicious snack perfect for your movie experience." %>
+              </p>
+              
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-2xl font-bold text-red-600">$<%= String.format("%.2f", food.getPrice()) %></span>
+                <div class="flex items-center text-sm text-gray-500">
+                  <i class="fas fa-fire text-orange-500 mr-1"></i>
+                  <span>Popular</span>
+                </div>
+              </div>
+              
+            
+            </div>
+          </div>
+        </div>
+        <%
+            foodDisplayCount++;
+        } 
+        
+        // If no food items found in database, show some sample items
+        if (allFoods.isEmpty()) {
+          String[][] sampleFoods = {
+            {"Classic Popcorn", "Popcorn", "4.5", "5.99", "Buttery and salty classic movie popcorn", "🍿"},
+            {"Pepperoni Pizza", "Pizza", "4.8", "12.99", "Freshly baked pizza with pepperoni and cheese", "🍕"},
+            {"Cheeseburger", "Burger", "4.6", "8.99", "Juicy beef patty with cheese and fresh veggies", "🍔"},
+            {"Coca Cola", "Soft Drinks", "4.3", "3.99", "Refreshing cold Coca Cola", "🥤"},
+            {"Chocolate Ice Cream", "Ice Cream", "4.7", "4.99", "Creamy chocolate ice cream", "🍦"},
+            {"Nachos Supreme", "Nachos", "4.4", "7.99", "Crispy nachos with cheese and jalapeños", "🌮"}
+          };
+          
+          for(int i = 0; i < sampleFoods.length; i++) {
+            String foodName = sampleFoods[i][0];
+            String foodType = sampleFoods[i][1];
+            String rating = sampleFoods[i][2];
+            String price = sampleFoods[i][3];
+            String description = sampleFoods[i][4];
+            String emoji = sampleFoods[i][5];
+        %>
+        <div class="swiper-slide">
+          <div class="food-item-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+            <!-- Rating Badge -->
+            <div class="absolute top-4 right-4 z-20">
+              <span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-yellow-700 shadow-sm flex items-center gap-1">
+                <i class="fas fa-star text-yellow-500 text-xs"></i>
+                <%= rating %>
+              </span>
+            </div>
+            
+            <!-- Food Image Container -->
+            <div class="food-item-image relative h-48 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center p-6">
+              <!-- Decorative Elements -->
+              <div class="absolute top-2 left-2 w-8 h-8 opacity-20">
+                <span class="text-2xl">🌿</span>
+              </div>
+              <div class="absolute bottom-2 right-2 w-8 h-8 opacity-20 rotate-45">
+                <span class="text-2xl">🌿</span>
+              </div>
+              
+              <!-- Food Emoji -->
+              <div class="relative z-10 text-center">
+                <div class="text-6xl transform hover:scale-110 transition-transform duration-300">
+                  <%= emoji %>
+                </div>
+              </div>
+              
+              <!-- Floating Shape -->
+              <div class="absolute bottom-0 left-0 w-full h-4 bg-white/30 rounded-t-full"></div>
+            </div>
+            
+            <!-- Content Section -->
+            <div class="food-item-content text-center p-6 relative">
+              <!-- Food Type Badge -->
+              <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+                <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                  <%= foodType %>
+                </span>
+              </div>
+              
+              <h3 class="text-xl font-bold text-gray-800 mt-4 mb-2">
+                <a href="foods.jsp" class="hover:text-orange-600 transition-colors duration-300">
+                  <%= foodName %>
+                </a>
+              </h3>
+              
+              <p class="text-gray-600 text-sm mb-3">
+                <%= description %>
+              </p>
+              
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-2xl font-bold text-red-600">$<%= price %></span>
+                <div class="flex items-center text-sm text-gray-500">
+                  <i class="fas fa-fire text-orange-500 mr-1"></i>
+                  <span>Popular</span>
+                </div>
+              </div>
+              
+             
+            </div>
+          </div>
+        </div>
+        <%
+          }
+        }
+        %>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="swiper-pagination mt-8"></div>
+    </div>
+     <div class="text-center mx-auto mt-6 text-red-600 font-bold hover:text-red-700">
+      -<a href="foods.jsp" class="underline duration-500 px-4 py-2 rounded inline-block"> Shop Now </a>-
+     </div>
+  </div>
+  
+</section>
+
+<script>
+  // Initialize food items slider
+  const foodItemsSwiper = new Swiper(".food-items-slider", {
+    slidesPerView: 1,
+    spaceBetween: 30,
+    loop: true,
     autoplay: {
-      delay: 3000,
+      delay: 4000,
       disableOnInteraction: false,
     },
     pagination: {
       el: ".swiper-pagination",
       clickable: true,
     },
+    navigation: {
+      nextEl: ".food-items-next",
+      prevEl: ".food-items-prev",
+    },
     breakpoints: {
-      640: { slidesPerView: 2 },
-      1024: { slidesPerView: 3 },
+      480: {
+        slidesPerView: 2,
+        spaceBetween: 20,
+      },
+      768: {
+        slidesPerView: 3,
+        spaceBetween: 25,
+      },
+      1024: {
+        slidesPerView: 4,
+        spaceBetween: 30,
+      },
     },
   });
 </script>
 
 
 
-
-
-
-<section class="max-w-7xl mx-auto px-6 py-12">
-  <!-- Tabs -->
-  <div class="border-b border-gray-200 mb-8">
-    <ul class="flex space-x-6 text-lg font-medium" id="tabs">
-      <li>
-        <button data-tab="recent" class="tab-btn py-2 border-b-2 border-blue-600 text-blue-600">Recent</button>
-      </li>
-      <li>
-        <button data-tab="popular" class="tab-btn py-2 text-gray-600 hover:text-blue-600">Most Popular</button>
-      </li>
-      <li>
-        <button data-tab="best" class="tab-btn py-2 text-gray-600 hover:text-blue-600">Best</button>
-      </li>
-      <li>
-        <button data-tab="coming" class="tab-btn py-2 text-gray-600 hover:text-blue-600">Coming Soon</button>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Tab Content -->
-  <div id="tab-content">
-    <!-- Recent -->
-    <div id="recent" class="tab-panel grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition">
-        <div class="relative">
-          <img class="w-full h-72 object-cover" src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-23-copyright-485x598.jpg" alt="Pirates Bay" />
-          <div class="absolute inset-0 bg-black bg-opacity-30 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-            <a href="https://filmax.themerex.net/pirates-bay/" class="text-white text-lg font-semibold">▶ Watch</a>
-          </div>
-        </div>
-        <div class="p-4">
-          <h3 class="text-lg font-bold"><a href="https://filmax.themerex.net/pirates-bay/" class="hover:text-blue-600">Pirates Bay</a></h3>
-          <p class="text-sm text-gray-500 mt-1">Fantasy</p>
-        </div>
+<!-- Features -->
+<section class="bg-white py-16">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center">
+    <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+      <div class="flex justify-center mb-4">
+        <span class="w-16 h-16 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-2xl">
+          🚚
+        </span>
       </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Free Delivery</h3>
+      <p class="text-gray-600">Get your favorite snacks delivered right to your seat without any extra charges.</p>
     </div>
-
-    <!-- Most Popular -->
-    <div id="popular" class="tab-panel hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition">
-        <div class="relative">
-          <img class="w-full h-72 object-cover" src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-19-copyright-485x598.jpg" alt="The Last Samurai" />
-          <div class="absolute inset-0 bg-black bg-opacity-30 opacity-0 hover:opacity-100 flex items-center justify-center transition">
-            <a href="https://filmax.themerex.net/the-last-samurai/" class="text-white text-lg font-semibold">▶ Watch</a>
-          </div>
-        </div>
-        <div class="p-4">
-          <h3 class="text-lg font-bold"><a href="https://filmax.themerex.net/the-last-samurai/" class="hover:text-blue-600">The Last Samurai</a></h3>
-          <p class="text-sm text-gray-500 mt-1">Fantasy</p>
-        </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+      <div class="flex justify-center mb-4">
+        <span class="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
+          💵
+        </span>
       </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Best Prices</h3>
+      <p class="text-gray-600">Enjoy competitive ticket prices and special discounts for students and seniors.</p>
     </div>
-
-    <!-- Best -->
-    <div id="best" class="tab-panel hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <p class="text-gray-600">Best movies list here...</p>
-    </div>
-
-    <!-- Coming Soon -->
-    <div id="coming" class="tab-panel hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <p class="text-gray-600">Coming soon list here...</p>
+    
+    <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+      <div class="flex justify-center mb-4">
+        <span class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-2xl">
+          🎧
+        </span>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Premium Experience</h3>
+      <p class="text-gray-600">State-of-the-art sound systems, comfortable seating, and crystal-clear projection.</p>
     </div>
   </div>
 </section>
+
+<%
+// Create a map of theater IDs to theater names
+Map<Integer, String> theaterNameMap = new HashMap<>();
+for (Theater theater : allTheaters) {
+    theaterNameMap.put(theater.getTheaterId(), theater.getName());
+}
+%>
+
+<!-- Testimonials -->
+<section class="bg-gray-900 py-16">
+  <div class="max-w-6xl mx-auto px-6 text-center text-white">
+    <h2 class="text-3xl font-bold mb-10">What People Say</h2>
+    <div class="swiper testimonials-slider">
+      <div class="swiper-wrapper">
+        <%
+        int reviewCount = 0;
+        for(Review review : allReviews) {
+            if(reviewCount >= 6) break;
+        %>
+        <div class="swiper-slide">
+          <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 h-full">
+            <% if(review.getUserImage() != null && !review.getUserImage().isEmpty()) { %>
+                <img src="<%= review.getUserImage() %>" alt="<%= review.getUserName() %>" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-2 border-blue-500">
+            <% } else { %>
+                <div class="w-20 h-20 rounded-full mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold border-2 border-blue-400">
+                    <%= review.getUserName().substring(0, 1).toUpperCase() %>
+                </div>
+            <% } %>
+            <div class="flex justify-center mb-3">
+              <% 
+              int rating = (int) Math.round(review.getRating());
+              for(int i = 1; i <= 5; i++) { 
+              %>
+                <span class="text-<%= i <= rating ? "yellow" : "gray" %>-400 text-sm">★</span>
+              <% } %>
+            </div>
+            <p class="italic mb-4 text-gray-300">"<%= review.getReviewText() %>"</p>
+            <h4 class="font-semibold text-white"><%= review.getUserName() %></h4>
+            <span class="text-sm text-gray-400">
+                <%= theaterNameMap.get(review.getTheaterId()) != null ? 
+                    theaterNameMap.get(review.getTheaterId()) : 
+                    "Theater #" + review.getTheaterId() %>
+            </span>
+          </div>
+        </div>
+        <%
+            reviewCount++;
+        }
+        
+        if (allReviews.isEmpty()) {
+        %>
+        <div class="swiper-slide">
+          <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 h-full">
+            <div class="w-20 h-20 rounded-full mx-auto mb-4 bg-gray-700 flex items-center justify-center text-gray-400 text-2xl">
+                👤
+            </div>
+            <p class="italic mb-4 text-gray-400">"Be the first to share your experience with us!"</p>
+            <h4 class="font-semibold text-gray-300">No Reviews Yet</h4>
+            <span class="text-sm text-gray-500">Share your thoughts after your visit</span>
+          </div>
+        </div>
+        <%
+        }
+        %>
+      </div>
+      <div class="swiper-pagination mt-6"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const swiper = new Swiper(".testimonials-slider", {
+    slidesPerView: 1,
+    spaceBetween: 20,
+    loop: true,
+    autoplay: { delay: 4000, disableOnInteraction: false },
+    pagination: { el: ".swiper-pagination", clickable: true },
+    breakpoints: { 
+      640: { slidesPerView: 1 }, 
+      768: { slidesPerView: 2 },
+      1024: { slidesPerView: 3 } 
+    },
+  });
+</script>
+
+
 
 <script>
   // Tab switching logic
   const tabs = document.querySelectorAll(".tab-btn");
   const panels = document.querySelectorAll(".tab-panel");
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      // Reset active tab
-      tabs.forEach(t => t.classList.remove("border-blue-600", "text-blue-600"));
-      tabs.forEach(t => t.classList.add("text-gray-600"));
-
-      // Hide all panels
-      panels.forEach(panel => panel.classList.add("hidden"));
-
-      // Show clicked tab + panel
-      tab.classList.add("border-blue-600", "text-blue-600");
-      tab.classList.remove("text-gray-600");
-      document.getElementById(tab.dataset.tab).classList.remove("hidden");
-    });
-  });
-</script>
-<section class="max-w-6xl mx-auto px-6 py-16">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-    
-    <!-- Left Column -->
-    <div>
-      <h2 class="text-4xl font-bold leading-tight">
-        Robert <br> Simpson
-      </h2>
-      <blockquote class="mt-4 text-gray-600 italic">
-        <p>
-          An actor's career filmography is the list of films he or she has appeared in; a director's filmography.
-        </p>
-        <cite class="block mt-2">
-          <a href="/about-us/" class="text-blue-600 hover:underline">
-            View Robert's biography
-          </a>
-        </cite>
-      </blockquote>
-    </div>
-
-    <!-- Right Column -->
-    <div>
-      <!-- Tabs -->
-      <div class="border-b border-gray-300 mb-6 flex space-x-6">
-        <button class="tab-btn pb-2 border-b-2 border-blue-600 font-semibold text-blue-600" data-tab="best">
-          Best Films
-        </button>
-        <button class="tab-btn pb-2 text-gray-600 hover:text-blue-600" data-tab="popular">
-          Most Popular
-        </button>
-        <button class="tab-btn pb-2 text-gray-600 hover:text-blue-600" data-tab="latest">
-          Latest
-        </button>
-      </div>
-
-      <!-- Tab Contents -->
-      <div id="tab-best" class="tab-content grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <!-- Film Item -->
-        <div class="group">
-          <div class="relative overflow-hidden rounded-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-24-copyright-600x600.jpg" class="w-full h-48 object-cover group-hover:scale-105 transition">
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-              <span class="text-white">▶</span>
-            </div>
-          </div>
-          <h5 class="mt-3 font-semibold">The Last Tales</h5>
-          <p class="text-sm text-gray-500">Action, Fantasy</p>
-        </div>
-        <div class="group">
-          <div class="relative overflow-hidden rounded-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-23-copyright-600x600.jpg" class="w-full h-48 object-cover group-hover:scale-105 transition">
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-              <span class="text-white">▶</span>
-            </div>
-          </div>
-          <h5 class="mt-3 font-semibold">Pirates Bay</h5>
-          <p class="text-sm text-gray-500">Action, Adventure</p>
-        </div>
-        <div class="group">
-          <div class="relative overflow-hidden rounded-lg">
-            <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/post-29-copyright-600x600.jpg" class="w-full h-48 object-cover group-hover:scale-105 transition">
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-              <span class="text-white">▶</span>
-            </div>
-          </div>
-          <h5 class="mt-3 font-semibold">Gladiator</h5>
-          <p class="text-sm text-gray-500">Action, Adventure</p>
-        </div>
-      </div>
-
-      <!-- Popular -->
-      <div id="tab-popular" class="tab-content hidden grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">Inception</h5>
-          <p class="text-sm text-gray-500">Sci-Fi, Thriller</p>
-        </div>
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">Titanic</h5>
-          <p class="text-sm text-gray-500">Romance, Drama</p>
-        </div>
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">Avatar</h5>
-          <p class="text-sm text-gray-500">Sci-Fi, Action</p>
-        </div>
-      </div>
-
-      <!-- Latest -->
-      <div id="tab-latest" class="tab-content hidden grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">Oppenheimer</h5>
-          <p class="text-sm text-gray-500">Drama, History</p>
-        </div>
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">Barbie</h5>
-          <p class="text-sm text-gray-500">Comedy, Fantasy</p>
-        </div>
-        <div>
-          <img src="https://via.placeholder.com/300x200" class="rounded-lg w-full h-48 object-cover">
-          <h5 class="mt-3 font-semibold">John Wick 4</h5>
-          <p class="text-sm text-gray-500">Action</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<script>
-  const tabButtons = document.querySelectorAll(".tab-btn");
-  const tabContents = document.querySelectorAll(".tab-content");
-
-  tabButtons.forEach(btn => {
+  tabs.forEach(btn => {
     btn.addEventListener("click", () => {
-      const tab = btn.getAttribute("data-tab");
-
-      // Reset buttons
-      tabButtons.forEach(b => b.classList.remove("border-blue-600","text-blue-600","font-semibold"));
-      btn.classList.add("border-blue-600","text-blue-600","font-semibold");
-
-      // Show/Hide contents
-      tabContents.forEach(content => {
-        content.classList.add("hidden");
+      // Remove active styles from all tabs
+      tabs.forEach(b => {
+        b.classList.remove("border-blue-600", "text-blue-600", "font-semibold");
+        b.classList.add("text-gray-600");
       });
-      document.getElementById("tab-" + tab).classList.remove("hidden");
+      
+      // Hide all panels
+      panels.forEach(p => p.classList.add("hidden"));
+      
+      // Activate clicked tab
+      btn.classList.add("border-blue-600", "text-blue-600", "font-semibold");
+      btn.classList.remove("text-gray-600");
+      
+      // Show corresponding panel
+      document.getElementById(btn.dataset.tab).classList.remove("hidden");
     });
   });
-</script>
-<section class="max-w-6xl mx-auto px-6 py-16">
-  <!-- Title -->
-  <div class="text-left mb-12">
-    <h2 class="text-4xl font-bold mb-2">Born Today</h2>
-    <p class="text-gray-600">Stay tuned for all the latest entertainment news and TV premiers</p>
-  </div>
-
-  <!-- Team Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-    <!-- Team Item -->
-    <div class="group text-center">
-      <div class="relative overflow-hidden rounded-lg">
-        <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/team-5-copyright-485x598.jpg" alt="Ryan Smith" class="w-full h-72 object-cover group-hover:scale-105 transition">
-        <a href="https://filmax.themerex.net/team/ryan-smith/" class="absolute inset-0"></a>
-      </div>
-      <h4 class="mt-3 font-semibold"><a href="https://filmax.themerex.net/team/ryan-smith/" class="hover:text-blue-600">Ryan Smith</a></h4>
-      <p class="text-gray-500">33 years</p>
-    </div>
-
-    <div class="group text-center">
-      <div class="relative overflow-hidden rounded-lg">
-        <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/team-4-copyright-485x598.jpg" alt="Karen Brown" class="w-full h-72 object-cover group-hover:scale-105 transition">
-        <a href="https://filmax.themerex.net/team/karen-brown/" class="absolute inset-0"></a>
-      </div>
-      <h4 class="mt-3 font-semibold"><a href="https://filmax.themerex.net/team/karen-brown/" class="hover:text-blue-600">Karen Brown</a></h4>
-      <p class="text-gray-500">25 years</p>
-    </div>
-
-    <div class="group text-center">
-      <div class="relative overflow-hidden rounded-lg">
-        <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/team-3-copyright-485x598.jpg" alt="Mark Lopez" class="w-full h-72 object-cover group-hover:scale-105 transition">
-        <a href="https://filmax.themerex.net/team/mark-lopez/" class="absolute inset-0"></a>
-      </div>
-      <h4 class="mt-3 font-semibold"><a href="https://filmax.themerex.net/team/mark-lopez/" class="hover:text-blue-600">Mark Lopez</a></h4>
-      <p class="text-gray-500">32 years</p>
-    </div>
-
-    <div class="group text-center">
-      <div class="relative overflow-hidden rounded-lg">
-        <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/team-2-copyright-485x598.jpg" alt="Ann Summers" class="w-full h-72 object-cover group-hover:scale-105 transition">
-        <a href="https://filmax.themerex.net/team/ann-summers/" class="absolute inset-0"></a>
-      </div>
-      <h4 class="mt-3 font-semibold"><a href="https://filmax.themerex.net/team/ann-summers/" class="hover:text-blue-600">Ann Summers</a></h4>
-      <p class="text-gray-500">27 years</p>
-    </div>
-
-    <div class="group text-center">
-      <div class="relative overflow-hidden rounded-lg">
-        <img src="https://filmax.themerex.net/wp-content/uploads/2017/12/team-1-copyright-485x598.jpg" alt="Sid Johnson" class="w-full h-72 object-cover group-hover:scale-105 transition">
-        <a href="https://filmax.themerex.net/team/sid-johnson/" class="absolute inset-0"></a>
-      </div>
-      <h4 class="mt-3 font-semibold"><a href="https://filmax.themerex.net/team/sid-johnson/" class="hover:text-blue-600">Sid Johnson</a></h4>
-      <p class="text-gray-500">28 years</p>
-    </div>
-  </div>
-</section>
-<!-- Tailwind Coming Soon Section -->
-<section class="bg-gray-900 text-white py-16 overflow-hidden">
-  <div class="max-w-6xl mx-auto px-6">
-    <!-- Section Header -->
-    <header class="text-center mb-12">
-      <h2 class="text-3xl font-bold">Coming Soon</h2>
-    </header>
-
-    <!-- Main Slides -->
-    <div id="slides" class="relative">
-      <!-- Slide 0 -->
-      <div class="slide flex flex-col lg:flex-row gap-8 opacity-100 transition-all duration-500" data-index="0">
-        <div class="relative lg:w-1/2">
-          <div class="absolute inset-0 bg-cover bg-center brightness-50" style="background-image: url('https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/hero-news.jpg');"></div>
-          <div class="relative z-10 p-6 lg:p-12 flex flex-col gap-4">
-            <span class="text-orange-400 font-semibold">Fantasy, Sci-fi, Action</span>
-            <h3 class="text-2xl lg:text-4xl font-bold">Colliding Planets</h3>
-            <div class="flex gap-1 text-yellow-400">
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-            </div>
-            <div class="flex items-center gap-2 text-gray-300">
-              <i class="fa fa-calendar-o"></i>
-              <span>2 October, 2019</span>
-            </div>
-            <p class="text-gray-200">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum...</p>
-            <a href="https://xenothemes.co.uk/specto/movies/colliding-planets/" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">More Info</a>
-          </div>
-        </div>
-        <div class="lg:w-1/2 flex justify-center items-center">
-          <a href="https://youtu.be/d96cjJhvlMA" class="relative group">
-            <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/trailer-1-555x335.png" alt="Colliding Planets" class="rounded shadow-lg">
-            <i class="fa fa-play absolute inset-0 m-auto text-4xl text-white opacity-80 group-hover:opacity-100"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Slide 1 -->
-      <div class="slide flex flex-col lg:flex-row gap-8 opacity-0 h-0 overflow-hidden transition-all duration-500" data-index="1">
-        <div class="relative lg:w-1/2">
-          <div class="absolute inset-0 bg-cover bg-center brightness-50" style="background-image: url('https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/hero-single-movie.jpg');"></div>
-          <div class="relative z-10 p-6 lg:p-12 flex flex-col gap-4">
-            <span class="text-orange-400 font-semibold">Thriller, Horror</span>
-            <h3 class="text-2xl lg:text-4xl font-bold">Infinite Vengeance</h3>
-            <div class="flex gap-1 text-yellow-400">
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star"></i>
-              <i class="fa fa-star text-gray-500"></i>
-            </div>
-            <div class="flex items-center gap-2 text-gray-300">
-              <i class="fa fa-calendar-o"></i>
-              <span>17 August, 2017</span>
-            </div>
-            <p class="text-gray-200">Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum...</p>
-            <a href="https://xenothemes.co.uk/specto/movies/infinite-vengeance/" class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">More Info</a>
-          </div>
-        </div>
-        <div class="lg:w-1/2 flex justify-center items-center">
-          <a href="https://youtu.be/d96cjJhvlMA" class="relative group">
-            <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/slide-1-video-555x335.png" alt="Infinite Vengeance" class="rounded shadow-lg">
-            <i class="fa fa-play absolute inset-0 m-auto text-4xl text-white opacity-80 group-hover:opacity-100"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Add more slides similarly -->
-    </div>
-
-    <!-- Thumbnails -->
-    <div class="flex gap-4 mt-12 overflow-x-auto" id="thumbnails">
-      <div class="thumbnail cursor-pointer opacity-100" data-index="0">
-        <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-14.jpg" alt="Colliding Planets" class="w-32 rounded shadow-lg">
-        <h5 class="text-sm mt-1">Colliding Planets</h5>
-        <span class="text-gray-400 text-xs">2 October, 2019</span>
-      </div>
-      <div class="thumbnail cursor-pointer opacity-50" data-index="1">
-        <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-12.jpg" alt="Infinite Vengeance" class="w-32 rounded shadow-lg">
-        <h5 class="text-sm mt-1">Infinite Vengeance</h5>
-        <span class="text-gray-400 text-xs">17 August, 2017</span>
-      </div>
-      <!-- Add more thumbnails -->
-    </div>
-  </div>
-</section>
-
-<!-- Tailwind + JS -->
-<script>
-const slides = document.querySelectorAll('.slide');
-const thumbnails = document.querySelectorAll('.thumbnail');
-
-thumbnails.forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    const index = thumb.getAttribute('data-index');
-
-    slides.forEach(slide => {
-      if(slide.getAttribute('data-index') === index) {
-        slide.classList.remove('opacity-0', 'h-0');
-        slide.classList.add('opacity-100');
-      } else {
-        slide.classList.add('opacity-0', 'h-0');
-        slide.classList.remove('opacity-100');
-      }
-    });
-
-    thumbnails.forEach(t => t.classList.remove('opacity-100'));
-    thumb.classList.add('opacity-100');
-  });
-});
-</script>
-<section class="py-12 px-4 md:px-8">
-    <div class="container mx-auto">
-        <h1 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800">Movie Schedule</h1>
-        <p class="text-center text-gray-600 mb-10">Check showtimes for your favorite movies</p>
-        
-        <!-- Tabs Navigation -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div class="flex flex-wrap border-b border-gray-200">
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="mon">Mon</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="tue">Tue</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="wed">Wed</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="thu">Thu</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="fri">Fri</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="sat">Sat</button>
-                <button class="tab-btn px-4 py-3 font-medium text-gray-600 hover:bg-gray-50 transition-colors" data-tab="sun">Sun</button>
-          <div class="ml-auto px-4 py-3 font-medium text-gray-800 md:block" id="today-date">
-    <!-- Date will be set by JS -->
-</div>
-            </div>
-            
-            <!-- Tab Content -->
-            <div class="p-4">
-                
-                <!-- Monday -->
-                <div class="tab-content hidden" id="mon-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Mon Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Action, Adventure</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Mon Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Monday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tuesday -->
-                <div class="tab-content hidden" id="tue-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb1-270x340.jpg" alt="Tue Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Drama, Thriller</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Tue Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Tuesday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Wednesday (Today) -->
-                <div class="tab-content" id="wed-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Locked in" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Thriller, Horror</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Locked in</h3>
-                                <p class="text-gray-700 mb-4">Claritas est etiam processus dynamicus...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thursday -->
-                <div class="tab-content hidden" id="thu-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-7-270x340.jpg" alt="Thu Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Comedy, Family</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Thu Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Thursday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Friday -->
-                <div class="tab-content hidden" id="fri-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb1-270x340.jpg" alt="Fri Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Adventure, Action</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Fri Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Friday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Saturday -->
-                <div class="tab-content hidden" id="sat-content">
-                    <div class="movie-card bg-white overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/07/movie-7-270x340.jpg" alt="Sat Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Horror, Thriller</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Sat Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Saturday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sunday -->
-                <div class="tab-content hidden" id="sun-content">
-                    <div class="movie-card bg-white  overflow-hidden mb-6">
-                        <div class="md:flex">
-                            <div class="md:w-1/4 p-4">
-                                <img src="https://xenothemes.co.uk/specto/wp-content/uploads/sites/2/2017/11/thumb2-270x340.jpg" alt="Sun Movie 1" class="w-full h-auto rounded-lg">
-                            </div>
-                            <div class="md:w-3/4 p-4">
-                                <span class="text-sm text-gray-500">Action, Thriller</span>
-                                <h3 class="text-xl font-bold mt-1 mb-2">Sun Movie 1</h3>
-                                <p class="text-gray-700 mb-4">Exciting Sunday movie description...</p>
-                                <a href="#" class="inline-flex items-center text-red-600 font-medium hover:text-red-800 transition-colors">
-                                    Full synopsis <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</section>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active classes
-            tabButtons.forEach(btn => btn.classList.remove('active', 'text-red-600', 'border-b-2', 'border-red-600'));
-            tabContents.forEach(content => content.classList.add('hidden')); // hide all
-
-            // Activate clicked button
-            button.classList.add('active', 'text-red-600', 'border-b-2', 'border-red-600');
-
-            // Show corresponding content
-            const tabId = button.getAttribute('data-tab') + '-content';
-            document.getElementById(tabId).classList.remove('hidden');
-        });
-    });
-
-    // Set initial active state
-    document.querySelector('.tab-btn[data-tab="wed"]').classList.add('active', 'text-red-600', 'border-b-2', 'border-red-600');
-    document.getElementById('wed-content').classList.remove('hidden');
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const todayDateElem = document.getElementById('today-date');
-
-    // Days and months
-    const dayMap = ['sun','mon','tue','wed','thu','fri','sat'];
-    const monthNames = ["January","February","March","April","May","June",
-      "July","August","September","October","November","December"];
-
-    const today = new Date();
-    const todayDay = dayMap[today.getDay()]; // 'mon', 'tue', ...
-    const todayMonth = monthNames[today.getMonth()]; // 'October', etc
-    const todayDateNum = today.getDate(); // 1-31
-
-    // Set the date text (capitalized day)
-    todayDateElem.textContent = `${todayDay.charAt(0).toUpperCase() + todayDay.slice(1)}, ${todayDateNum} ${todayMonth}`;
-
-    // Tab click logic
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active', 'text-red-600', 'border-b-2', 'border-red-600'));
-            tabContents.forEach(content => content.classList.add('hidden'));
-
-            button.classList.add('active', 'text-red-600', 'border-b-2', 'border-red-600');
-
-            const tabId = button.getAttribute('data-tab') + '-content';
-            const content = document.getElementById(tabId);
-            if(content) content.classList.remove('hidden');
-        });
-    });
-
-    // Set initial tab to today
-    const todayButton = document.querySelector(`.tab-btn[data-tab="${todayDay}"]`);
-    if(todayButton) {
-        todayButton.classList.add('active', 'text-red-600', 'border-b-2', 'border-red-600');
-        const todayContent = document.getElementById(`${todayDay}-content`);
-        if(todayContent) todayContent.classList.remove('hidden');
-    }
-});
 </script>
 
 <jsp:include page="layout/footer.jsp" />
-<jsp:include page="layout/JSPFooter.jsp" />

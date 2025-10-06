@@ -21,6 +21,9 @@ if(user != null) {
     CartDAO cartDAO = new CartDAO();
     cartCount = cartDAO.getCartItems(user.getUserId()).size();
 }
+
+// get current page
+String currentPage = request.getRequestURI();
 %>
 
 <header class="sticky top-0 z-50 bg-white shadow-md">
@@ -37,13 +40,38 @@ if(user != null) {
 
             <!-- Desktop Navigation Links -->
             <div class="hidden lg:flex lg:space-x-6">
-                <a href="home.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">Home</a>
-                <a href="movies.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">Movies</a>
-                <a href="foods.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">Food</a>
-                <a href="faq.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">FAQ</a>
-                <a href="reviews.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">Reviews</a>
-                <a href="about.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">About us</a>
-                <a href="contact.jsp" class="text-sm font-medium text-gray-900 hover:text-black transition">Contact</a>
+                <a href="home.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("home.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Home
+                </a>
+                <a href="movies.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("movies.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Movies
+                </a>
+                <a href="movie-list-user.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("movie-list-user.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Movie Lists
+                </a>
+                <a href="foods.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("foods.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Food
+                </a>
+                <a href="faq.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("faq.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   FAQ
+                </a>
+                <a href="reviews.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("moduleReview.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Reviews
+                </a>
+                <a href="about.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("about.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   About us
+                </a>
+                <a href="contact.jsp" class="relative pb-1 text-sm font-medium transition-all duration-200 
+                   <%= currentPage.endsWith("contact.jsp") ? "text-red-600 after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-red-600" : "text-gray-900 hover:text-red-600" %>">
+                   Contact
+                </a>
             </div>
 
             <!-- Right Section -->
@@ -51,7 +79,6 @@ if(user != null) {
                 <% if(user != null) { %>
                 <!-- User Dropdown & Cart -->
                 <div class="hidden lg:flex items-center gap-3 relative">
-                    <!-- User Info -->
                     <div class="flex flex-col text-right">
                         <span class="text-sm font-medium text-gray-900"><%= username %></span>
                         <span class="text-xs text-gray-500"><%= email %></span>
@@ -81,7 +108,6 @@ if(user != null) {
                     </a>
                 </div>
                 <% } else { %>
-                <!-- Guest Buttons -->
                 <div class="hidden lg:flex items-center gap-2">
                     <a href="login.jsp" class="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-300 rounded hover:bg-gray-100 hover:text-black transition">Login</a>
                     <a href="register.jsp" class="px-4 py-2 text-sm font-medium text-white bg-black rounded hover:bg-gray-800 transition">Get Started</a>
@@ -101,36 +127,43 @@ if(user != null) {
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="hidden lg:hidden border-t w-full bg-white shadow-md">
         <div class="flex flex-col px-4 py-3 space-y-2">
-            <a href="home.jsp" class="block text-gray-900 font-medium hover:text-black transition">Home</a>
-            <a href="movies.jsp" class="block text-gray-900 font-medium hover:text-black transition">Movies</a>
-            <a href="foods.jsp" class="block text-gray-900 font-medium hover:text-black transition">Food</a>
-            <a href="faq.jsp" class="block text-gray-900 font-medium hover:text-black transition">FAQ</a>
-            <a href="reviews.jsp" class="block text-gray-900 font-medium hover:text-black transition">Reviews</a>
-            <a href="about.jsp" class="block text-gray-900 font-medium hover:text-black transition">About us</a>
-            <a href="contact.jsp" class="block text-gray-900 font-medium hover:text-black transition">Contact</a>
+            <a href="home.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("home.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Home</a>
+            <a href="movies.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("movies.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Movies</a>
+            <a href="movie-list-user.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("movie-list-user.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Movie Lists</a>
+            <a href="foods.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("foods.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Food</a>
+            <a href="faq.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("faq.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">FAQ</a>
+            <a href="reviews.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("moduleReview.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Reviews</a>
+            <a href="about.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("about.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">About us</a>
+            <a href="contact.jsp" class="text-sm font-medium transition 
+               <%= currentPage.endsWith("contact.jsp") ? "text-red-600 border-l-4 border-red-600 pl-2" : "text-gray-900 hover:text-red-600" %>">Contact</a>
 
             <% if(user != null) { %>
-                <a href="profile.jsp" class="block text-gray-900 font-medium hover:text-black transition">Profile</a>
-                <a href="user-orders.jsp" class="block text-gray-900 font-medium hover:text-black transition">My Orders</a>
-                <a href="logout" class="block text-red-600 font-medium hover:text-red-800 transition">Logout</a>
-                <a href="cart?action=view" class="block text-gray-900 font-medium hover:text-black transition">
+                <a href="profile.jsp" class="text-sm font-medium text-gray-900 hover:text-red-600 transition">Profile</a>
+                <a href="user-orders.jsp" class="text-sm font-medium text-gray-900 hover:text-red-600 transition">My Orders</a>
+                <a href="logout" class="text-sm font-medium text-red-600 hover:text-red-800 transition">Logout</a>
+                <a href="cart?action=view" class="text-sm font-medium text-gray-900 hover:text-red-600 transition">
                     My Cart <% if(cartCount>0){ %>(<span id="cartCountMobile"><%=cartCount%></span>)<% } %>
                 </a>
             <% } else { %>
-                <a href="login.jsp" class="block text-gray-900 font-medium hover:text-black transition">Login</a>
-                <a href="register.jsp" class="block text-white font-medium bg-black rounded hover:bg-gray-800 transition">Get Started</a>
+                <a href="login.jsp" class="text-sm font-medium text-gray-900 hover:text-red-600 transition">Login</a>
+                <a href="register.jsp" class="text-sm font-medium text-white bg-black rounded hover:bg-gray-800 transition">Get Started</a>
             <% } %>
         </div>
     </div>
 </header>
 
 <script>
-// Mobile menu toggle
 function toggleMenu() {
     document.getElementById("mobileMenu").classList.toggle("hidden");
 }
 
-// Profile dropdown toggle
 const profileBtn = document.getElementById("profileBtn");
 const profileMenu = document.getElementById("profileMenu");
 
@@ -138,8 +171,6 @@ if(profileBtn){
     profileBtn.addEventListener("click", () => {
         profileMenu.classList.toggle("hidden");
     });
-
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
         if(!profileBtn.contains(e.target) && !profileMenu.contains(e.target)){
             profileMenu.classList.add("hidden");
@@ -147,7 +178,6 @@ if(profileBtn){
     });
 }
 
-// Update cart count dynamically
 function updateCartCount(newCount){
     const desktopCount = document.getElementById("cartCount");
     const mobileCount = document.getElementById("cartCountMobile");

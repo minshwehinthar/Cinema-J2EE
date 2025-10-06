@@ -100,6 +100,19 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
         <a href="employeeDetails.jsp?id=<%=rs.getInt("user_id")%>" class="p-2 bg-gray-100 rounded hover:bg-gray-200">
             <i class="fa fa-pencil text-gray-600"></i>
         </a>
+        
+          <%-- VIEW SEATS button --%>
+    <%
+        int theaterId = new com.demo.dao.UserDAO().getTheaterIdByUserId(rs.getInt("user_id"));
+        if(theaterId > 0) {
+    %>
+    <a href="viewSeat.jsp?theater_id=<%=theaterId%>" 
+       class="p-2 bg-blue-500 rounded hover:bg-blue-600 text-white" 
+       title="View Seats">
+        <i class="fa fa-chair"></i>
+    </a>
+    <% } %>
+        
         <button class="delete-btn p-2 bg-gray-100 rounded hover:bg-red-100" data-id="<%=rs.getInt("user_id")%>">
             <i class="fa fa-trash text-red-600"></i>
         </button>

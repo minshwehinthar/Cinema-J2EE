@@ -8,14 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import com.demo.dao.UserDAO;
 import com.demo.model.User;
 
-/**
- * Servlet implementation class LoginServlet
- */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -37,17 +33,26 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
-            // Redirect based on role
+            // Get saved redirect URL (if any)
+            String redirectURL = (String) session.getAttribute("redirectAfterLogin");
+            session.removeAttribute("redirectAfterLogin"); // clear it after use
+
+            // Determine role-based default if no redirect URL
             String role = user.getRole();
-            if ("admin".equals(role)) {
-                response.sendRedirect("index.jsp"); // Admin 
-            } else if("theateradmin".equals(role)) {
-            		int theaterId = dao.getTheaterIdByUserId(user.getUserId());
-                session.setAttribute("theater_id", theaterId);
-            		response.sendRedirect("theateradminpickmovies.jsp");
-            }else {
-                response.sendRedirect("index-user.jsp"); // Regular user dashboard
+            if (redirectURL == null || redirectURL.isEmpty()) {
+                if ("admin".equals(role)) {
+                    redirectURL = "index.jsp";
+                } else if ("theateradmin".equals(role)) {
+                    int theaterId = dao.getTheaterIdByUserId(user.getUserId());
+                    session.setAttribute("theater_id", theaterId);
+                    redirectURL = "theateradminpickmovies.jsp";
+                } else {
+                    redirectURL = "index-user.jsp";
+                }
             }
+
+            // Redirect to saved or default page
+            response.sendRedirect(redirectURL);
 
         } else {
             // Invalid login

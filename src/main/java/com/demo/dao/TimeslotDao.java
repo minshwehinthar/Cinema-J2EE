@@ -118,8 +118,44 @@ public class TimeslotDao {
         }
         return list;
     }
-    
-    
-    
+    public boolean updateTimeslot(int slotId, String startTime, String endTime) {
+        boolean updated = false;
+        MyConnection conObj = new MyConnection();
+        Connection con = conObj.getConnection();
+
+        try {
+            PreparedStatement pstm = con.prepareStatement(
+                "UPDATE timeslots SET start_time = ?, end_time = ? WHERE slot_id = ?"
+            );
+            pstm.setString(1, startTime);
+            pstm.setString(2, endTime);
+            pstm.setInt(3, slotId);
+
+            int row = pstm.executeUpdate();
+            updated = (row > 0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return updated;
+    }
+
+    public boolean deleteTimeslot(int slotId) {
+        boolean deleted = false;
+        MyConnection conObj = new MyConnection();
+        Connection con = conObj.getConnection();
+
+        try {
+            PreparedStatement pstm = con.prepareStatement(
+                "DELETE FROM timeslots WHERE slot_id = ?"
+            );
+            pstm.setInt(1, slotId);
+            int row = pstm.executeUpdate();
+            deleted = (row > 0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return deleted;
+    }
+
 
 }

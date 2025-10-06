@@ -6,6 +6,10 @@
     String username = (user != null) ? user.getName() : "Guest";
     String email = (user != null && user.getEmail() != null) ? user.getEmail() : "Viewer";
 %>
+<script src="${pageContext.request.contextPath}/assets/js/movies1.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/movies2.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/moviedetails1.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/seat-script.js"></script>
 <jsp:include page="JSPHeader.jsp"/>
 <!-- Footer -->
 <footer class="backdrop-blur-sm shadow-sm bg-white text-gray-800">

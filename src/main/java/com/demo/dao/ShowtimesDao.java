@@ -146,6 +146,29 @@ public class ShowtimesDao {
     }
 
     
-
+    public ArrayList<String> getFormattedShowtimes(int theaterId, int movieId, LocalDate date) {
+        ArrayList<String> formattedTimes = new ArrayList<>();
+        try (Connection con = new MyConnection().getConnection()) {
+            PreparedStatement pstm = con.prepareStatement(
+                "SELECT t.start_time " +
+                "FROM showtimes s JOIN timeslots t ON s.slot_id = t.slot_id " +
+                "WHERE s.theater_id=? AND s.movie_id=? AND s.show_date=?"
+            );
+            pstm.setInt(1, theaterId);
+            pstm.setInt(2, movieId);
+            pstm.setDate(3, Date.valueOf(date));
+            ResultSet rs = pstm.executeQuery();
+            while (rs.next()) {
+                Time startTime = rs.getTime("start_time");
+                if (startTime != null) {
+                    // Format time as HH:mm
+                    formattedTimes.add(startTime.toLocalTime().toString());
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return formattedTimes;
+    }
 
 }
