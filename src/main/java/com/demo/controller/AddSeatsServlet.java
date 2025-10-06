@@ -1,42 +1,44 @@
 package com.demo.controller;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
-import java.io.IOException;
-import com.demo.dao.SeatPriceDao;
 import com.demo.dao.SeatsDao;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+
+import java.io.IOException;
 
 @WebServlet("/AddSeatsServlet")
 public class AddSeatsServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-        Integer theaterId = (Integer) request.getSession().getAttribute("theater_id");
-        if(theaterId == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
+        int theaterId = Integer.parseInt(request.getParameter("theater_id"));
+        int seatsPerRow = Integer.parseInt(request.getParameter("seatsPerRow"));
 
-        String seatType = request.getParameter("seat_type");
-        String rowsInput = request.getParameter("rows"); // e.g., "A,B,C"
-        int seatsPerRow = Integer.parseInt(request.getParameter("seats_per_row"));
+        int normalRows = Integer.parseInt(request.getParameter("normalRows"));
+        int vipRows = Integer.parseInt(request.getParameter("vipRows"));
+        int coupleRows = Integer.parseInt(request.getParameter("coupleRows"));
+        int coupleSeats = Integer.parseInt(request.getParameter("coupleSeats"));
 
-        SeatPriceDao priceDao = new SeatPriceDao();
-        int priceId = priceDao.getPriceIdBySeatType(seatType);
+        SeatsDao dao = new SeatsDao();
+        int nextRow = 0;
 
-        if(priceId == -1) {
-            response.sendRedirect("addSeats.jsp?msg=error");
-            return;
-        }
+        // Add Normal seats (price_id = 1)
+        if (normalRows > 0)
+            nextRow = dao.addSeatsForType(theaterId, nextRow, normalRows, seatsPerRow, 1, false);
 
-        SeatsDao seatsDao = new SeatsDao();
-        boolean added = seatsDao.addSeatsForRows(theaterId, rowsInput, seatsPerRow, priceId);
+        // Add VIP seats (price_id = 2)
+        if (vipRows > 0)
+            nextRow = dao.addSeatsForType(theaterId, nextRow, vipRows, seatsPerRow, 2, false);
 
-        if(added) {
-            response.sendRedirect("addSeats.jsp?msg=success");
-        } else {
-            response.sendRedirect("addSeats.jsp?msg=error");
-        }
+        // Add Couple seats (price_id = 3)
+        if (coupleRows > 0)
+            nextRow = dao.addSeatsForType(theaterId, nextRow, coupleRows, coupleSeats * 2, 3, true);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("success", "Seats added successfully!");
+        response.sendRedirect("employees.jsp");
     }
 }

@@ -68,7 +68,7 @@
         </span>
     </td>
     <td class="px-6 py-4 text-center flex justify-center space-x-2">
-    <a href="MoviesDetails.jsp?movieId=<%=m.getMovie_id()%>" 
+    <a href="MoviesDetails.jsp?id=<%= m.getMovie_id() %>" 
        class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm">Detail</a>
     <a href="editMovie.jsp?movieId=<%=m.getMovie_id()%>" 
            class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">Edit</a>

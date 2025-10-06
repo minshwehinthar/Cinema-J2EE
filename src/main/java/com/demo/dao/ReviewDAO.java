@@ -88,4 +88,37 @@ public class ReviewDAO {
         }
         return reviews;
     }
+    
+    // Get all reviews for about page (NEW METHOD)
+    public List<Review> getAllReviews() {
+        List<Review> reviews = new ArrayList<>();
+        String sql = "SELECT r.*, u.name, u.image, u.imgtype FROM reviews r " +
+                     "JOIN users u ON r.user_id = u.user_id " +
+                     "ORDER BY r.created_at DESC";
+        try (Connection con = MyConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Review r = new Review();
+                r.setId(rs.getInt("id"));
+                r.setUserId(rs.getInt("user_id"));
+                r.setTheaterId(rs.getInt("theater_id"));
+                r.setReviewText(rs.getString("review_text"));
+                r.setIsGood(rs.getString("is_good"));
+                r.setRating(rs.getInt("rating"));
+                r.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                r.setUserName(rs.getString("name"));
+
+                byte[] imgBytes = rs.getBytes("image");
+                if(imgBytes != null) {
+                    String base64Img = "data:" + rs.getString("imgtype") + ";base64," + Base64.getEncoder().encodeToString(imgBytes);
+                    r.setUserImage(base64Img);
+                }
+                reviews.add(r);
+            }
+        } catch(SQLException e){
+            e.printStackTrace();
+        }
+        return reviews;
+    }
 }

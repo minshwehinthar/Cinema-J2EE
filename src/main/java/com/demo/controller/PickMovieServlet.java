@@ -41,6 +41,15 @@ public class PickMovieServlet extends HttpServlet {
                 return;
             }
         }
+        if ("coming-soon".equalsIgnoreCase(movieStatus)) {
+            try {
+                startDate = LocalDate.parse(request.getParameter("start_date"));
+                endDate = LocalDate.parse(request.getParameter("end_date"));
+            } catch (Exception e) {
+                response.sendRedirect("theateradminpickmovies.jsp?msg=invaliddate");
+                return;
+            }
+        }
 
         TheaterMoviesDao theaterDao = new TheaterMoviesDao();
         TimeslotDao slotDao = new TimeslotDao();
@@ -81,10 +90,32 @@ public class PickMovieServlet extends HttpServlet {
             }
 
         } else if ("coming-soon".equalsIgnoreCase(movieStatus)) {
+        	 ArrayList<Timeslot> allSlots = slotDao.getTimeslotsByTheater(theaterId);
+             if (allSlots.isEmpty()) {
+                 response.sendRedirect("addTimeslots.jsp?msg=notimeslots");
+                 return;
+             }
+
+             // Check if at least one free slot exists in date range
+             boolean hasAvailableSlot = false;
+             LocalDate current = startDate;
+             while (!current.isAfter(endDate)) {
+                 ArrayList<Timeslot> freeSlots = showDao.getFreeTimeslotsForDate(theaterId, current, allSlots);
+                 if (!freeSlots.isEmpty()) {
+                     hasAvailableSlot = true;
+                     break;
+                 }
+                 current = current.plusDays(1);
+             }
+
+             if (!hasAvailableSlot) {
+                 response.sendRedirect("addTimeslots.jsp?msg=nofreeslot");
+                 return;
+             }
             // Coming soon → insert with NULL dates or a placeholder
-            int row = theaterDao.addMovieToTheater(theaterId, movieId, null, null);
+        	int row = theaterDao.addMovieToTheater(theaterId, movieId, startDate.toString(), endDate.toString());
             if (row > 0) {
-                response.sendRedirect("theateradminpickmovies.jsp?msg=added");
+                response.sendRedirect("assignTimeslot.jsp?movie_id=" + movieId + "&msg=added");
             } else {
                 response.sendRedirect("theateradminpickmovies.jsp?msg=error");
             }

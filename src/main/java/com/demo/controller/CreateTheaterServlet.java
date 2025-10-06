@@ -103,12 +103,17 @@ public class CreateTheaterServlet extends HttpServlet {
             int theaterId = theaterDAO.createTheater(theater);
 
             if (theaterId != -1) {
-                request.setAttribute("success", "Theater and Admin created successfully!");
+                // Store theater_id in session for use in addSeats.jsp
+                HttpSession session = request.getSession();
+                session.setAttribute("theater_id", theaterId);
+
+                // Redirect directly to addSeats.jsp
+                response.sendRedirect("addSeats.jsp");
+                return; // stop execution
             } else {
                 request.setAttribute("error", "Failed to create theater.");
+                request.getRequestDispatcher("create-theater-admin.jsp").forward(request, response);
             }
-
-            request.getRequestDispatcher("create-theater-admin.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

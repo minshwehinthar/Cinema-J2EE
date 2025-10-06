@@ -293,4 +293,35 @@ public class TheaterDAO {
 
         return false;
     }
+    
+    public Integer getTheaterIdByAdmin(int adminId) {
+        Integer theaterId = null;
+        try (Connection con = MyConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT theater_id FROM theaters WHERE user_id = ?")) {
+            ps.setInt(1, adminId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                theaterId = rs.getInt("theater_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return theaterId;
+    }
+    public int getTheaterIdByUserId(int userId) {
+        int theaterId = 0;
+        try {
+            Connection con = MyConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT theater_id FROM users WHERE user_id=?");
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                theaterId = rs.getInt("theater_id");
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return theaterId;
+    }
+
 }

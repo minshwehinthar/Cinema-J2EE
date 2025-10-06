@@ -39,12 +39,7 @@ int goodPercent = totalReviews > 0 ? (goodReviews * 100) / totalReviews : 0;
 int badPercent = totalReviews > 0 ? (badReviews * 100) / totalReviews : 0;
 %>
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Theater Reviews</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<jsp:include page="layout/JSPHeader.jsp"></jsp:include>
 <%
 boolean loggedIn = (user != null);
 String reviewsHeight = loggedIn ? "54vh" : "";
@@ -61,7 +56,7 @@ String reviewsHeight = loggedIn ? "54vh" : "";
     height: 0;
 }
 </style>
-</head>
+
 <body class="bg-gray-50">
 <jsp:include page="layout/header.jsp"></jsp:include>
 

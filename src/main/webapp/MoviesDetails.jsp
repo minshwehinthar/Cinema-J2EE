@@ -1,73 +1,92 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.demo.dao.MoviesDao" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.demo.model.Movies" %>
+<%@ page import="com.demo.dao.MoviesDao" %>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.Base64" %>
+
+<jsp:include page="layout/JSPHeader.jsp" />
+<jsp:include page="layout/header.jsp" />
 
 <%
-    String movieIdParam = request.getParameter("movieId");
-    if(movieIdParam == null){
-        response.sendRedirect("moviesList.jsp");
-        return;
-    }
+    String idParam = request.getParameter("id");
+    Movies movie = null;
+    String posterBase64 = "";
+    String posterType = "";
 
-    int movieId = Integer.parseInt(movieIdParam);
-    MoviesDao moviesDAO = new MoviesDao();
-    Movies movie = moviesDAO.getMovieById(movieId);
+    if(idParam != null){
+        int movieId = Integer.parseInt(idParam);
+        MoviesDao dao = new MoviesDao();
+        movie = dao.getMovieById(movieId);
 
-    if(movie.getMovie_id() == 0){
-        out.println("<h2>Movie not found!</h2>");
-        return;
+        if(movie != null){
+            Connection con = new com.demo.dao.MyConnection().getConnection();
+            try {
+                PreparedStatement ps = con.prepareStatement(
+                    "SELECT poster, postertype FROM movies WHERE movie_id=?");
+                ps.setInt(1, movieId);
+                ResultSet rs = ps.executeQuery();
+                if(rs.next()){
+                    byte[] posterBytes = rs.getBytes("poster");
+                    posterType = rs.getString("postertype");
+                    if(posterBytes != null){
+                        posterBase64 = Base64.getEncoder().encodeToString(posterBytes);
+                    }
+                }
+                rs.close();
+                ps.close();
+            } catch(Exception e){ e.printStackTrace(); }
+            finally { con.close(); }
+        }
     }
 %>
 
-<jsp:include page="layout/JSPHeader.jsp"/>
-<div class="flex">
-    <jsp:include page="layout/sidebar.jsp"/>
-    <div class="flex-1 sm:ml-64">
-        <jsp:include page="/layout/AdminHeader.jsp"/>
-        <div class="p-8 bg-white shadow rounded-lg">
-            <h1 class="text-3xl font-bold mb-4 text-gray-900"><%= movie.getTitle() %></h1>
+<% if(movie == null){ %>
+    <div class="text-center mt-20 text-red-600 font-semibold text-xl">
+        ❌ Movie not found!
+    </div>
+<% } else { %>
 
-            <div class="flex flex-col md:flex-row gap-6">
-                <!-- Poster -->
-                <div class="w-full md:w-1/3">
-                    <img src="MovieMediaServlet?movieId=<%= movie.getMovie_id() %>&type=poster" 
-                         class="rounded-lg shadow" 
-                         alt="<%= movie.getTitle() %> Poster"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster';"/>
-                </div>
+<div class="min-h-screen bg-gray-50 py-10 px-6">
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="grid md:grid-cols-2 gap-10 p-8">
 
-                <!-- Details -->
-                <div class="flex-1">
-                    <p><strong>Status:</strong> 
-                        <span class="<%= "now-showing".equals(movie.getStatus())?"text-green-600":"text-yellow-600" %> font-semibold">
-                            <%= movie.getStatus() %>
-                        </span>
-                    </p>
-                    <p><strong>Duration:</strong> <%= movie.getDuration() %></p>
-                    <p><strong>Director:</strong> <%= movie.getDirector() != null ? movie.getDirector() : "-" %></p>
-                    <p><strong>Genres:</strong> <%= movie.getGenres() != null ? movie.getGenres() : "-" %></p>
-                    <p><strong>Casts:</strong> <%= movie.getCasts() != null ? movie.getCasts() : "-" %></p>
-                    <p class="mt-4"><strong>Synopsis:</strong><br/> <%= movie.getSynopsis() != null ? movie.getSynopsis() : "-" %></p>
+            <!-- Poster -->
+            <div class="flex justify-center">
+                <% if (!posterBase64.isEmpty()) { %>
+                    <img src="data:<%=posterType%>;base64,<%=posterBase64%>"
+                         alt="Movie Poster"
+                         class="w-80 aspect-[2/3] object-cover rounded-2xl shadow-xl border border-gray-200" />
+                <% } else { %>
+                    <img src="assets/img/cart_empty.png"
+                         class="w-80 aspect-[2/3] object-cover rounded-2xl border border-gray-200 shadow-lg" />
+                <% } %>
+            </div>
 
-                    <!-- Trailer -->
-                    <div class="mt-6">
-                        <strong>Trailer:</strong>
-                        <video controls class="w-full rounded-lg mt-2" onerror="this.style.display='none';">
-                            <source src="MovieMediaServlet?movieId=<%= movie.getMovie_id() %>&type=trailer" type="<%= movie.getTrailertype() %>">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+            <!-- Movie Info -->
+            <div class="flex flex-col gap-6">
+                <h1 class="text-4xl font-bold text-gray-800"><%= movie.getTitle() %></h1>
+                <p class="text-indigo-600 font-medium"><%= movie.getStatus() %></p>
+                <p><span class="font-semibold">Duration:</span> <%= movie.getDuration() %></p>
+                <p><span class="font-semibold">Director:</span> <%= movie.getDirector() %></p>
+                <p><span class="font-semibold">Cast:</span> <%= movie.getCasts() %></p>
+                <p><span class="font-semibold">Genres:</span> <%= movie.getGenres() %></p>
+                <p class="text-gray-700 leading-relaxed"><%= movie.getSynopsis() %></p>
+            </div>
+        </div>
 
-                    <!-- Action Buttons -->
-                    <div class="mt-6 flex space-x-2">
-                        <a href="editMovie.jsp?movieId=<%= movie.getMovie_id() %>" 
-                           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit Movie</a>
-                        <a href="moviesList.jsp" 
-                           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to List</a>
-                    </div>
-                </div>
+        <!-- Trailer -->
+        <div class="w-full px-8 pb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🎬 Watch Trailer</h2>
+            <div class="w-full aspect-video rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <video controls class="w-full h-full">
+                    <source src="GetMoviesTrailerServlet?movie_id=<%= movie.getMovie_id() %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
         </div>
     </div>
 </div>
-<jsp:include page="layout/JSPFooter.jsp"/>
+
+<% } %>
+
+<jsp:include page="layout/JSPFooter.jsp" />

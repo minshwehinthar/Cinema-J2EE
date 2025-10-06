@@ -67,9 +67,16 @@
                   <span class="ms-3">Theaters</span>
                </a>
             </li>
+            
          <% } %>
          
  <% if("theateradmin".equalsIgnoreCase(role)) { %>
+  <li>
+               <a href="addTimeslots.jsp" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-sky-100 hover:text-sky-700">
+                  <i class="fa-solid fa-film w-5 h-5 text-gray-500 group-hover:text-sky-700"></i>
+                  <span class="ms-3">Time</span>
+               </a>
+            </li>
          <li>
                <a href="theateradminpickmovies.jsp" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-sky-100 hover:text-sky-700">
                   <i class="fa-solid fa-film w-5 h-5 text-gray-500 group-hover:text-sky-700"></i>

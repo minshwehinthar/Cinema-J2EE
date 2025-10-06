@@ -33,6 +33,26 @@ public class TheaterMoviesDao {
         
         return row;
     }
+	
+	public boolean isMovieAddedToTheater(int theaterId, int movieId) {
+	    boolean exists = false;
+	    MyConnection conObj = new MyConnection();
+	    Connection con = conObj.getConnection();
+	    try {
+	        PreparedStatement ps = con.prepareStatement(
+	            "SELECT COUNT(*) FROM theater_movies WHERE theater_id = ? AND movie_id = ?"
+	        );
+	        ps.setInt(1, theaterId);
+	        ps.setInt(2, movieId);
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next() && rs.getInt(1) > 0) {
+	            exists = true;
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return exists;
+	}
 
 	public ArrayList<Movies> getAvailableMoviesForTheater(int theaterId) {
 	    ArrayList<Movies> list = new ArrayList<>();
@@ -105,6 +125,13 @@ public class TheaterMoviesDao {
 	            m.setMovie_id(rs.getInt("movie_id"));
 	            m.setTitle(rs.getString("title"));
 	            m.setStatus(rs.getString("status"));
+	            m.setDuration(rs.getString("duration"));
+	            m.setDirector(rs.getString("director"));
+	            m.setCasts(rs.getString("casts"));
+	            m.setGenres(rs.getString("genres"));
+	            m.setSynopsis(rs.getString("synopsis")); // ✅ FIX
+	            m.setPostertype(rs.getString("postertype"));
+	            m.setTrailertype(rs.getString("trailertype"));
 	            list.add(m);
 	        }
 	    } catch (SQLException e) {
@@ -114,6 +141,65 @@ public class TheaterMoviesDao {
 	    return list;
 	}
 
+	public ArrayList<Movies> getMoviesByTheaterAdmin(int userId) {
+	    ArrayList<Movies> list = new ArrayList<>();
+	    MyConnection conObj = new MyConnection();
+	    Connection con = conObj.getConnection();
+
+	    try {
+	        PreparedStatement pstm = con.prepareStatement(
+	            "SELECT DISTINCT m.* FROM movies m " +
+	            "INNER JOIN theater_movies tm ON m.movie_id = tm.movie_id " +
+	            "INNER JOIN theaters t ON t.theater_id = tm.theater_id " +
+	            "WHERE t.user_id = ?"
+	        );
+	        pstm.setInt(1, userId);
+	        ResultSet rs = pstm.executeQuery();
+
+	        while (rs.next()) {
+	            Movies m = new Movies();
+	            m.setMovie_id(rs.getInt("movie_id"));
+	            m.setTitle(rs.getString("title"));
+	            m.setStatus(rs.getString("status"));
+	            m.setDuration(rs.getString("duration"));
+	            m.setDirector(rs.getString("director"));
+	            m.setCasts(rs.getString("casts"));
+	            m.setGenres(rs.getString("genres"));
+	            m.setSynopsis(rs.getString("synopsis"));
+	            m.setPostertype(rs.getString("postertype"));
+	            m.setTrailertype(rs.getString("trailertype"));
+	            list.add(m);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return list;
+	}
+
+	public ArrayList<Movies> getComingSoonMovies() {
+	    ArrayList<Movies> list = new ArrayList<>();
+	    String sql = "SELECT * FROM movies WHERE status = 'Coming Soon'";
+	    try (Connection con = MyConnection.getConnection();
+	         PreparedStatement ps = con.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            Movies m = new Movies();
+	            m.setMovie_id(rs.getInt("movie_id"));
+	            m.setTitle(rs.getString("title"));
+	            m.setStatus(rs.getString("status"));
+	            m.setDuration(rs.getString("duration"));
+	            m.setDirector(rs.getString("director"));
+	            m.setGenres(rs.getString("genres"));
+	            m.setSynopsis(rs.getString("synopsis"));
+	            list.add(m);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return list;
+	}
 
 	
 }

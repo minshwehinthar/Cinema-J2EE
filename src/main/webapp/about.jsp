@@ -1,28 +1,46 @@
-
 <jsp:include page="layout/JSPHeader.jsp"/>
 <jsp:include page="layout/header.jsp"/>
 
-
-
+<%@ page import="java.util.List" %>
+<%@ page import="com.demo.dao.ReviewDAO" %>
+<%@ page import="com.demo.model.Review" %>
 <%
-    // Defaults (can be overridden by servlet/controller)
+    // Get real review data using existing DAO methods
+    ReviewDAO reviewDao = new ReviewDAO();
+    List<Review> allReviews = reviewDao.getAllReviews();
+    List<Review> featuredReviews = allReviews.size() > 6 ? allReviews.subList(0, 6) : allReviews;
+    
+    // Calculate metrics manually since getReviewStatistics() doesn't exist
+    int totalReviews = allReviews.size();
+    int positiveReviews = 0;
+    int totalRating = 0;
+    
+    for (Review review : allReviews) {
+        if ("yes".equals(review.getIsGood())) {
+            positiveReviews++;
+        }
+        totalRating += review.getRating();
+    }
+    
+    double averageRating = totalReviews > 0 ? (double) totalRating / totalReviews : 0;
+    int satisfactionRate = totalReviews > 0 ? (positiveReviews * 100) / totalReviews : 0;
+
+    // Defaults for Cinezy Cinema
     String reviewScore = (String) request.getAttribute("reviewScore");
-    if (reviewScore == null) reviewScore = "4.97/5 reviews";
+    if (reviewScore == null) reviewScore = String.format("%.1f/5 from %d reviews", averageRating, totalReviews);
 
     String heroTitle = (String) request.getAttribute("heroTitle");
-    if (heroTitle == null) heroTitle = "Discover our journey and what drives us";
+    if (heroTitle == null) heroTitle = "Experience Cinema Like Never Before";
 
     String heroDesc = (String) request.getAttribute("heroDescription");
-    if (heroDesc == null) heroDesc = "Founded by data experts, we create cutting-edge SaaS analytics platforms tailored for businesses of all sizes.";
+    if (heroDesc == null) heroDesc = "At Cinezy, we bring stories to life with state-of-the-art technology, luxurious comfort, and unforgettable movie experiences for every film lover.";
 
     String heroImage = (String) request.getAttribute("heroImage");
-    if (heroImage == null) heroImage = "https://cdn.prod.website-files.com/67721265f59069a5268af325/67853b886028916a22239cbc_about%20hero%203nd%20image.webp";
+    if (heroImage == null) heroImage = "https://plus.unsplash.com/premium_photo-1683740128672-7f1a4b824f5e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8Y2luZW1hfGVufDB8fDB8fHww";
 
     Object userObj = session.getAttribute("user");
-    String ctaHref = (userObj == null) ? request.getContextPath() + "/account/sign-in" : request.getContextPath() + "/dashboard";
+    String ctaHref = (userObj == null) ? request.getContextPath() + "/account/sign-in" : request.getContextPath() + "/movies";
 %>
-
-<jsp:include page="layout/JSPHeader.jsp"/>
 
 <section class="relative bg-gray-50 py-16">
   <div class="mx-auto max-w-7xl px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -32,11 +50,11 @@
       <!-- Reviews -->
       <div class="flex items-center gap-3">
         <div class="flex text-yellow-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
+          <% for(int i = 1; i <= 5; i++) { %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current <%= i <= Math.round(averageRating) ? "text-yellow-400" : "text-gray-300" %>" viewBox="0 0 20 20">
+              <path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/>
+            </svg>
+          <% } %>
         </div>
         <span class="text-gray-600 text-lg font-medium"><%= reviewScore %></span>
       </div>
@@ -54,41 +72,41 @@
       <!-- Buttons -->
       <div class="flex gap-4 pt-4">
         <a href="<%= ctaHref %>" 
-           class="inline-flex items-center px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition">
-          Get Started
+           class="inline-flex items-center px-6 py-3 rounded-xl bg-red-600 text-white font-semibold shadow hover:bg-red-700 transition">
+          Book Tickets
           <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </a>
-        <a href="${pageContext.request.contextPath}/account/sign-in"
+        <a href="${pageContext.request.contextPath}/movies"
            class="inline-flex items-center px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-800 font-semibold shadow hover:bg-gray-100 transition">
-          Free Trial
+          View Movies
         </a>
       </div>
     </div>
 
     <!-- Right Image -->
     <div class="flex justify-center lg:justify-end">
-      <img src="<%= heroImage %>" alt="About Hero" class="rounded-2xl shadow-xl max-w-lg w-full object-cover"/>
+      <img src="<%= heroImage %>" alt="Cinezy Cinema Experience" class="rounded-2xl shadow-xl max-w-xl w-full object-cover"/>
     </div>
 
   </div>
 </section>
 
 <%
-    // Metrics data (could also come from database or servlet)
+    // Metrics data for Cinezy Cinema
     class Metric {
         String value, title, desc;
         Metric(String v, String t, String d) { value=v; title=t; desc=d; }
     }
 
     java.util.List<Metric> metrics = new java.util.ArrayList<>();
-    metrics.add(new Metric("95%", "Customer satisfaction", "Trusted by millions, our service ensures unparalleled customer satisfaction with dedicated support and innovative solutions tailored to your needs."));
-    metrics.add(new Metric("10+", "Innovation & insight", "Driving over a decade of groundbreaking innovations and deep industry insights to empower businesses worldwide."));
-    metrics.add(new Metric("$10m", "Efficient financial", "Streamlined processes delivering over $10 million in financial savings and value creation for our clients."));
-    metrics.add(new Metric("50m", "Users worldwide", "Serving a global community of over 50 million users, delivering impactful and reliable solutions every day."));
+    metrics.add(new Metric(totalReviews + "+", "Happy Moviegoers", "Real customers who've shared their experiences through our review system."));
+    metrics.add(new Metric(satisfactionRate + "%", "Satisfaction Rate", "Based on " + positiveReviews + " positive reviews from our valued cinema guests."));
+    metrics.add(new Metric("12", "Premium Screens", "State-of-the-art screens with 4K laser projection and immersive sound technology."));
+    metrics.add(new Metric(String.format("%.1f", averageRating), "Average Rating", "Consistent high ratings across picture quality, sound, and comfort."));
 
-    String metricsImage = "https://cdn.prod.website-files.com/67721265f59069a5268af325/67852df879198be1be0c7adc_intro%20image.webp";
+    String metricsImage = "https://images.unsplash.com/photo-1595769816263-9b910be24d5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
 %>
 
 <section class="bg-white py-20">
@@ -96,7 +114,7 @@
 
     <!-- Left Image -->
     <div class="flex justify-center lg:justify-start">
-      <img src="<%= metricsImage %>" alt="Metrics" class="rounded-2xl shadow-xl max-w-md w-full object-cover"/>
+      <img src="<%= metricsImage %>" alt="Cinezy Cinema Interior" class="rounded-2xl shadow-xl max-w-md w-full object-cover"/>
     </div>
 
     <!-- Right Metrics -->
@@ -105,7 +123,7 @@
         for(Metric m : metrics) {
       %>
         <div class="bg-gray-50 rounded-xl p-6 shadow hover:shadow-lg transition">
-          <div class="text-4xl font-bold text-blue-600"><%= m.value %></div>
+          <div class="text-4xl font-bold text-red-600"><%= m.value %></div>
           <h3 class="text-lg font-semibold text-gray-900 mt-2"><%= m.title %></h3>
           <p class="text-sm text-gray-600 mt-3"><%= m.desc %></p>
         </div>
@@ -121,13 +139,12 @@
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-3xl mx-auto mb-16">
+    <div class="text-center mx-auto mb-16">
       <h2 class="text-3xl md:text-5xl font-bold text-gray-900">
-        Core features that set us apart from the competition
+        Premium Cinema Experience at Cinezy
       </h2>
       <p class="mt-4 text-lg text-gray-600">
-        Explore our standout features designed to deliver exceptional performance 
-        and value, distinguishing us from the competition.
+        Discover what makes Cinezy the ultimate destination for movie lovers with our exceptional features and services.
       </p>
     </div>
 
@@ -139,61 +156,60 @@
         
         <!-- Feature Card -->
         <div class="flex gap-4 p-6 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition">
-          <div class="flex-shrink-0 text-blue-600 text-3xl">
-            <!-- Heroicon or custom SVG -->
+          <div class="flex-shrink-0 text-red-600 text-3xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M3 20h18M4 10h16M7 6h10M9 14h6" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900">Real-time analytics</h3>
+            <h3 class="text-xl font-semibold text-gray-900">4K Laser Projection</h3>
             <p class="mt-2 text-sm text-gray-600">
-              Gain actionable insights with our real-time analytics feature.
+              Crystal-clear 4K laser projection for the sharpest, most vibrant picture quality available.
             </p>
           </div>
         </div>
 
         <!-- Feature Card -->
         <div class="flex gap-4 p-6 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition">
-          <div class="flex-shrink-0 text-blue-600 text-3xl">
+          <div class="flex-shrink-0 text-red-600 text-3xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M12 4.354a4 4 0 110 7.292 4 4 0 010-7.292zM12 12v8m-6 0h12" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m-2.828-9.9a9 9 0 012.728-2.728"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900">Mobile accessibility</h3>
+            <h3 class="text-xl font-semibold text-gray-900">Dolby Atmos Sound</h3>
             <p class="mt-2 text-sm text-gray-600">
-              Manage your finances on the go with our mobile-friendly platform.
+              Immersive Dolby Atmos sound system that puts you right in the middle of the action.
             </p>
           </div>
         </div>
 
         <!-- Feature Card -->
         <div class="flex gap-4 p-6 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition">
-          <div class="flex-shrink-0 text-blue-600 text-3xl">
+          <div class="flex-shrink-0 text-red-600 text-3xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M4 6h16M4 12h16M4 18h16" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900">Customizable reports</h3>
+            <h3 class="text-xl font-semibold text-gray-900">Luxury Recliners</h3>
             <p class="mt-2 text-sm text-gray-600">
-              Streamline your financial processes with automated workflows.
+              Premium leather recliners with extra legroom and personal cup holders for maximum comfort.
             </p>
           </div>
         </div>
 
         <!-- Feature Card -->
         <div class="flex gap-4 p-6 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition">
-          <div class="flex-shrink-0 text-blue-600 text-3xl">
+          <div class="flex-shrink-0 text-red-600 text-3xl">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path d="M12 11c.828 0 1.5-.895 1.5-2s-.672-2-1.5-2-1.5.895-1.5 2 .672 2 1.5 2zM12 13c-2.5 0-4.5 2.015-4.5 4.5V20h9v-2.5c0-2.485-2-4.5-4.5-4.5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900">Enhanced security</h3>
+            <h3 class="text-xl font-semibold text-gray-900">Gourmet Snack Bar</h3>
             <p class="mt-2 text-sm text-gray-600">
-              Protect your sensitive financial data with state-of-the-art security measures.
+              Premium snacks, gourmet popcorn, and artisanal beverages for the complete cinema experience.
             </p>
           </div>
         </div>
@@ -202,8 +218,8 @@
       <!-- Feature Image -->
       <div class="flex justify-center lg:justify-end">
         <img 
-          src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677810b4186dbf1f9240a1b5_features%20image.webp" 
-          alt="Features illustration"
+          src="https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80" 
+          alt="Cinezy Cinema Features"
           class="rounded-2xl shadow-xl max-w-sm lg:max-w-md"
         />
       </div>
@@ -211,15 +227,16 @@
     </div>
   </div>
 </section>
+
 <section class="bg-white py-20">
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     <!-- Header -->
     <div class="text-center mb-16">
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900">
-        Meet the Financer Team
+        Meet the Cinezy Team
       </h2>
-      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-        The people behind our innovation, strategy, and growth.
+      <p class="mt-4 text-lg text-gray-600 mx-auto">
+        The passionate movie enthusiasts dedicated to creating magical cinema experiences.
       </p>
     </div>
 
@@ -228,11 +245,11 @@
       
       <!-- Team Member -->
       <div class="bg-gray-50 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-        <img class="w-full h-64 object-cover" src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab035617aa1aeef37af80_team%20image%201.webp" alt="Amara Okafor">
+        <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1974&q=80" alt="Alex Morgan">
         <div class="p-6 text-center">
-          <h3 class="text-xl font-semibold text-gray-900">Amara Okafor</h3>
-          <p class="text-gray-600 text-sm mt-1">Head of Marketing</p>
-          <a href="https://www.temlis.com/" target="_blank" class="inline-block mt-3 text-blue-600 hover:text-blue-800">
+          <h3 class="text-xl font-semibold text-gray-900">Alex Morgan</h3>
+          <p class="text-gray-600 text-sm mt-1">Cinema Operations Manager</p>
+          <a href="#" class="inline-block mt-3 text-red-600 hover:text-red-800">
             <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab4ee0e69e77797d0b49f_linkedin%20icon.svg" alt="LinkedIn" class="w-6 h-6 inline-block">
           </a>
         </div>
@@ -240,11 +257,11 @@
 
       <!-- Team Member -->
       <div class="bg-gray-50 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-        <img class="w-full h-64 object-cover" src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab035115e12eff602a83f_team%20image%202.webp" alt="Jakob George">
+        <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Sarah Chen">
         <div class="p-6 text-center">
-          <h3 class="text-xl font-semibold text-gray-900">Jakob George</h3>
-          <p class="text-gray-600 text-sm mt-1">Head of Finance</p>
-          <a href="https://www.temlis.com/" target="_blank" class="inline-block mt-3 text-blue-600 hover:text-blue-800">
+          <h3 class="text-xl font-semibold text-gray-900">Sarah Chen</h3>
+          <p class="text-gray-600 text-sm mt-1">Head of Customer Experience</p>
+          <a href="#" class="inline-block mt-3 text-red-600 hover:text-red-800">
             <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab4ee0e69e77797d0b49f_linkedin%20icon.svg" alt="LinkedIn" class="w-6 h-6 inline-block">
           </a>
         </div>
@@ -252,94 +269,126 @@
 
       <!-- Team Member -->
       <div class="bg-gray-50 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-        <img class="w-full h-64 object-cover" src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab035afc0ef4f9d9683e6_team%20image%203.webp" alt="Leila Khatami">
+        <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Marcus Rodriguez">
         <div class="p-6 text-center">
-          <h3 class="text-xl font-semibold text-gray-900">Leila Khatami</h3>
-          <p class="text-gray-600 text-sm mt-1">Accountant</p>
-          <a href="https://www.temlis.com/" target="_blank" class="inline-block mt-3 text-blue-600 hover:text-blue-800">
+          <h3 class="text-xl font-semibold text-gray-900">Marcus Rodriguez</h3>
+          <p class="text-gray-600 text-sm mt-1">Technical Director</p>
+          <a href="#" class="inline-block mt-3 text-red-600 hover:text-red-800">
             <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/677ab4ee0e69e77797d0b49f_linkedin%20icon.svg" alt="LinkedIn" class="w-6 h-6 inline-block">
           </a>
         </div>
       </div>
-
-      <!-- More team members can be added the same way -->
       
     </div>
   </div>
 </section>
+
 <section class="bg-gray-50 py-20">
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="text-center mx-auto mb-12">
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900">
-        What Our Clients Are Saying
+        What Our Movie Lovers Are Saying
       </h2>
       <p class="mt-4 text-lg text-gray-600">
-        Our users love how Advisora simplifies their processes and streamlines operations.
+        Hear from our audience about their unforgettable experiences at Cinezy Cinema.
       </p>
     </div>
 
     <!-- Testimonials Grid -->
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      
-      <!-- Card -->
-      <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-        <p class="text-gray-600 text-lg">
-          “Advisora has completely transformed the way I manage my finances. With its intuitive interface and powerful features, I now have better control and visibility into my expenses and investments. Highly recommend it!”
-        </p>
-        <div class="flex items-center mt-6">
-          <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/67785a398d421f0cd02666a8_testimonials%20user%201.webp" alt="User" class="w-12 h-12 rounded-full object-cover">
-          <div class="ml-4">
-            <h3 class="text-lg font-semibold text-gray-900">William Parker</h3>
-            <p class="text-sm text-gray-500">CFO at BrightPath</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card -->
-      <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-        <p class="text-gray-600 text-lg">
-          “I've been using Advisora for years now, and I can't imagine managing my finances without it. From tracking expenses to creating budgets, Advisora has simplified every aspect of my financial life.”
-        </p>
-        <div class="flex items-center mt-6">
-          <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/67785a39ab3a84e8587a7acd_testimonials%20user%202.webp" alt="User" class="w-12 h-12 rounded-full object-cover">
-          <div class="ml-4">
-            <h3 class="text-lg font-semibold text-gray-900">Michael Carter</h3>
-            <p class="text-sm text-gray-500">Freelance Web Developer</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card -->
-      <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
-        <p class="text-gray-600 text-lg">
-          “Advisora has been a game-changer for our business. With its comprehensive financial management tools, we've been able to streamline processes and make more informed decisions. The support team is also top-notch.”
-        </p>
-        <div class="flex items-center mt-6">
-          <img src="https://cdn.prod.website-files.com/67721265f59069a5268af325/67785a3937e2049e3aa1ef9a_testimonials%20user%203.webp" alt="User" class="w-12 h-12 rounded-full object-cover">
-          <div class="ml-4">
-            <h3 class="text-lg font-semibold text-gray-900">John Spencer</h3>
-            <p class="text-sm text-gray-500">Manager at GlobeSync</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add more cards if needed... -->
-      
+      <%
+        if (featuredReviews.isEmpty()) {
+          // Fallback testimonials if no reviews exist
+          String[] fallbackTestimonials = {
+            "Cinezy has completely transformed my movie-going experience. The 4K projection and Dolby Atmos sound make every film feel like a premiere!",
+            "I've been coming to Cinezy for years, and it keeps getting better. The staff is always friendly and the theaters are spotless.",
+            "The gourmet snack bar and comfortable seating make Cinezy our go-to cinema for date nights. Absolutely love it!"
+          };
+          String[] fallbackNames = {"James Wilson", "Emily Parker", "Michael Brown"};
+          String[] fallbackRoles = {"Movie Enthusiast", "Film Student", "Regular Customer"};
+          
+          for(int i = 0; i < 3; i++) {
+      %>
+            <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="flex text-yellow-400">
+                  <% for(int j = 0; j < 5; j++) { %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/>
+                    </svg>
+                  <% } %>
+                </div>
+              </div>
+              <p class="text-gray-600 text-lg">
+                "<%= fallbackTestimonials[i] %>"
+              </p>
+              <div class="flex items-center mt-6">
+                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  <%= fallbackNames[i].charAt(0) %>
+                </div>
+                <div class="ml-4">
+                  <h3 class="text-lg font-semibold text-gray-900"><%= fallbackNames[i] %></h3>
+                  <p class="text-sm text-gray-500"><%= fallbackRoles[i] %></p>
+                </div>
+              </div>
+            </div>
+      <%
+          }
+        } else {
+          for(Review review : featuredReviews) {
+            String fallbackInitial = review.getUserName() != null && !review.getUserName().isEmpty() ? 
+                                    review.getUserName().substring(0, 1).toUpperCase() : "U";
+      %>
+            <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-between">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="flex text-yellow-400">
+                  <% for(int i = 1; i <= 5; i++) { %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current <%= i <= review.getRating() ? "text-yellow-400" : "text-gray-300" %>" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/>
+                    </svg>
+                  <% } %>
+                </div>
+                <span class="text-gray-500 text-sm"><%= review.getRating() %>/5</span>
+              </div>
+              <p class="text-gray-600 text-lg">
+                "<%= review.getReviewText() %>"
+              </p>
+              <div class="flex items-center mt-6">
+                <% if(review.getUserImage() != null) { %>
+                  <img src="<%= review.getUserImage() %>" alt="<%= review.getUserName() %>" class="w-12 h-12 rounded-full object-cover">
+                <% } else { %>
+                  <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <%= fallbackInitial %>
+                  </div>
+                <% } %>
+                <div class="ml-4">
+                  <h3 class="text-lg font-semibold text-gray-900"><%= review.getUserName() %></h3>
+                  <p class="text-sm text-gray-500">
+                    <%= "yes".equals(review.getIsGood()) ? "Positive Experience" : "Constructive Feedback" %>
+                  </p>
+                </div>
+              </div>
+            </div>
+      <%
+          }
+        }
+      %>
     </div>
   </div>
 </section>
+
 <section class="py-16 bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="text-center mx-auto mb-12">
       <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-        Discover the latest blogs
+        Latest from Cinezy Blog
       </h2>
       <p class="mt-4 text-lg text-gray-600">
-        Stay informed with the latest health and wellness insights from our experts.
+        Stay updated with movie news, behind-the-scenes stories, and cinema insights.
       </p>
     </div>
 
@@ -350,17 +399,17 @@
       <a href="#" class="group block rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 bg-white">
         <div class="aspect-w-16 aspect-h-9">
           <img 
-            src="https://cdn.prod.website-files.com/67721265f59069a5268af347/6778668556a2e86e20b6112b_blog%20thumbnail.webp"
-            alt="Blog thumbnail"
+            src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2luZW1hfGVufDB8fDB8fHww"
+            alt="Movie Technology"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           >
         </div>
         <div class="p-6">
-          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-indigo-600">
-            The Ultimate Guide to Budgeting in 2024
+          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-red-600">
+            The Evolution of Cinema Technology
           </h3>
           <p class="mt-3 text-gray-600 text-sm">
-            Master the art of budgeting with our comprehensive guide. Learn how to create a budget that works for you, optimize your spending, and achieve your financial goals this year.
+            Explore how cinema technology has transformed from classic film projectors to today's cutting-edge 4K laser projection and immersive sound systems.
           </p>
         </div>
       </a>
@@ -369,17 +418,17 @@
       <a href="#" class="group block rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 bg-white">
         <div class="aspect-w-16 aspect-h-9">
           <img 
-            src="https://cdn.prod.website-files.com/67721265f59069a5268af347/6778693054f080d2a033ad01_blog%20thumbnail.webp"
-            alt="Blog thumbnail"
+            src="https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            alt="Movie Snacks"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           >
         </div>
         <div class="p-6">
-          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-indigo-600">
-            Top Investment Strategies for Long-Term Growth
+          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-red-600">
+            Gourmet Cinema Snacks Revolution
           </h3>
           <p class="mt-3 text-gray-600 text-sm">
-            Discover the best investment strategies to build and sustain your wealth over time. From stocks to bonds.
+            Discover how cinema snacks have evolved beyond traditional popcorn to include artisanal treats and gourmet options that enhance your movie experience.
           </p>
         </div>
       </a>
@@ -388,36 +437,27 @@
       <a href="#" class="group block rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 bg-white">
         <div class="aspect-w-16 aspect-h-9">
           <img 
-            src="https://cdn.prod.website-files.com/67721265f59069a5268af347/677869f58437826b2f3372d6_blog%20thumbnail.webp"
-            alt="Blog thumbnail"
+            src="https://images.unsplash.com/photo-1577315974138-71362a43d4f5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8"
+            alt="Behind the Scenes"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           >
         </div>
         <div class="p-6">
-          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-indigo-600">
-            Understanding Cryptocurrency: What You Need to Know
+          <h3 class="text-xl font-semibold text-gray-900 group-hover:text-red-600">
+            Behind the Scenes: Running a Modern Cinema
           </h3>
           <p class="mt-3 text-gray-600 text-sm">
-            Cryptocurrency continues to make headlines, but what does it mean for your finances? Get a clear understanding of the risks.
+            Get an exclusive look at what goes into operating a state-of-the-art cinema, from projection technology to customer service excellence.
           </p>
         </div>
       </a>
 
     </div>
 
-    <!-- Button -->
-    <div class="mt-12 text-center">
-      <a href="/blog" 
-         class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 shadow-md">
-        See More
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-      </a>
-    </div>
+   
 
   </div>
 </section>
 
-	<jsp:include page="layout/footer.jsp"/>
-	<jsp:include page="layout/JSPFooter.jsp"/>
+<jsp:include page="layout/footer.jsp"/>
+<jsp:include page="layout/JSPFooter.jsp"/>

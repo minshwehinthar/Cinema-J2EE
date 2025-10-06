@@ -1,42 +1,50 @@
 package com.demo.controller;
 
-import jakarta.servlet.*;
+import com.demo.dao.TimeslotDao;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
-import com.demo.dao.TimeslotDao;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 @WebServlet("/AddTimeslotServlet")
 public class AddTimeslotServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int theaterId = Integer.parseInt(request.getParameter("theaterId"));
+        String startTimeStr = request.getParameter("startTime");
+        String endTimeStr = request.getParameter("endTime");
 
-        HttpSession session = request.getSession();
-        Integer theaterId = (Integer) session.getAttribute("theater_id"); 
+        // Basic validation: start time must be before end time
+        try {
+            LocalTime startTime = LocalTime.parse(startTimeStr);
+            LocalTime endTime = LocalTime.parse(endTimeStr);
 
-        if(theaterId == null) {
-            response.sendRedirect("login.jsp");
-            return;
+            if (!startTime.isBefore(endTime)) {
+                response.sendRedirect("addTimeslots.jsp?msg=Start time must be before end time");
+                return;
+            }
+
+            TimeslotDao dao = new TimeslotDao();
+            boolean available = dao.isTimeslotAvailable(theaterId, startTimeStr, endTimeStr);
+
+            if (!available) {
+                response.sendRedirect("addTimeslots.jsp?msg=Timeslot overlaps with existing one");
+                return;
+            }
+
+            int row = dao.addTimeslot(theaterId, startTimeStr, endTimeStr);
+            if (row > 0) {
+                response.sendRedirect("addTimeslots.jsp?msg=Timeslot added successfully");
+            } else {
+                response.sendRedirect("addTimeslots.jsp?msg=Failed to add timeslot");
+            }
+
+        } catch (DateTimeParseException e) {
+            // Invalid time format
+            response.sendRedirect("addTimeslots.jsp?msg=Invalid time format");
         }
-
-        String startTime = request.getParameter("start_time");
-        String endTime = request.getParameter("end_time");
-
-        TimeslotDao dao = new TimeslotDao();
-
-        if(!dao.isTimeslotAvailable(theaterId, startTime, endTime)) {
-            response.sendRedirect("addTimeslots.jsp?msg=overlap");
-            return;
-        }
-
-        int row = dao.addTimeslot(theaterId, startTime, endTime);
-        if(row > 0) {
-            response.sendRedirect("addTimeslots.jsp?msg=success");
-        } else {
-            response.sendRedirect("addTimeslots.jsp?msg=error");
-        }
-
     }
 }
