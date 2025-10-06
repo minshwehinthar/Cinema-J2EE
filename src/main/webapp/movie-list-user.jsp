@@ -21,8 +21,6 @@
 
 <%
 User user = (User) session.getAttribute("user");
-boolean isLoggedIn = (user != null);
-String userRole = isLoggedIn ? user.getRole() : "guest";
 
 TheaterMoviesDao dao = new TheaterMoviesDao();
 TheaterDAO theaterDao = new TheaterDAO();
@@ -33,20 +31,19 @@ ArrayList<Theater> theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
 
 int theaterId = 0;
 
-if (isLoggedIn && "theateradmin".equals(user.getRole())) {
-    moviesList = dao.getMoviesByTheaterAdmin(user.getUserId());
-    ArrayList<Theater> filteredTheaters = new ArrayList<>();
-    for (Theater t : theaters) {
-        if (t.getUserId() == user.getUserId()) {
-            filteredTheaters.add(t);
-            theaterId = t.getTheaterId();
-            break;
-        }
-    }
-    theaters = filteredTheaters;
+if (user != null && "theateradmin".equals(user.getRole())) {
+	moviesList = dao.getMoviesByTheaterAdmin(user.getUserId());
+	ArrayList<Theater> filteredTheaters = new ArrayList<>();
+	for (Theater t : theaters) {
+		if (t.getUserId() == user.getUserId()) {
+	filteredTheaters.add(t);
+	theaterId = t.getTheaterId();
+	break;
+		}
+	}
+	theaters = filteredTheaters;
 } else {
-    // Both guests and regular users see all movies picked by theaters
-    moviesList = dao.getMoviesPickedByTheaters();
+	moviesList = dao.getMoviesPickedByTheaters();
 }
 
 // Create a map to organize movies by date (only dates that have showtimes)
@@ -54,364 +51,435 @@ Map<LocalDate, Map<Movies, List<Theater>>> moviesByDate = new TreeMap<>();
 
 // Get all unique show dates from the database
 for (Movies movie : moviesList) {
-    String status = movie.getStatus();
-    
-    ArrayList<Theater> movieTheaters = dao.getTheatersByMovie(movie.getMovie_id());
+	String status = movie.getStatus();
+	// REMOVED THE LINE THAT EXCLUDES COMING-SOON MOVIES
+	// if ("coming-soon".equalsIgnoreCase(status)) continue;
 
-    for (Theater theater : movieTheaters) {
-        LocalDate[] dates = showtimesDao.getMovieDates(theater.getTheaterId(), movie.getMovie_id());
-        if (dates != null && dates.length == 2) {
-            LocalDate startDate = dates[0];
-            LocalDate endDate = dates[1];
+	ArrayList<Theater> movieTheaters = dao.getTheatersByMovie(movie.getMovie_id());
 
-            // Add movie to each date in its showing range
-            LocalDate currentDate = startDate;
-            while (!currentDate.isAfter(endDate)) {
-                if (!moviesByDate.containsKey(currentDate)) {
-                    moviesByDate.put(currentDate, new HashMap<>());
-                }
+	for (Theater theater : movieTheaters) {
+		LocalDate[] dates = showtimesDao.getMovieDates(theater.getTheaterId(), movie.getMovie_id());
+		if (dates != null && dates.length == 2) {
+	LocalDate startDate = dates[0];
+	LocalDate endDate = dates[1];
 
-                // Add theater to movie for this date
-                if (!moviesByDate.get(currentDate).containsKey(movie)) {
-                    moviesByDate.get(currentDate).put(movie, new ArrayList<>());
-                }
-                if (!moviesByDate.get(currentDate).get(movie).contains(theater)) {
-                    moviesByDate.get(currentDate).get(movie).add(theater);
-                }
+	// Add movie to each date in its showing range
+	LocalDate currentDate = startDate;
+	while (!currentDate.isAfter(endDate)) {
+		if (!moviesByDate.containsKey(currentDate)) {
+			moviesByDate.put(currentDate, new HashMap<>());
+		}
 
-                currentDate = currentDate.plusDays(1);
-            }
-        }
-    }
+		// Add theater to movie for this date
+		if (!moviesByDate.get(currentDate).containsKey(movie)) {
+			moviesByDate.get(currentDate).put(movie, new ArrayList<>());
+		}
+		if (!moviesByDate.get(currentDate).get(movie).contains(theater)) {
+			moviesByDate.get(currentDate).get(movie).add(theater);
+		}
+
+		currentDate = currentDate.plusDays(1);
+	}
+		}
+	}
 }
 
 // Filter out past dates and sort by date
 Map<LocalDate, Map<Movies, List<Theater>>> filteredMoviesByDate = new TreeMap<>();
 LocalDate today = LocalDate.now();
 for (LocalDate date : moviesByDate.keySet()) {
-    if (!date.isBefore(today)) {
-        filteredMoviesByDate.put(date, moviesByDate.get(date));
-    }
+	if (!date.isBefore(today)) {
+		filteredMoviesByDate.put(date, moviesByDate.get(date));
+	}
 }
 %>
 
-<!-- Header - Different for guests vs logged-in users -->
-<% if (isLoggedIn) { %>
-    <jsp:include page="layout/header.jsp" />
-<% } else { %>
-    <!-- Guest Header -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">Movie Booking System</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="login.jsp" class="text-gray-700 hover:text-red-600">Login</a>
-                    <a href="register.jsp" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Sign Up</a>
-                </div>
-            </div>
-        </div>
-    </header>
-<% } %>
 
-<div class="p-8">
-    <!-- Main Content Area -->
-    <div class="flex-1 container mx-auto">
-        <div class="p-8">
-            <h2 class="text-2xl font-bold mb-6">Movie Schedule - Now Showing & Coming Soon</h2>
-            
-            <!-- Guest Message -->
-            <% if (!isLoggedIn) { %>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                        </svg>
-                        <p class="text-blue-700">
-                            You're viewing as a guest. <a href="login.jsp" class="font-medium underline">Login</a> to book tickets or <a href="register.jsp" class="font-medium underline">create an account</a>.
-                        </p>
-                    </div>
-                </div>
-            <% } %>
+		<!-- Admin Header -->
+		<jsp:include page="layout/header.jsp" />
 
-            <!-- Filters Row -->
-            <div class="mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <!-- Date Category Filters -->
-                    <div class="flex-1">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Date Categories</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button class="date-category-btn px-3 py-1 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition" data-category="all">All Dates</button>
-                            <button class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-category="today">Today</button>
-                            <button class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-category="tomorrow">Tomorrow</button>
-                            <button class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-category="this-week">This Week</button>
-                            <button class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-category="next-week">Next Week</button>
-                            <button class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-category="this-month">This Month</button>
-                        </div>
-                    </div>
+		<div class="p-8">
+			<!-- Dashboard modules -->
+			<!-- Main Content Area (right of sidebar for all users) -->
+			<div class="flex-1 container mx-auto">
+				<div class="p-8">
+					<h2 class="text-2xl font-bold mb-6">Movie Schedule - Now
+						Showing & Coming Soon</h2>
 
-                    <!-- Status Filter -->
-                    <div class="flex-1">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Filter by Status</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button class="status-filter-btn px-3 py-1 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition" data-status="all">All Status</button>
-                            <button class="status-filter-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-status="now-showing">Now Showing</button>
-                            <button class="status-filter-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition" data-status="coming-soon">Coming Soon</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<!-- Filters Row -->
+					<div class="mb-6">
+						<div
+							class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+							<!-- Date Category Filters -->
+							<div class="flex-1">
+								<h3 class="text-sm font-semibold text-gray-700 mb-2">Date
+									Categories</h3>
+								<div class="flex flex-wrap gap-2">
+									<button
+										class="date-category-btn px-3 py-1 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
+										data-category="all">All Dates</button>
+									<button
+										class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-category="today">Today</button>
+									<button
+										class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-category="tomorrow">Tomorrow</button>
+									<button
+										class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-category="this-week">This Week</button>
+									<button
+										class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-category="next-week">Next Week</button>
+									<button
+										class="date-category-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-category="this-month">This Month</button>
+								</div>
+							</div>
 
-            <!-- Date Navigation - Only show if there are dates with showtimes -->
-            <% if (!filteredMoviesByDate.isEmpty()) { %>
-            <div class="mb-6">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Select Specific Date</h3>
-                <div class="flex space-x-2 overflow-x-auto pb-2">
-                    <%
-                    DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("E");
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd");
-                    int activeDay = 0;
-                    for (LocalDate date : filteredMoviesByDate.keySet()) {
-                    %>
-                    <button class="date-filter-btn flex-shrink-0 px-4 py-2 rounded-lg border <%=activeDay == 0 ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"%> transition" data-date="<%=date.toString()%>">
-                        <div class="text-center">
-                            <div class="text-sm font-semibold"><%=date.format(dayFormatter)%></div>
-                            <div class="text-xs"><%=date.format(dateFormatter)%></div>
-                        </div>
-                    </button>
-                    <%
-                    activeDay++;
-                    }
-                    %>
-                </div>
-            </div>
+							<!-- Status Filter -->
+							<div class="flex-1">
+								<h3 class="text-sm font-semibold text-gray-700 mb-2">Filter
+									by Status</h3>
+								<div class="flex flex-wrap gap-2">
+									<button
+										class="status-filter-btn px-3 py-1 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
+										data-status="all">All Status</button>
+									<button
+										class="status-filter-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-status="now-showing">Now Showing</button>
+									<button
+										class="status-filter-btn px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300 transition"
+										data-status="coming-soon">Coming Soon</button>
+								</div>
+							</div>
+						</div>
+					</div>
 
-            <!-- Daily Tables -->
-            <%
-            int tableCount = 0;
-            for (LocalDate date : filteredMoviesByDate.keySet()) {
-                Map<Movies, List<Theater>> dailyMovies = filteredMoviesByDate.get(date);
-                if (!dailyMovies.isEmpty()) {
-            %>
-            <div class="daily-table date-table mb-8 <%=tableCount == 0 ? "" : "hidden"%>" data-date="<%=date.toString()%>">
-                <div class="bg-red-500 text-white px-6 py-3 rounded-t-lg">
-                    <h3 class="text-lg font-semibold">
-                        <%=date.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy"))%>
-                    </h3>
-                </div>
-                <div class="bg-white rounded-b-lg shadow-md overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Movie</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Theaters</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Show Times</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="table-body-<%=date.toString()%>">
-                                <%
-                                for (Movies movie : dailyMovies.keySet()) {
-                                    List<Theater> theatersForMovie = dailyMovies.get(movie);
-                                    String status = movie.getStatus();
-                                    // Create theater IDs string for filtering
-                                    StringBuilder theaterIds = new StringBuilder();
-                                    if (theatersForMovie != null && !theatersForMovie.isEmpty()) {
-                                        for (int i = 0; i < theatersForMovie.size(); i++) {
-                                            theaterIds.append(theatersForMovie.get(i).getTheaterId());
-                                            if (i < theatersForMovie.size() - 1) {
-                                                theaterIds.append(",");
-                                            }
-                                        }
-                                    }
-                                %>
-                                <tr class="hover:bg-gray-50 movie-row" data-theaters="<%=theaterIds.toString()%>" data-status="<%=status != null ? status.toLowerCase() : ""%>">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-16 w-12">
-                                                <img class="h-16 w-12 object-cover rounded" src="GetMoviesPosterServlet?movie_id=<%=movie.getMovie_id()%>" alt="<%=movie.getTitle()%>">
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    <%=movie.getTitle() != null ? movie.getTitle() : "Untitled"%>
-                                                </div>
-                                                <div class="text-xs text-gray-400">
-                                                    <%=movie.getGenres() != null ? movie.getGenres() : "N/A"%>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <%
-                                        String statusBadgeClass = "bg-gray-500";
-                                        String statusText = "Unknown";
-                                        if ("now-showing".equalsIgnoreCase(status)) {
-                                            statusBadgeClass = "bg-green-600";
-                                            statusText = "Now Showing";
-                                        } else if ("coming-soon".equalsIgnoreCase(status)) {
-                                            statusBadgeClass = "bg-yellow-500";
-                                            statusText = "Coming Soon";
-                                        }
-                                        %>
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white <%=statusBadgeClass%>">
-                                            <%=statusText%>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <%=movie.getDuration() != null ? movie.getDuration() : "N/A"%>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">
-                                        <% if (theatersForMovie != null && !theatersForMovie.isEmpty()) { %>
-                                        <div class="space-y-1">
-                                            <% for (Theater theater : theatersForMovie) { %>
-                                            <div class="font-medium"><%=theater.getName()%></div>
-                                            <div class="text-xs text-gray-400"><%=theater.getLocation()%></div>
-                                            <% } %>
-                                        </div>
-                                        <% } else { %>
-                                            No theaters
-                                        <% } %>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">
-                                        <div class="space-y-1">
-                                            <% if (theatersForMovie != null && !theatersForMovie.isEmpty()) {
-                                                for (Theater theater : theatersForMovie) {
-                                                    // Get only showtimes for this theater, movie, and date
-                                                    ArrayList<String> showtimes = showtimesDao.getFormattedShowtimes(theater.getTheaterId(), movie.getMovie_id(), date);
-                                            %>
-                                            <div class="text-xs">
-                                                <span class="font-medium"><%=theater.getName()%></span>:
-                                                <% if (showtimes != null && !showtimes.isEmpty()) {
-                                                    for (int i = 0; i < showtimes.size(); i++) {
-                                                        String start = showtimes.get(i);
-                                                %>
-                                                <span class="text-red-600 font-medium"><%=start.substring(0, 5)%></span><%=(i < showtimes.size() - 1) ? ", " : ""%>
-                                                <% }
-                                                } else { %>
-                                                <span class="text-gray-400">No shows</span>
-                                                <% } %>
-                                            </div>
-                                            <% }
-                                            } else { %>
-                                            No theaters
-                                            <% } %>
-                                        </div>
-                                    </td>
+					<!-- Date Navigation - Only show if there are dates with showtimes -->
+					<%
+					if (!filteredMoviesByDate.isEmpty()) {
+					%>
+					<div class="mb-6">
+						<h3 class="text-sm font-semibold text-gray-700 mb-2">Select
+							Specific Date</h3>
+						<div class="flex space-x-2 overflow-x-auto pb-2">
+							<%
+							DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("E");
+							DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd");
+							int activeDay = 0;
+							for (LocalDate date : filteredMoviesByDate.keySet()) {
+							%>
+							<button
+								class="date-filter-btn flex-shrink-0 px-4 py-2 rounded-lg border <%=activeDay == 0
+		? "bg-red-600 text-white border-red-600"
+		: "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"%> transition"
+								data-date="<%=date.toString()%>">
+								<div class="text-center">
+									<div class="text-sm font-semibold"><%=date.format(dayFormatter)%></div>
+									<div class="text-xs"><%=date.format(dateFormatter)%></div>
+								</div>
+							</button>
+							<%
+							activeDay++;
+							}
+							%>
+						</div>
+					</div>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button type="button" class="trailer-btn text-red-600 hover:text-red-900 text-xs" data-trailer-url="GetMoviesTrailerServlet?movie_id=<%=movie.getMovie_id()%>">Trailer</button>
-                                            
-                                            <!-- Movie Details - Available to all users including guests -->
-                                            <a href="moviedetails.jsp?movie_id=<%=movie.getMovie_id()%>" class="text-blue-600 hover:text-blue-900 text-xs font-medium">Movie Details</a>
-                                            
-                                            
-                                        </div>
-                                    </td>
-                                </tr>
-                                <%
-                                }
-                                %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <%
-                    tableCount++;
-                }
-            }
-            %>
-            <% } else { %>
-            <!-- No Movies Message -->
-            <div class="text-center py-12 bg-white rounded-lg shadow-md">
-                <div class="text-gray-500 text-lg mb-4">No movies scheduled</div>
-                <p class="text-gray-400">There are no showtimes scheduled in the database.</p>
-            </div>
-            <% } %>
-        </div>
-    </div>
+					<!-- Daily Tables -->
+					<%
+					int tableCount = 0;
+					for (LocalDate date : filteredMoviesByDate.keySet()) {
+						Map<Movies, List<Theater>> dailyMovies = filteredMoviesByDate.get(date);
+						if (!dailyMovies.isEmpty()) {
+					%>
+					<div
+						class="daily-table date-table mb-8 <%=tableCount == 0 ? "" : "hidden"%>"
+						data-date="<%=date.toString()%>">
+						<div class="bg-red-500 text-white px-6 py-3 rounded-t-lg">
+							<h3 class="text-lg font-semibold">
+								<%=date.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy"))%>
+							</h3>
+						</div>
+						<div class="bg-white rounded-b-lg shadow-md overflow-hidden">
+							<div class="overflow-x-auto">
+								<table class="min-w-full divide-y divide-gray-200">
+									<thead class="bg-gray-50">
+										<tr>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Movie</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Theaters</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Show
+												Times</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+										</tr>
+									</thead>
+									<tbody class="bg-white divide-y divide-gray-200"
+										id="table-body-<%=date.toString()%>">
+										<%
+										for (Movies movie : dailyMovies.keySet()) {
+											List<Theater> theatersForMovie = dailyMovies.get(movie);
+											String status = movie.getStatus();
+											// Create theater IDs string for filtering
+											StringBuilder theaterIds = new StringBuilder();
+											if (theatersForMovie != null && !theatersForMovie.isEmpty()) {
+												for (int i = 0; i < theatersForMovie.size(); i++) {
+											theaterIds.append(theatersForMovie.get(i).getTheaterId());
+											if (i < theatersForMovie.size() - 1) {
+												theaterIds.append(",");
+											}
+												}
+											}
+										%>
+										<tr class="hover:bg-gray-50 movie-row"
+											data-theaters="<%=theaterIds.toString()%>"
+											data-status="<%=status != null ? status.toLowerCase() : ""%>">
+											<td class="px-6 py-4 whitespace-nowrap">
+												<div class="flex items-center">
+													<div class="flex-shrink-0 h-16 w-12">
+														<img class="h-16 w-12 object-cover rounded"
+															src="GetMoviesPosterServlet?movie_id=<%=movie.getMovie_id()%>"
+															alt="<%=movie.getTitle()%>">
+													</div>
+													<div class="ml-4">
+														<div class="text-sm font-medium text-gray-900">
+															<%=movie.getTitle() != null ? movie.getTitle() : "Untitled"%>
+														</div>
+														
+														<div class="text-xs text-gray-400">
+															<%=movie.getGenres() != null ? movie.getGenres() : "N/A"%>
+														</div>
+													</div>
+												</div>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap">
+												<%
+												String statusBadgeClass = "bg-gray-500";
+												String statusText = "Unknown";
+												if ("now-showing".equalsIgnoreCase(status)) {
+													statusBadgeClass = "bg-green-600";
+													statusText = "Now Showing";
+												} else if ("coming-soon".equalsIgnoreCase(status)) {
+													statusBadgeClass = "bg-yellow-500";
+													statusText = "Coming Soon";
+												}
+												%> <span
+												class="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white <%=statusBadgeClass%>">
+													<%=statusText%>
+											</span>
+											</td>
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+												<%=movie.getDuration() != null ? movie.getDuration() : "N/A"%>
+											</td>
+											<td class="px-6 py-4 text-sm text-gray-500">
+												<%
+												if (theatersForMovie != null && !theatersForMovie.isEmpty()) {
+												%>
+												<div class="space-y-1">
+													<%
+													for (Theater theater : theatersForMovie) {
+													%>
+													<div class="font-medium"><%=theater.getName()%></div>
+													<div class="text-xs text-gray-400"><%=theater.getLocation()%></div>
+													<%
+													}
+													%>
+												</div> <%
+ } else {
+ %> No theaters <%
+ }
+ %>
+											</td>
+											<td class="px-6 py-4 text-sm text-gray-500">
+												<div class="space-y-1">
+													<%
+													if (theatersForMovie != null && !theatersForMovie.isEmpty()) {
+														for (Theater theater : theatersForMovie) {
+															// Get only showtimes for this theater, movie, and date
+															ArrayList<String> showtimes = showtimesDao.getFormattedShowtimes(theater.getTheaterId(), movie.getMovie_id(),
+															date);
+													%>
+													<div class="text-xs">
+														<span class="font-medium"><%=theater.getName()%></span>:
+														<%
+														if (showtimes != null && !showtimes.isEmpty()) {
+															for (int i = 0; i < showtimes.size(); i++) {
+																String start = showtimes.get(i);
+														%>
+														<span class="text-red-600 font-medium"><%=start.substring(0, 5)%></span><%=(i < showtimes.size() - 1) ? ", " : ""%>
+														<%
+														}
+														} else {
+														%>
+														<span class="text-gray-400">No shows</span>
+														<%
+														}
+														%>
+														
+													</div>
+													<%
+													}
+													} else {
+													%>
+													No theaters
+													<%
+													}
+													%>
+												</div>
+											</td>
 
-    <!-- Right Sidebar (Theater Filter) - Available to all users -->
-    <% if (isLoggedIn && ("admin".equals(user.getRole()) || "theateradmin".equals(user.getRole()))) { %>
-    <!-- Sidebar Toggle Button -->
-    <button id="sidebar-toggle" class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">☰</button>
+											<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+												<div class="flex space-x-2">
+													<button type="button"
+														class="trailer-btn text-red-600 hover:text-red-900 text-xs"
+														data-trailer-url="GetMoviesTrailerServlet?movie_id=<%=movie.getMovie_id()%>">
+														Trailer</button>
+													
+													<!-- Movie Details - Available to ALL users including guests -->
+													<a href="moviedetails.jsp?movie_id=<%=movie.getMovie_id()%>"
+													   class="text-blue-600 hover:text-blue-900 text-xs font-medium">Movie Details</a>
+													
+													<%-- <!-- Book Now button - Only show to logged-in users -->
+													<% if (user != null && "user".equals(user.getRole())) { %>
+														<a href="booking.jsp?movie_id=<%=movie.getMovie_id()%>&date=<%=date.toString()%>" 
+														   class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Book Now</a>
+													<% } else if (user == null) { %>
+														<a href="login.jsp?redirect=booking&movie_id=<%=movie.getMovie_id()%>&date=<%=date.toString()%>" 
+														   class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Login to Book</a>
+													<% } %> --%>
+												</div>
+											</td>
+										</tr>
+										<%
+										}
+										%>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<%
+					tableCount++;
+					}
+					}
+					%>
+					<%
+					} else {
+					%>
+					<!-- No Movies Message -->
+					<div class="text-center py-12 bg-white rounded-lg shadow-md">
+						<div class="text-gray-500 text-lg mb-4">No movies scheduled</div>
+						<p class="text-gray-400">There are no showtimes scheduled in
+							the database.</p>
+					</div>
+					<%
+					}
+					%>
+				</div>
+			</div>
 
-    <aside id="right-sidebar" class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="text-lg font-semibold text-gray-800">Filter by Theater</h3>
-            <button id="sidebar-close" class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
-        </div>
+			<!-- Right Sidebar (Theater Filter for Admin only) -->
 
-        <ul class="space-y-1 overflow-hidden">
-            <!-- All Button -->
-            <li class="theater-filter px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold" data-theater-id="all">Show All Theaters</li>
+			<!-- Sidebar Toggle Button -->
+			<button id="sidebar-toggle"
+				class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">
+				☰</button>
 
-            <% if (theaters != null && theaters.size() > 0) { %>
-                <% for (Theater t : theaters) { %>
-                <li class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition" data-theater-id="<%=t.getTheaterId()%>">
-                    <span class="block font-medium"><%=t.getName()%></span>
-                    <span class="block text-xs text-gray-500"><%=t.getLocation()%></span>
-                </li>
-                <% } %>
-            <% } else { %>
-                <p class="text-gray-500 text-sm mt-3">No theaters available.</p>
-            <% } %>
-        </ul>
-    </aside>
-    <% } %>
-</div>
+			<aside id="right-sidebar"
+				class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5  transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+				<div class="flex justify-between items-center mb-3">
+					<h3 class="text-lg font-semibold text-gray-800">Filter by
+						Theater</h3>
+					<button id="sidebar-close"
+						class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
+				</div>
 
-<!-- Trailer Popup -->
-<div class="trailer-popup hidden fixed inset-0 flex items-center justify-center z-100">
-    <div class="absolute inset-0 backdrop-blur-xs"></div>
-    <div class="relative w-full max-w-8xl bg-opacity-80 rounded-lg overflow-hidden transform scale-90 opacity-0 transition-all duration-300 ease-out z-10">
-        <button class="trailer-close absolute top-3 right-3 text-gray-800 hover:text-red-500 text-3xl font-bold z-20">✕</button>
-        <div>
-            <h3 class="text-gray-900 text-2xl md:text-3xl font-semibold text-center mb-4">Trailer</h3>
-            <div class="w-full aspect-video rounded-xl overflow-hidden shadow-inner">
-                <video class="w-full h-full bg-black" controls>
-                    <source data-src="" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
-        </div>
-    </div>
-</div>
+				<ul class="space-y-1 overflow-hidden">
+					<!-- All Button -->
+					<li
+						class="theater-filter px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold"
+						data-theater-id="all">Show All Theaters</li>
 
-<!-- Footer -->
-<% if (isLoggedIn) { %>
-    <jsp:include page="layout/footer.jsp" />
-<% } else { %>
-    <!-- Guest Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <h3 class="text-xl font-bold">Movie Booking System</h3>
-                    <p class="text-gray-400 mt-2">Book your favorite movies anytime, anywhere</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="about.jsp" class="text-gray-300 hover:text-white">About</a>
-                    <a href="contact.jsp" class="text-gray-300 hover:text-white">Contact</a>
-                    <a href="privacy.jsp" class="text-gray-300 hover:text-white">Privacy Policy</a>
-                    <a href="terms.jsp" class="text-gray-300 hover:text-white">Terms of Service</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
-                <p>&copy; 2023 Movie Booking System. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-<% } %>
+					<%
+					if (theaters != null && theaters.size() > 0) {
+					%>
+					<%
+					for (Theater t : theaters) {
+					%>
+					<li
+						class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition"
+						data-theater-id="<%=t.getTheaterId()%>"><span
+						class="block font-medium"><%=t.getName()%></span> <span
+						class="block text-xs text-gray-500"><%=t.getLocation()%></span>
+					</li>
+					<%
+					}
+					%>
+					<%
+					} else {
+					%>
+					<p class="text-gray-500 text-sm mt-3">No theaters available.</p>
+					<%
+					}
+					%>
+				</ul>
+			</aside>
 
-<jsp:include page="layout/JSPFooter.jsp" />
+			<script>
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const rightSidebar = document.getElementById('right-sidebar');
 
-<script>
+    sidebarToggle.addEventListener('click', () => {
+        const isOpen = !rightSidebar.classList.contains('translate-x-full');
+        rightSidebar.classList.toggle('translate-x-full');
+
+        // Change button icon
+        sidebarToggle.textContent = isOpen ? '☰' : '✕';
+    });
+
+    // Optional: close sidebar by clicking outside (mobile)
+    document.addEventListener('click', (e) => {
+        if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
+            rightSidebar.classList.add('translate-x-full');
+            sidebarToggle.textContent = '☰';
+        }
+    });
+</script>
+			
+		</div>
+
+		<!-- Trailer Popup -->
+		<div
+			class="trailer-popup hidden fixed inset-0 flex items-center justify-center z-100">
+			<div class="absolute inset-0 backdrop-blur-xs"></div>
+			<div
+				class="relative w-full max-w-8xl bg-opacity-80 rounded-lg overflow-hidden transform scale-90 opacity-0 transition-all duration-300 ease-out z-10">
+				<button
+					class="trailer-close absolute top-3 right-3 text-gray-800 hover:text-red-500 text-3xl font-bold z-20">✕</button>
+				<div>
+					<h3
+						class="text-gray-900 text-2xl md:text-3xl font-semibold text-center mb-4">Trailer</h3>
+					<div
+						class="w-full aspect-video rounded-xl overflow-hidden shadow-inner">
+						<video class="w-full h-full bg-black" controls>
+							<source data-src="" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
+				</div>
+			</div>
+		</div>
+<jsp:include page="layout/footer.jsp" />
+		<jsp:include page="layout/JSPFooter.jsp" />
+
+		<script>
 // Global variable to track current theater filter
 let currentTheaterFilter = 'all';
 let currentStatusFilter = 'all';
@@ -611,28 +679,27 @@ function isThisMonth(date) {
 
 // Theater filter functionality (for admin)
 const theaterFilters = document.querySelectorAll('.theater-filter');
-if (theaterFilters.length > 0) {
-    theaterFilters.forEach(item => {
-        item.addEventListener('click', () => {
-            const theaterId = item.getAttribute('data-theater-id');
-            currentTheaterFilter = theaterId;
 
-            // Reset active state
-            theaterFilters.forEach(i => {
-                i.classList.remove('bg-red-100', 'text-red-700', 'font-semibold');
-                i.classList.add('text-gray-700', 'hover:bg-red-50');
-            });
-            item.classList.add('bg-red-100', 'text-red-700', 'font-semibold');
-            item.classList.remove('text-gray-700', 'hover:bg-red-50');
+theaterFilters.forEach(item => {
+    item.addEventListener('click', () => {
+        const theaterId = item.getAttribute('data-theater-id');
+        currentTheaterFilter = theaterId;
 
-            // Apply filter to current visible table
-            const currentTable = document.querySelector('.daily-table:not(.hidden)');
-            if (currentTable) {
-                applyFilters(currentTable);
-            }
+        // Reset active state
+        theaterFilters.forEach(i => {
+            i.classList.remove('bg-red-100', 'text-red-700', 'font-semibold');
+            i.classList.add('text-gray-700', 'hover:bg-red-50');
         });
+        item.classList.add('bg-red-100', 'text-red-700', 'font-semibold');
+        item.classList.remove('text-gray-700', 'hover:bg-red-50');
+
+        // Apply filter to current visible table
+        const currentTable = document.querySelector('.daily-table:not(.hidden)');
+        if (currentTable) {
+            applyFilters(currentTable);
+        }
     });
-}
+});
 
 // Function to apply both theater and status filters
 function applyFilters(table) {
@@ -692,27 +759,5 @@ if (dateFilterBtns.length > 0) {
     if (firstTable) {
         applyFilters(firstTable);
     }
-}
-
-// Sidebar toggle functionality for admin users
-const sidebarToggle = document.getElementById('sidebar-toggle');
-if (sidebarToggle) {
-    const rightSidebar = document.getElementById('right-sidebar');
-    
-    sidebarToggle.addEventListener('click', () => {
-        const isOpen = !rightSidebar.classList.contains('translate-x-full');
-        rightSidebar.classList.toggle('translate-x-full');
-
-        // Change button icon
-        sidebarToggle.textContent = isOpen ? '☰' : '✕';
-    });
-
-    // Optional: close sidebar by clicking outside (mobile)
-    document.addEventListener('click', (e) => {
-        if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
-            rightSidebar.classList.add('translate-x-full');
-            sidebarToggle.textContent = '☰';
-        }
-    });
 }
 </script>

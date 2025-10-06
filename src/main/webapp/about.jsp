@@ -36,7 +36,7 @@
     if (heroDesc == null) heroDesc = "At Cinezy, we bring stories to life with state-of-the-art technology, luxurious comfort, and unforgettable movie experiences for every film lover.";
 
     String heroImage = (String) request.getAttribute("heroImage");
-    if (heroImage == null) heroImage = "https://images.unsplash.com/photo-1489599809505-7c8c62a03075?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+    if (heroImage == null) heroImage = "https://plus.unsplash.com/premium_photo-1683740128672-7f1a4b824f5e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8Y2luZW1hfGVufDB8fDB8fHww";
 
     Object userObj = session.getAttribute("user");
     String ctaHref = (userObj == null) ? request.getContextPath() + "/account/sign-in" : request.getContextPath() + "/movies";
@@ -87,7 +87,7 @@
 
     <!-- Right Image -->
     <div class="flex justify-center lg:justify-end">
-      <img src="<%= heroImage %>" alt="Cinezy Cinema Experience" class="rounded-2xl shadow-xl max-w-lg w-full object-cover"/>
+      <img src="<%= heroImage %>" alt="Cinezy Cinema Experience" class="rounded-2xl shadow-xl max-w-xl w-full object-cover"/>
     </div>
 
   </div>
@@ -139,7 +139,7 @@
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-3xl mx-auto mb-16">
+    <div class="text-center mx-auto mb-16">
       <h2 class="text-3xl md:text-5xl font-bold text-gray-900">
         Premium Cinema Experience at Cinezy
       </h2>
@@ -235,7 +235,7 @@
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900">
         Meet the Cinezy Team
       </h2>
-      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+      <p class="mt-4 text-lg text-gray-600 mx-auto">
         The passionate movie enthusiasts dedicated to creating magical cinema experiences.
       </p>
     </div>
@@ -257,7 +257,7 @@
 
       <!-- Team Member -->
       <div class="bg-gray-50 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-        <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=1974&q=80" alt="Sarah Chen">
+        <img class="w-full h-64 object-cover" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Sarah Chen">
         <div class="p-6 text-center">
           <h3 class="text-xl font-semibold text-gray-900">Sarah Chen</h3>
           <p class="text-gray-600 text-sm mt-1">Head of Customer Experience</p>
@@ -287,7 +287,7 @@
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="text-center mx-auto mb-12">
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900">
         What Our Movie Lovers Are Saying
       </h2>
@@ -383,7 +383,7 @@
   <div class="max-w-7xl mx-auto px-6 lg:px-8">
     
     <!-- Header -->
-    <div class="text-center max-w-2xl mx-auto mb-12">
+    <div class="text-center mx-auto mb-12">
       <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
         Latest from Cinezy Blog
       </h2>
@@ -399,7 +399,7 @@
       <a href="#" class="group block rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 bg-white">
         <div class="aspect-w-16 aspect-h-9">
           <img 
-            src="https://images.unsplash.com/photo-1489599809505-7c8c62a03075?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2luZW1hfGVufDB8fDB8fHww"
             alt="Movie Technology"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           >
@@ -437,7 +437,7 @@
       <a href="#" class="group block rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 bg-white">
         <div class="aspect-w-16 aspect-h-9">
           <img 
-            src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2050&q=80"
+            src="https://images.unsplash.com/photo-1577315974138-71362a43d4f5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8"
             alt="Behind the Scenes"
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           >
@@ -454,16 +454,7 @@
 
     </div>
 
-    <!-- Button -->
-    <div class="mt-12 text-center">
-      <a href="/blog" 
-         class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white bg-red-600 hover:bg-red-700 transition duration-300 shadow-md">
-        Read More Articles
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-      </a>
-    </div>
+   
 
   </div>
 </section>
