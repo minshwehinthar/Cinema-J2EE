@@ -106,11 +106,12 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
         int theaterId = new com.demo.dao.UserDAO().getTheaterIdByUserId(rs.getInt("user_id"));
         if(theaterId > 0) {
     %>
-    <a href="viewSeat.jsp?theater_id=<%=theaterId%>" 
-       class="p-2 bg-blue-500 rounded hover:bg-blue-600 text-white" 
-       title="View Seats">
-        <i class="fa fa-chair"></i>
-    </a>
+    <a href="setTheaterSession?theater_id=<%=theaterId%>" 
+   class="p-2 bg-blue-500 rounded hover:bg-blue-600 text-white" 
+   title="View Seats">
+    <i class="fa fa-chair"></i>
+</a>
+
     <% } %>
         
         <button class="delete-btn p-2 bg-gray-100 rounded hover:bg-red-100" data-id="<%=rs.getInt("user_id")%>">
