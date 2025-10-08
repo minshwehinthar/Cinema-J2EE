@@ -24,11 +24,6 @@
 
 <link rel="stylesheet" href="assets/css/seat-style.css">
 
-<script src="${pageContext.request.contextPath}/assets/js/movies1.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/movies2.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/moviedetails1.js"></script>
-
-
 
 <!-- Icon -->
 

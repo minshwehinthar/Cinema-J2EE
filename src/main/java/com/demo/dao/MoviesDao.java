@@ -206,6 +206,39 @@ return row;
 	    }
 	}
 
+	public ArrayList<Movies> getMoviesByTheater(int theaterId) {
+	    ArrayList<Movies> list = new ArrayList<>();
+	    MyConnection conobj = new MyConnection();
+	    Connection con = conobj.getConnection();
 
+	    String sql = "SELECT DISTINCT m.* FROM movies m "
+	               + "JOIN showtimes s ON m.movie_id = s.movie_id "
+	               + "WHERE s.theater_id = ?";
+
+	    try (PreparedStatement pstm = con.prepareStatement(sql)) {
+	        pstm.setInt(1, theaterId);
+	        ResultSet rs = pstm.executeQuery();
+
+	        while (rs.next()) {
+	            Movies m = new Movies();
+	            m.setMovie_id(rs.getInt("movie_id"));
+	            m.setTitle(rs.getString("title"));
+	            m.setStatus(rs.getString("status"));
+	            m.setDuration(rs.getString("duration"));
+	            m.setDirector(rs.getString("director"));
+	            m.setCasts(rs.getString("casts"));
+	            m.setGenres(rs.getString("genres"));
+	            m.setSynopsis(rs.getString("synopsis"));
+	            m.setPostertype(rs.getString("postertype"));
+	            m.setTrailertype(rs.getString("trailertype"));
+	            list.add(m);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return list;
+	}
+	
+	
 	
 }

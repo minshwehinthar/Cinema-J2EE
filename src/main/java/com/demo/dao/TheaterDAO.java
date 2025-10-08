@@ -95,6 +95,7 @@ public class TheaterDAO {
     }
 
     // Create theater
+ // Create theater
     public int createTheater(Theater theater) {
         String sql = "INSERT INTO theaters (name, location, image, imgtype, user_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
 
@@ -104,11 +105,12 @@ public class TheaterDAO {
             ps.setString(1, theater.getName());
             ps.setString(2, theater.getLocation());
 
-            // Store path as string
-            if (theater.getImage() != null) {
-                ps.setString(3, theater.getImage());
+            // Convert Base64 to bytes for BLOB column
+            if (theater.getImage() != null && !theater.getImage().isEmpty()) {
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(theater.getImage());
+                ps.setBytes(3, imageBytes);
             } else {
-                ps.setNull(3, Types.VARCHAR);
+                ps.setNull(3, Types.BLOB);
             }
 
             ps.setString(4, theater.getImgtype());
@@ -129,6 +131,7 @@ public class TheaterDAO {
 
         return -1;
     }
+
 
 //    // Update theater
 //    public boolean updateTheater(Theater theater) {

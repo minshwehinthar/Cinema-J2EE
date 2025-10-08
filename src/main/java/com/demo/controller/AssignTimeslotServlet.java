@@ -17,40 +17,36 @@ public class AssignTimeslotServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         Integer theaterId = (Integer) session.getAttribute("theater_id");
+
         if (theaterId == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        Integer movieId = request.getParameter("movie_id") != null ? Integer.parseInt(request.getParameter("movie_id")) :
-                          (Integer) request.getAttribute("movie_id");
-        if(movieId == null) {
-            request.setAttribute("msg", "no_selection");
-            RequestDispatcher rd = request.getRequestDispatcher("assignTimeslots.jsp");
-            rd.forward(request, response);
-            return;
-        }
-
+        int movieId = Integer.parseInt(request.getParameter("movie_id"));
         ShowtimesDao dao = new ShowtimesDao();
+
+        // ✅ Get movie start/end dates
         LocalDate[] dates = dao.getMovieDates(theaterId, movieId);
-        if(dates == null) {
-            request.setAttribute("msg", "nodates");
-            request.setAttribute("movie_id", movieId);
-            RequestDispatcher rd = request.getRequestDispatcher("assignTimeslots.jsp");
-            rd.forward(request, response);
+        if (dates == null) {
+            response.sendRedirect("assignTimeslot.jsp?movie_id=" + movieId + "&msg=nodates");
             return;
         }
 
         LocalDate startDate = dates[0];
         LocalDate endDate = dates[1];
+
         boolean inserted = false;
 
+        // ✅ Loop all dates, check selected slot, insert only if chosen
         LocalDate current = startDate;
-        while(!current.isAfter(endDate)) {
+        while (!current.isAfter(endDate)) {
             String slotParam = request.getParameter("slot_" + current.toString());
-            if(slotParam != null && !slotParam.isEmpty()) {
+            if (slotParam != null && !slotParam.isEmpty()) {
                 int slotId = Integer.parseInt(slotParam);
-                if(!dao.isSlotAssigned(theaterId, movieId, slotId, current)) {
+
+                // Insert only if not already assigned
+                if (!dao.isSlotAssigned(theaterId, movieId, slotId, current)) {
                     dao.insertShowtime(theaterId, movieId, slotId, current);
                     inserted = true;
                 }
@@ -58,15 +54,10 @@ public class AssignTimeslotServlet extends HttpServlet {
             current = current.plusDays(1);
         }
 
-        if(inserted) {
-            request.setAttribute("msg", "timeslot_assigned");
-            RequestDispatcher rd = request.getRequestDispatcher("theateradminpickmovies.jsp");
-            rd.forward(request, response);
+        if (inserted) {
+            response.sendRedirect("theateradminpickmovies.jsp?msg=timeslot_assigned");
         } else {
-            request.setAttribute("msg", "no_selection");
-            request.setAttribute("movie_id", movieId);
-            RequestDispatcher rd = request.getRequestDispatcher("assignTimeslots.jsp");
-            rd.forward(request, response);
+            response.sendRedirect("assignTimeslot.jsp?movie_id=" + movieId + "&msg=no_selection");
         }
     }
 

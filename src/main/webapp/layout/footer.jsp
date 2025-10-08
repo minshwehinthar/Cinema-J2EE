@@ -10,7 +10,8 @@
 <script src="${pageContext.request.contextPath}/assets/js/movies2.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/moviedetails1.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/seat-script.js"></script>
-<jsp:include page="JSPHeader.jsp"/>
+<script src="${pageContext.request.contextPath}/assets/js/booking.js"></script> 
+
 <!-- Footer -->
 <footer class="backdrop-blur-sm shadow-sm bg-white text-gray-800">
     <div class="container mx-auto p-6">

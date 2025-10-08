@@ -1,9 +1,7 @@
 package com.demo.controller;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +15,6 @@ import com.demo.dao.MyConnection;
 public class DeleteMovieServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // Handle POST request to delete movie
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -29,19 +26,43 @@ public class DeleteMovieServlet extends HttpServlet {
         }
 
         int movieId = Integer.parseInt(movieIdParam);
+        String movieStatus = "now-showing"; // default
+        String redirectPage;
 
+        // Step 1: Get movie status first
+        String getStatusSql = "SELECT status FROM movies WHERE movie_id = ?";
+        try (Connection con = MyConnection.getConnection();
+             PreparedStatement psStatus = con.prepareStatement(getStatusSql)) {
+
+            psStatus.setInt(1, movieId);
+            try (ResultSet rs = psStatus.executeQuery()) {
+                if (rs.next()) {
+                    movieStatus = rs.getString("status");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Step 2: Delete movie
         String sql = "DELETE FROM movies WHERE movie_id = ?";
-
         try (Connection con = MyConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, movieId);
             int rowsAffected = ps.executeUpdate();
 
-            if (rowsAffected > 0) {
-                response.sendRedirect("showing-now.jsp?msg=deleted");
+            // Step 3: Decide redirect based on status
+            if ("coming-soon".equalsIgnoreCase(movieStatus)) {
+                redirectPage = "coming-soon.jsp";
             } else {
-                response.sendRedirect("showing-now.jsp?msg=notfound");
+                redirectPage = "showing-now.jsp";
+            }
+
+            if (rowsAffected > 0) {
+                response.sendRedirect(redirectPage + "?msg=deleted");
+            } else {
+                response.sendRedirect(redirectPage + "?msg=notfound");
             }
 
         } catch (SQLException e) {
@@ -50,7 +71,6 @@ public class DeleteMovieServlet extends HttpServlet {
         }
     }
 
-    // Redirect GET requests to movies.jsp
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
