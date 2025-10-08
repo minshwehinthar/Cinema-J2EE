@@ -16,12 +16,12 @@
           <a href="home.jsp" class="hover:text-white">Home</a>
           <span class="mx-2 text-gray-300">/</span>
         </li>
-        <li class="text-gray-300" aria-current="page">Our Faqs</li>
+        <li class="text-gray-300" aria-current="page">Our FAQs</li>
       </ol>
     </nav>
 
     <!-- Page Title -->
-    <h1 class="text-4xl md:text-5xl font-bold text-white">Our Faqs</h1>
+    <h1 class="text-4xl md:text-5xl font-bold text-white">Our FAQs</h1>
   </div>
 </section>
 
@@ -38,31 +38,32 @@
     <%-- FAQ Item --%>
     <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
       <button class="faq-question w-full flex justify-between items-center p-5 bg-gray-50 hover:bg-gray-100 font-semibold text-left">
-        What is your return policy?
+        What is this website about?
         <span class="faq-icon transition-transform duration-300">+</span>
       </button>
       <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
-        <p class="py-4">We offer a 30-day money-back guarantee on all purchases. If you're not satisfied with our product for any reason.</p>
+        <p class="py-4">This is an online cinema booking system where you can browse movies, select your preferred theater, choose seats, and even pre-order food and drinks.
+</p>
       </div>
     </div>
 
     <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
       <button class="faq-question w-full flex justify-between items-center p-5 bg-gray-50 hover:bg-gray-100 font-semibold text-left">
-        How long does it take to receive support?
+        Do I need an account to book tickets?
         <span class="faq-icon transition-transform duration-300">+</span>
       </button>
       <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
-        <p class="py-4">Our support team strives to respond to all inquiries within 24 hours. However, response times may vary depending on the volume of requests.</p>
-      </div>
+        <p class="py-4">Yes, you need to create an account to book tickets, manage your orders, and view your booking history.
+        </p>      </div>
     </div>
 
     <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
       <button class="faq-question w-full flex justify-between items-center p-5 bg-gray-50 hover:bg-gray-100 font-semibold text-left">
-        Is my data secure with your platform?
+       Can I book for any theater?
         <span class="faq-icon transition-transform duration-300">+</span>
       </button>
       <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
-        <p class="py-4">Yes, we take data security seriously. Our platform employs industry-standard encryption protocols to safeguard your data.</p>
+        <p class="py-4">Yes! Our system supports multiple theaters. Simply choose your preferred theater before selecting a movie and showtime.</p>
       </div>
     </div>
 
@@ -72,17 +73,28 @@
         <span class="faq-icon transition-transform duration-300">+</span>
       </button>
       <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
-        <p class="py-4">Yes, you can cancel your subscription at any time. Simply log in to your account and navigate to the subscription settings to initiate the cancellation process.</p>
+        <p class="py-4">Cancellations depend on the theater’s policy. Usually, tickets cannot be changed or refunded once confirmed.
+</p>
       </div>
     </div>
 
     <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
       <button class="faq-question w-full flex justify-between items-center p-5 bg-gray-50 hover:bg-gray-100 font-semibold text-left">
-        Do you offer customization options for your products?
+        Are movie times the same in all theaters?
         <span class="faq-icon transition-transform duration-300">+</span>
       </button>
       <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
-        <p class="py-4">Yes, we offer customization options for certain products. Please contact our sales team to discuss your specific requirements.</p>
+        <p class="py-4">No, showtimes vary by theater. Please check the specific schedule for each location.</p>
+      </div>
+    </div>
+    
+    <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+      <button class="faq-question w-full flex justify-between items-center p-5 bg-gray-50 hover:bg-gray-100 font-semibold text-left">
+        Can I choose my own seat?
+        <span class="faq-icon transition-transform duration-300">+</span>
+      </button>
+      <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 px-5">
+        <p class="py-4">Yes, you can view the seat layout and choose available seats in real time.</p>
       </div>
     </div>
 

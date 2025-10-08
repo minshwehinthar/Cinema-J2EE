@@ -76,7 +76,7 @@
           <% } %>
           <span class="text-gray-700 text-sm ml-1"><%=String.format("%.1f", rating) %>/5</span>
         </div>
-        <p class="text-green-600 font-bold text-2xl">$<%=food.getPrice()%></p>
+        <p class="text-green-600 font-bold text-2xl"><%=food.getPrice()%> MMK</p>
       </div>
 
       <!-- Description -->
@@ -105,7 +105,7 @@
           <button type="button" onclick="updateQty(1)" class="text-gray-700 text-xl font-bold">+</button>
         </div>
 
-        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-full transition">
+        <button type="submit" class="bg-red-700 hover:bg-red-900 text-white font-medium py-2 px-6 rounded-full transition">
           Add to Cart
         </button>
       </form>

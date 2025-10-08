@@ -43,7 +43,7 @@
         ArrayList<Theater> theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
     %>
     <aside id="right-sidebar"
-        class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+        class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full z-100 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
         <div class="flex justify-between items-center mb-3">
             <h3 class="text-lg font-semibold text-gray-800">Filter by Theater</h3>
             <button id="sidebar-close"
@@ -110,7 +110,7 @@
                         <h3 class="text-white font-bold text-lg truncate"><%= m.getTitle() %></h3>
                         <p class="text-gray-300 text-sm truncate"><%= m.getDuration() %></p>
                         <p class="text-gray-200 text-xs line-clamp-3 mt-1">
-                            <%= (m.getSynopsis() != null && !m.getSynopsis().trim().isEmpty()) ? m.getSynopsis() : "No synopsis available." %>
+                            <%= m.getGenres() != null ? m.getGenres() : "N/A" %>
                         </p>
                         <span class="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full uppercase <%= badgeClass %>">
                             <%= status != null ? status : "Unknown" %>

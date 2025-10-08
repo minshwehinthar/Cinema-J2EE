@@ -261,9 +261,7 @@ for (LocalDate date : moviesByDate.keySet()) {
 														<div class="text-sm font-medium text-gray-900">
 															<%=movie.getTitle() != null ? movie.getTitle() : "Untitled"%>
 														</div>
-														<div class="text-sm text-gray-500">
-															<%=movie.getDirector() != null ? movie.getDirector() : "N/A"%>
-														</div>
+														
 														<div class="text-xs text-gray-400">
 															<%=movie.getGenres() != null ? movie.getGenres() : "N/A"%>
 														</div>

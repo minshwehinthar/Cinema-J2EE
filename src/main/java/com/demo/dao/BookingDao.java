@@ -627,7 +627,28 @@ public class BookingDao {
         }
         return booking;
     }
- 
+ // Add this method to your BookingDao class
+    public int getTheaterIdByBookingId(int bookingId) {
+        int theaterId = 0;
+        String sql = "SELECT s.theater_id FROM bookings b " +
+                     "JOIN showtimes s ON b.showtime_id = s.showtime_id " +
+                     "WHERE b.booking_id = ?";
+        
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                theaterId = rs.getInt("theater_id");
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return theaterId;
+    }
 
  
 }

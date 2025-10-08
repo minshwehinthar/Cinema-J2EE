@@ -93,7 +93,7 @@ String reviewsHeight = loggedIn ? "54vh" : "";
         </div>
     </div>
 
-    <!-- Reviews List -->
+        <!-- Reviews List -->
     <div class="reviews-container flex flex-col space-y-3 mb-8 px-2">
         <%
         if (reviews.isEmpty()) {
@@ -102,16 +102,24 @@ String reviewsHeight = loggedIn ? "54vh" : "";
         <%
         } else {
             for (Review r : reviews) {
-                // Convert byte[] user image to Base64
-                String reviewUserImage = null;
-                if (r.getUserImage() != null) {
-                    byte[] imgBytes = r.getUserImage().getBytes(); // If stored as byte[], else skip
-                    if(imgBytes.length > 0) {
-                        reviewUserImage = "data:image/png;base64," + Base64.getEncoder().encodeToString(imgBytes);
+                // Handle user image - FIXED VERSION
+                String reviewUserImage = "assets/img/user.png"; // default image
+                
+                if (r.getUserImage() != null && !r.getUserImage().trim().isEmpty()) {
+                    String userImage = r.getUserImage().trim();
+                    
+                    // Check if it's already a complete URL or data URI
+                    if (userImage.startsWith("http") || userImage.startsWith("data:image")) {
+                        reviewUserImage = userImage;
+                    } 
+                    // Check if it's a base64 string without data URI prefix
+                    else if (userImage.length() > 100) { // Base64 strings are typically long
+                        reviewUserImage = "data:image/png;base64," + userImage;
                     }
-                }
-                if(reviewUserImage == null){
-                    reviewUserImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAjVBMVEXZ3OF...";
+                    // Assume it's a file path
+                    else {
+                        reviewUserImage = userImage;
+                    }
                 }
 
                 boolean isGood = "yes".equals(r.getIsGood());
@@ -122,7 +130,9 @@ String reviewsHeight = loggedIn ? "54vh" : "";
         <div class="review-item flex flex-col border border-gray-200 rounded-lg p-3 bg-white">
             <div class="flex justify-between mb-2">
                 <div class="flex items-center space-x-3">
-                    <img src="<%=reviewUserImage%>" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                    <img src="<%=reviewUserImage%>" alt="avatar" 
+                         class="w-10 h-10 rounded-full object-cover"
+                         onerror="this.src='assets/img/user.png'">
                     <div class="flex flex-col">
                         <span class="font-medium text-gray-800"><%=r.getUserName()%></span>
                         <span class="text-xs text-gray-400 review-timestamp"><%=r.getCreatedAt()%></span>

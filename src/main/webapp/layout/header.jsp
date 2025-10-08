@@ -33,7 +33,7 @@ String currentPage = request.getRequestURI();
             <a href="home.jsp" class="flex items-center gap-2">
                 <img src="assets/img/cinema-logo.jpg" alt="Logo" class="w-12 h-12">
                 <div class="flex flex-col leading-tight">
-                    <span class="font-semibold text-gray-900">J-Seven</span>
+                    <span class="font-semibold text-gray-900">CINEZY</span>
                     <span class="text-xs text-gray-500">Movies & Cinemas</span>
                 </div>
             </a>

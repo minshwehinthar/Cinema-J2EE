@@ -14,7 +14,7 @@
         String base64Image = Base64.getEncoder().encodeToString(user.getImage());
         profileImage = "data:image/" + user.getImgtype() + ";base64," + base64Image;
     } else {
-        profileImage = "assets/default-avatar.png";
+        profileImage = "assets/img/user.png";
     }
 %>
 <jsp:include page="JSPHeader.jsp"/>

@@ -38,7 +38,7 @@ input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 4px rgba(59,
 
 .dropdown { position: relative; }
 .dropdown-btn { cursor: pointer; }
-.dropdown-list { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 10; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.dropdown-list { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .dropdown-list div { padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s; }
 .dropdown-list div:hover { background: #f3f4f6; }
 </style>
@@ -172,56 +172,60 @@ input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 4px rgba(59,
 <jsp:include page="layout/footer.jsp"/>
 
 <script>
-// Payment selection & custom dropdown
-const paymentOptions = document.querySelectorAll('.payment-option');
-const paymentError = document.getElementById('paymentError');
+document.addEventListener('DOMContentLoaded', () => {
+    // Payment selection
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const paymentError = document.getElementById('paymentError');
 
-paymentOptions.forEach(option => {
-    const input = option.querySelector('input');
-    option.addEventListener('click', () => {
-        paymentOptions.forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        input.checked = true;
-        paymentError.style.display = 'none';
+    paymentOptions.forEach(option => {
+        const input = option.querySelector('input');
+        option.addEventListener('click', () => {
+            paymentOptions.forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            input.checked = true;
+            paymentError.style.display = 'none';
+        });
     });
-});
 
-const dropdownBtn = document.getElementById('dropdownBtn');
-const dropdownList = document.getElementById('dropdownList');
-const selectedTheater = document.getElementById('selectedTheater');
-const theaterInput = document.getElementById('theaterIdInput');
+    // Theater dropdown
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownList = document.getElementById('dropdownList');
+    const selectedTheater = document.getElementById('selectedTheater');
+    const theaterInput = document.getElementById('theaterIdInput');
 
-dropdownBtn.addEventListener('click', () => {
-    dropdownList.style.display = dropdownList.style.display === 'block' ? 'none' : 'block';
-});
-
-dropdownList.querySelectorAll('div').forEach(item => {
-    item.addEventListener('click', () => {
-        selectedTheater.textContent = item.textContent;
-        theaterInput.value = item.dataset.id;
-        dropdownList.style.display = 'none';
-        theaterInput.nextElementSibling.style.display = 'none';
+    dropdownBtn.addEventListener('click', () => {
+        dropdownList.style.display = dropdownList.style.display === 'block' ? 'none' : 'block';
     });
-});
 
-document.addEventListener('click', (e) => {
-    if(!dropdownBtn.contains(e.target) && !dropdownList.contains(e.target)){
-        dropdownList.style.display = 'none';
-    }
-});
+    dropdownList.querySelectorAll('div').forEach(item => {
+        item.addEventListener('click', () => {
+            selectedTheater.textContent = item.textContent;
+            theaterInput.value = item.dataset.id;
+            dropdownList.style.display = 'none';
+            theaterInput.nextElementSibling.style.display = 'none';
+        });
+    });
 
-const form = document.getElementById('checkoutForm');
-form.addEventListener('submit', function(e){
-    let valid = true;
-    document.querySelectorAll('.error-text').forEach(span => span.style.display='none');
+    document.addEventListener('click', (e) => {
+        if(!dropdownBtn.contains(e.target) && !dropdownList.contains(e.target)){
+            dropdownList.style.display = 'none';
+        }
+    });
 
-    if(document.getElementById('name').value.trim()===''){ document.getElementById('name').nextElementSibling.style.display='block'; valid=false; }
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())){ document.getElementById('email').nextElementSibling.style.display='block'; valid=false; }
-    if(!/^(\+?95|0)9\d{7,9}$/.test(document.getElementById('phone').value.trim())){ document.getElementById('phone').nextElementSibling.style.display='block'; valid=false; }
-    if(theaterInput.value.trim()===''){ theaterInput.nextElementSibling.style.display='block'; valid=false; }
-    if(!Array.from(document.querySelectorAll('input[name="paymentMethod"]')).some(i=>i.checked)){ paymentError.style.display='block'; valid=false; }
+    // Form validation
+    const form = document.getElementById('checkoutForm');
+    form.addEventListener('submit', function(e){
+        let valid = true;
+        document.querySelectorAll('.error-text').forEach(span => span.style.display='none');
 
-    if(!valid){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'});}
+        if(document.getElementById('name').value.trim()===''){ document.getElementById('name').nextElementSibling.style.display='block'; valid=false; }
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())){ document.getElementById('email').nextElementSibling.style.display='block'; valid=false; }
+        if(!/^(\+?95|0)9\d{7,9}$/.test(document.getElementById('phone').value.trim())){ document.getElementById('phone').nextElementSibling.style.display='block'; valid=false; }
+        if(theaterInput.value.trim()===''){ theaterInput.nextElementSibling.style.display='block'; valid=false; }
+        if(!Array.from(document.querySelectorAll('input[name="paymentMethod"]')).some(i=>i.checked)){ paymentError.style.display='block'; valid=false; }
+
+        if(!valid){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'});}
+    });
 });
 </script>
 
