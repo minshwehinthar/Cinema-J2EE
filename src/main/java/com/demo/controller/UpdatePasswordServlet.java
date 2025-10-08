@@ -40,10 +40,18 @@ public class UpdatePasswordServlet extends HttpServlet {
             }
         }
 
-        if (success) {
-            response.sendRedirect("profile.jsp?msg=passwordUpdated");
+        // Determine redirect URL based on user role
+        String redirectUrl;
+        if ("admin".equals(user.getRole()) || "theateradmin".equals(user.getRole())) {
+            redirectUrl = "admin-profile.jsp?msg=";
         } else {
-            response.sendRedirect("profile.jsp?msg=passwordError");
+            redirectUrl = "profile.jsp?msg=";
+        }
+
+        if (success) {
+            response.sendRedirect(redirectUrl + "password_updated");
+        } else {
+            response.sendRedirect(redirectUrl + "invalid_password");
         }
     }
 }

@@ -134,32 +134,76 @@
         </div>
     </div>
 
-   <!-- Right Sidebar (Theater Filter with All Button) -->
-<% if ("admin".equals(user.getRole())) { %>
-<aside id="right-sidebar" 
-       class="fixed top-[64px] right-0 w-64 h-[calc(100vh-64px)] bg-white border-l border-gray-200 shadow-md overflow-y-auto p-5 hidden sm:block">
-    <h3 class="text-lg font-semibold text-gray-800 mb-3">Theater</h3>
+			<!-- Right Sidebar (Theater Filter for Admin only) -->
+			<%
+			if ("admin".equals(user.getRole())) {
+			%>
+			<!-- Sidebar Toggle Button -->
+			<button id="sidebar-toggle"
+				class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">
+				☰</button>
 
-    <ul class="space-y-1">
-        <!-- All Button -->
-        <li class="theater-filter px-3 py-2 text-blue-700 bg-blue-100 rounded-lg cursor-pointer font-semibold"
-            data-theater-id="all">
-            Show All
-        </li>
+			<aside id="right-sidebar"
+				class="fixed top-[64px] right-0 w-64 h-[calc(100vh-64px)] bg-white border-l border-gray-200 shadow-md overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+				<div class="flex justify-between items-center mb-3">
+					<h3 class="text-lg font-semibold text-gray-800">Theater</h3>
+					<button id="sidebar-close"
+						class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
+				</div>
 
-        <% if (theaters != null && theaters.size() > 0) { %>
-            <% for (Theater t : theaters) { %>
-                <li class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition"
-                    data-theater-id="<%= t.getTheaterId() %>">
-                    <span class="block font-medium"><%= t.getName() %></span>
-                </li>
-            <% } %>
-        <% } else { %>
-            <p class="text-gray-500 text-sm mt-3">No theaters available.</p>
-        <% } %>
-    </ul>
-</aside>
-<% } %>
+				<ul class="space-y-1">
+					<!-- All Button -->
+					<li
+						class="theater-filter px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold"
+						data-theater-id="all">Show All</li>
+
+					<%
+					if (theaters != null && theaters.size() > 0) {
+					%>
+					<%
+					for (Theater t : theaters) {
+					%>
+					<li
+						class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition"
+						data-theater-id="<%=t.getTheaterId()%>"><span
+						class="block font-medium"><%=t.getName()%></span>
+					</li>
+					<%
+					}
+					%>
+					<%
+					} else {
+					%>
+					<p class="text-gray-500 text-sm mt-3">No theaters available.</p>
+					<%
+					}
+					%>
+				</ul>
+			</aside>
+
+			<script>
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const rightSidebar = document.getElementById('right-sidebar');
+
+    sidebarToggle.addEventListener('click', () => {
+        const isOpen = !rightSidebar.classList.contains('translate-x-full');
+        rightSidebar.classList.toggle('translate-x-full');
+
+        // Change button icon
+        sidebarToggle.textContent = isOpen ? '☰' : '✕';
+    });
+
+    // Optional: close sidebar by clicking outside (mobile)
+    document.addEventListener('click', (e) => {
+        if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
+            rightSidebar.classList.add('translate-x-full');
+            sidebarToggle.textContent = '☰';
+        }
+    });
+</script>
+			<%
+			}
+			%>
 
 </div>
 
@@ -190,6 +234,7 @@ const trailerVideo = trailerPopup.querySelector('video');
 const trailerSource = trailerVideo.querySelector('source');
 const trailerCard = trailerPopup.querySelector('div.relative');
 
+// Trailer popup logic
 trailerBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const url = btn.getAttribute('data-trailer-url');
@@ -222,7 +267,9 @@ trailerPopup.addEventListener('click', e => {
     }
 });
 
-// Theater filter logic with “All” option
+// =============================
+// THEATER FILTER FIX (RED THEME)
+// =============================
 const theaterFilters = document.querySelectorAll('.theater-filter');
 const movieCards = document.querySelectorAll('.movie-card');
 
@@ -230,17 +277,23 @@ theaterFilters.forEach(item => {
     item.addEventListener('click', () => {
         const theaterId = item.getAttribute('data-theater-id');
 
-        // reset active
-        theaterFilters.forEach(i => i.classList.remove('bg-blue-100','text-blue-700','font-semibold'));
-        item.classList.add('bg-blue-100','text-blue-700','font-semibold');
+        // Reset all to inactive (gray)
+        theaterFilters.forEach(i => {
+            i.classList.remove('bg-red-100', 'text-red-700', 'font-semibold');
+            i.classList.add('text-gray-700');
+        });
 
-        // show all movies if “All” selected
+        // Set active (red highlight)
+        item.classList.remove('text-gray-700');
+        item.classList.add('bg-red-100', 'text-red-700', 'font-semibold');
+
+        // Show all if "all" selected
         if (theaterId === "all") {
             movieCards.forEach(card => card.style.display = '');
             return;
         }
 
-        // filter by theater
+        // Filter by selected theater
         movieCards.forEach(card => {
             const theaters = card.getAttribute('data-theaters').split(",");
             card.style.display = theaters.includes(theaterId) ? '' : 'none';

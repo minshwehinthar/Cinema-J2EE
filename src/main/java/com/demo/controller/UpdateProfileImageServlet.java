@@ -31,20 +31,44 @@ public class UpdateProfileImageServlet extends HttpServlet {
         }
 
         Part filePart = request.getPart("profileImage");
+        boolean success = false;
+        
         if (filePart != null && filePart.getSize() > 0) {
+            try {
+                // Read bytes
+                byte[] imageBytes = filePart.getInputStream().readAllBytes();
+                
+                // Get image type
+                String imageType = filePart.getContentType();
+                
+                // Update DB
+                UserDAO dao = new UserDAO();
+                user.setImage(imageBytes); // update model
+                user.setImgtype(imageType); // set image type
+                success = dao.updateUser(user); // full update to save byte[] image
 
-            // Read bytes
-            byte[] imageBytes = filePart.getInputStream().readAllBytes();
-
-            // Update DB
-            UserDAO dao = new UserDAO();
-            user.setImage(imageBytes); // update model
-            dao.updateUser(user); // full update to save byte[] image
-
-            // Update session
-            request.getSession().setAttribute("user", user);
+                // Update session if successful
+                if (success) {
+                    request.getSession().setAttribute("user", user);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
         }
 
-        response.sendRedirect("profile.jsp");
+        // Determine redirect URL based on user role
+        String redirectUrl;
+        if ("admin".equals(user.getRole()) || "theateradmin".equals(user.getRole())) {
+            redirectUrl = "admin-profile.jsp?msg=";
+        } else {
+            redirectUrl = "profile.jsp?msg=";
+        }
+
+        if (success) {
+            response.sendRedirect(redirectUrl + "image_updated");
+        } else {
+            response.sendRedirect(redirectUrl + "error");
+        }
     }
 }

@@ -45,9 +45,9 @@ public class LoginServlet extends HttpServlet {
                 } else if ("theateradmin".equals(role)) {
                     int theaterId = dao.getTheaterIdByUserId(user.getUserId());
                     session.setAttribute("theater_id", theaterId);
-                    redirectURL = "theateradminpickmovies.jsp";
+                    redirectURL = "index.jsp";
                 } else {
-                    redirectURL = "index-user.jsp";
+                    redirectURL = "home.jsp";
                 }
             }
 

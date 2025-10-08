@@ -69,6 +69,20 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
     int start = (currentPage-1)*pageSize;
     int rowNum = start+1;
 
+    String paginationOnly = request.getParameter("pagination_only");
+    if("1".equals(paginationOnly)){
+        // --- Only return pagination HTML ---
+        out.print("<div class='flex justify-center space-x-1 mt-4'>");
+        out.print("<button onclick='loadEmployees("+Math.max(1,currentPage-1)+")' class='px-3 py-1 border rounded "+(currentPage==1?"bg-gray-200 text-gray-500":"bg-white") +"'>Prev</button>");
+        for(int i=1;i<=totalPages;i++){
+            out.print("<button onclick='loadEmployees("+i+")' class='px-3 py-1 border rounded "+(i==currentPage?"bg-blue-600 text-white":"bg-white") +"'>"+i+"</button>");
+        }
+        out.print("<button onclick='loadEmployees("+Math.min(totalPages,currentPage+1)+")' class='px-3 py-1 border rounded "+(currentPage==totalPages?"bg-gray-200 text-gray-500":"bg-white") +"'>Next</button>");
+        out.print("</div>");
+        rs.close(); ps.close(); conn.close();
+        return;
+    }
+
     if(totalRows == 0){
         out.print("<tr><td colspan='7' class='px-6 py-4 text-center text-gray-500'>No item found.</td></tr>");
     } else {
@@ -106,11 +120,12 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
         int theaterId = new com.demo.dao.UserDAO().getTheaterIdByUserId(rs.getInt("user_id"));
         if(theaterId > 0) {
     %>
-    <a href="viewSeat.jsp?theater_id=<%=theaterId%>" 
-       class="p-2 bg-blue-500 rounded hover:bg-blue-600 text-white" 
-       title="View Seats">
-        <i class="fa fa-chair"></i>
-    </a>
+    <a href="setTheaterSession?theater_id=<%=theaterId%>" 
+   class="p-2 bg-blue-500 rounded hover:bg-blue-600 text-white" 
+   title="View Seats">
+    <i class="fa fa-chair"></i>
+</a>
+
     <% } %>
         
         <button class="delete-btn p-2 bg-gray-100 rounded hover:bg-red-100" data-id="<%=rs.getInt("user_id")%>">
@@ -123,16 +138,6 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
     }
 
     rs.close(); ps.close(); conn.close();
-
-    // --- pagination footer ---
-    out.print("<tr><td colspan='7' class='px-6 py-4 text-center'>");
-    out.print("<div class='flex justify-center space-x-1'>");
-    out.print("<button onclick='loadEmployees("+Math.max(1,currentPage-1)+")' class='px-3 py-1 border rounded "+(currentPage==1?"bg-gray-200 text-gray-500":"bg-white") +"'>Prev</button>");
-    for(int i=1;i<=totalPages;i++){
-        out.print("<button onclick='loadEmployees("+i+")' class='px-3 py-1 border rounded "+(i==currentPage?"bg-blue-600 text-white":"bg-white") +"'>"+i+"</button>");
-    }
-    out.print("<button onclick='loadEmployees("+Math.min(totalPages,currentPage+1)+")' class='px-3 py-1 border rounded "+(currentPage==totalPages?"bg-gray-200 text-gray-500":"bg-white") +"'>Next</button>");
-    out.print("</div></td></tr>");
     return;
 }
 %>
@@ -169,6 +174,9 @@ if("POST".equalsIgnoreCase(request.getMethod())) {
                 </table>
             </div>
 
+            <!-- Pagination outside table -->
+            <div id="pagination" class="flex justify-center space-x-1 mt-4"></div>
+
         </div>
     </div>
 </div>
@@ -189,6 +197,7 @@ function loadEmployees(page=1, query=document.getElementById('searchInput').valu
     }).then(res=>res.text()).then(html=>{
         document.getElementById('tableBody').innerHTML = html;
         attachDeleteEvents();
+        renderPagination();
     });
 }
 
@@ -228,6 +237,17 @@ function sortTable(field){
 function debounce(func, delay){
     let timer;
     return function(...args){ clearTimeout(timer); timer=setTimeout(()=>func.apply(this,args),delay); };
+}
+
+// --- render pagination outside table ---
+function renderPagination(){
+    fetch('employees.jsp',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'search='+encodeURIComponent(document.getElementById('searchInput').value)+'&page='+currentPage+'&pagination_only=1'
+    }).then(res=>res.text()).then(html=>{
+        document.getElementById('pagination').innerHTML = html;
+    });
 }
 
 window.onload=function(){ loadEmployees(); }

@@ -1,9 +1,7 @@
 package com.demo.controller;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -32,6 +30,25 @@ public class RemoveMovieFromTheaterServlet extends HttpServlet {
         int movieId = Integer.parseInt(movieIdParam);
         int theaterId = Integer.parseInt(theaterIdParam);
 
+        String status = "now-showing"; // default
+        String redirectPage;
+
+        // 🔹 Step 1: Get the movie status first
+        String getStatusSql = "SELECT status FROM movies WHERE movie_id = ?";
+        try (Connection con = MyConnection.getConnection();
+             PreparedStatement psStatus = con.prepareStatement(getStatusSql)) {
+
+            psStatus.setInt(1, movieId);
+            try (ResultSet rs = psStatus.executeQuery()) {
+                if (rs.next()) {
+                    status = rs.getString("status");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 🔹 Step 2: Delete movie from that theater
         String sql = "DELETE FROM theater_movies WHERE movie_id = ? AND theater_id = ?";
 
         try (Connection con = MyConnection.getConnection();
@@ -39,13 +56,19 @@ public class RemoveMovieFromTheaterServlet extends HttpServlet {
 
             ps.setInt(1, movieId);
             ps.setInt(2, theaterId);
-
             int rowsAffected = ps.executeUpdate();
 
-            if (rowsAffected > 0) {
-                response.sendRedirect(request.getContextPath() + "/showing-now.jsp?msg=removed");
+            // 🔹 Step 3: Redirect based on movie status
+            if ("coming-soon".equalsIgnoreCase(status)) {
+                redirectPage = "coming-soon.jsp";
             } else {
-                response.sendRedirect(request.getContextPath() + "/showing-now.jsp?msg=notfound");
+                redirectPage = "showing-now.jsp";
+            }
+
+            if (rowsAffected > 0) {
+                response.sendRedirect(request.getContextPath() + "/" + redirectPage + "?msg=removed");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/" + redirectPage + "?msg=notfound");
             }
 
         } catch (SQLException e) {

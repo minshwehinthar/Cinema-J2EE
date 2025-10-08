@@ -6,17 +6,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.*;
+import java.util.Base64;
 
 import com.demo.dao.MyConnection;
 import com.demo.dao.TheaterDAO;
-import com.demo.dao.UserDAO;
 import com.demo.model.Theater;
-import com.demo.model.User;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 @WebServlet("/CreateTheaterServlet")
 @MultipartConfig(
@@ -34,68 +29,80 @@ public class CreateTheaterServlet extends HttpServlet {
 
         try (Connection con = MyConnection.getConnection()) {
 
-            // ===== 1️⃣ Admin Info =====
+            // ===== 1️⃣ Create Admin User =====
             String username = request.getParameter("username");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");
             String password = request.getParameter("password");
 
-            Part adminImagePart = request.getPart("admin_image"); // new field in JSP
+            Part adminImagePart = request.getPart("admin_image");
             byte[] adminImageBytes = null;
             String adminImgType = null;
 
             if (adminImagePart != null && adminImagePart.getSize() > 0) {
                 try (InputStream is = adminImagePart.getInputStream()) {
                     adminImageBytes = is.readAllBytes();
-                    adminImgType = adminImagePart.getContentType();
+                }
+                String contentType = adminImagePart.getContentType(); // e.g. image/png
+                if (contentType != null && contentType.contains("/")) {
+                    adminImgType = contentType.substring(contentType.indexOf("/") + 1); // → png
                 }
             }
 
-            String insertUserSQL = "INSERT INTO users (name,email,phone,password,role,status,image,imgtype) " +
-                                   "VALUES (?, ?, ?, ?, 'theateradmin', 'active', ?, ?)";
-            int adminId = -1;
+            String insertUserSQL = """
+                INSERT INTO users (name, email, phone, password, role, status, image, imgtype)
+                VALUES (?, ?, ?, ?, 'theateradmin', 'active', ?, ?)
+            """;
 
+            int adminId = -1;
             try (PreparedStatement ps = con.prepareStatement(insertUserSQL, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, username);
                 ps.setString(2, email);
                 ps.setString(3, phone);
                 ps.setString(4, password);
-                if (adminImageBytes != null) ps.setBytes(5, adminImageBytes); else ps.setNull(5, java.sql.Types.BLOB);
+
+                if (adminImageBytes != null) ps.setBytes(5, adminImageBytes);
+                else ps.setNull(5, Types.BLOB);
+
                 ps.setString(6, adminImgType);
 
-                int affectedRows = ps.executeUpdate();
-                if (affectedRows > 0) {
+                int affected = ps.executeUpdate();
+                if (affected > 0) {
                     ResultSet rs = ps.getGeneratedKeys();
                     if (rs.next()) adminId = rs.getInt(1);
                 }
             }
 
             if (adminId == -1) {
-                request.setAttribute("error", "Failed to create theater admin.");
+                request.setAttribute("error", "❌ Failed to create admin user.");
                 request.getRequestDispatcher("create-theater-admin.jsp").forward(request, response);
                 return;
             }
 
-            // ===== 2️⃣ Theater Info =====
+            // ===== 2️⃣ Create Theater =====
             String theaterName = request.getParameter("theater_name");
             String street = request.getParameter("street");
             String fullLocation = request.getParameter("full_location");
 
             Part theaterImagePart = request.getPart("image");
-            byte[] theaterImageBytes = null;
+            String theaterImgBase64 = null;
             String theaterImgType = null;
 
             if (theaterImagePart != null && theaterImagePart.getSize() > 0) {
                 try (InputStream is = theaterImagePart.getInputStream()) {
-                    theaterImageBytes = is.readAllBytes();
-                    theaterImgType = theaterImagePart.getContentType();
+                    byte[] imageBytes = is.readAllBytes();
+                    theaterImgBase64 = Base64.getEncoder().encodeToString(imageBytes);
+                }
+                String contentType = theaterImagePart.getContentType();
+                if (contentType != null && contentType.contains("/")) {
+                    theaterImgType = contentType.substring(contentType.indexOf("/") + 1);
                 }
             }
 
             Theater theater = new Theater();
             theater.setName(theaterName);
             theater.setLocation(street + ", " + fullLocation);
-            if (theaterImageBytes != null) theater.setImage(java.util.Base64.getEncoder().encodeToString(theaterImageBytes));
+            theater.setImage(theaterImgBase64);
             theater.setImgtype(theaterImgType);
             theater.setUserId(adminId);
 
@@ -103,21 +110,18 @@ public class CreateTheaterServlet extends HttpServlet {
             int theaterId = theaterDAO.createTheater(theater);
 
             if (theaterId != -1) {
-                // Store theater_id in session for use in addSeats.jsp
                 HttpSession session = request.getSession();
                 session.setAttribute("theater_id", theaterId);
 
-                // Redirect directly to addSeats.jsp
                 response.sendRedirect("addSeats.jsp");
-                return; // stop execution
             } else {
-                request.setAttribute("error", "Failed to create theater.");
+                request.setAttribute("error", "❌ Failed to create theater record.");
                 request.getRequestDispatcher("create-theater-admin.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Exception occurred: " + e.getMessage());
+            request.setAttribute("error", "⚠️ Exception: " + e.getMessage());
             request.getRequestDispatcher("create-theater-admin.jsp").forward(request, response);
         }
     }

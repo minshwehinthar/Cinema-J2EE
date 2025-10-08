@@ -24,7 +24,7 @@
     <!-- Logo / Branding -->
     <div class="flex items-center gap-2">
         <img src="assets/img/cinema-logo.jpg" alt="Logo" class="w-10 h-10">
-        <span class="text-lg font-semibold text-gray-700">J-Seven</span>
+        <span class="text-lg font-semibold text-gray-700">CINEZY</span>
     </div>
 
     <!-- Right Section -->
@@ -39,14 +39,14 @@
         <div class="relative">
             <!-- Profile Button -->
             <button id="profileBtn" class="flex items-center focus:outline-none">
-                <img class="w-11 h-11 object-cover rounded-full ring-2 ring-sky-400 transition duration-200 hover:ring-sky-600" 
+                <img class="w-11 h-11 object-cover rounded-full transition duration-200 hover:ring-sky-600" 
                      src="<%= profileImage %>" 
                      alt="Profile"/>
             </button>
 
             <!-- Dropdown Menu -->
             <div id="profileMenu" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg hidden">
-                <a href="./profile.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-sky-50">Profile</a>
+                <a href="./admin-profile.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-sky-50">Profile</a>
                 <a href="./logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
             </div>
         </div>

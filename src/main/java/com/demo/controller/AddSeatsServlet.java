@@ -1,10 +1,10 @@
 package com.demo.controller;
 
 import com.demo.dao.SeatsDao;
+import com.demo.dao.SeatPriceDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
 
 @WebServlet("/AddSeatsServlet")
@@ -14,31 +14,36 @@ public class AddSeatsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int theaterId = Integer.parseInt(request.getParameter("theater_id"));
-        int seatsPerRow = Integer.parseInt(request.getParameter("seatsPerRow"));
+        try {
+            int theaterId = Integer.parseInt(request.getParameter("theater_id"));
+            int seatsPerRow = Integer.parseInt(request.getParameter("seatsPerRow"));
+            int normalRows = Integer.parseInt(request.getParameter("normalRows"));
+            int vipRows = Integer.parseInt(request.getParameter("vipRows"));
+            int coupleRows = Integer.parseInt(request.getParameter("coupleRows"));
+            int coupleSeats = Integer.parseInt(request.getParameter("coupleSeats"));
 
-        int normalRows = Integer.parseInt(request.getParameter("normalRows"));
-        int vipRows = Integer.parseInt(request.getParameter("vipRows"));
-        int coupleRows = Integer.parseInt(request.getParameter("coupleRows"));
-        int coupleSeats = Integer.parseInt(request.getParameter("coupleSeats"));
+            // Get actual price IDs from database
+            SeatPriceDao priceDao = new SeatPriceDao();
+            int normalPriceId = priceDao.getPriceIdBySeatType("Normal");
+            int vipPriceId = priceDao.getPriceIdBySeatType("VIP");
+            int couplePriceId = priceDao.getPriceIdBySeatType("Couple");
 
-        SeatsDao dao = new SeatsDao();
-        int nextRow = 0;
+            SeatsDao seatsDao = new SeatsDao();
+            
+            // Use the method that matches your form parameters
+            seatsDao.addSeatsForTheater(theaterId, normalRows, vipRows, coupleRows, 
+                                      seatsPerRow, coupleSeats, normalPriceId, vipPriceId, couplePriceId);
 
-        // Add Normal seats (price_id = 1)
-        if (normalRows > 0)
-            nextRow = dao.addSeatsForType(theaterId, nextRow, normalRows, seatsPerRow, 1, false);
-
-        // Add VIP seats (price_id = 2)
-        if (vipRows > 0)
-            nextRow = dao.addSeatsForType(theaterId, nextRow, vipRows, seatsPerRow, 2, false);
-
-        // Add Couple seats (price_id = 3)
-        if (coupleRows > 0)
-            nextRow = dao.addSeatsForType(theaterId, nextRow, coupleRows, coupleSeats * 2, 3, true);
-
-        HttpSession session = request.getSession();
-        session.setAttribute("success", "Seats added successfully!");
-        response.sendRedirect("employees.jsp");
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Seats added successfully!");
+            response.sendRedirect("employees.jsp");
+            
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.sendRedirect("add-seats.jsp?error=invalid_input");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("add-seats.jsp?error=server_error");
+        }
     }
 }

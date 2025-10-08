@@ -4,17 +4,27 @@ import java.math.BigDecimal;
 
 public class Seat {
 	private int seatId;
+	private int theaterId;
 	private String seatNumber;
-	private String status;
-	private String seatType;
+	private int priceId;
+	private String seatType; // Optional: Normal, VIP, Couple
 	private BigDecimal price;
 
+	// Getters and Setters
 	public int getSeatId() {
 		return seatId;
 	}
 
 	public void setSeatId(int seatId) {
 		this.seatId = seatId;
+	}
+
+	public int getTheaterId() {
+		return theaterId;
+	}
+
+	public void setTheaterId(int theaterId) {
+		this.theaterId = theaterId;
 	}
 
 	public String getSeatNumber() {
@@ -25,12 +35,12 @@ public class Seat {
 		this.seatNumber = seatNumber;
 	}
 
-	public String getStatus() {
-		return status;
+	public int getPriceId() {
+		return priceId;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setPriceId(int priceId) {
+		this.priceId = priceId;
 	}
 
 	public String getSeatType() {
