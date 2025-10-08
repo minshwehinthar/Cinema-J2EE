@@ -323,7 +323,7 @@ function deleteBooking(bookingId) {
 }
 
 function viewBookingDetails(bookingId) {
-    window.location.href = 'bookingDetails.jsp?id=' + bookingId;
+    window.location.href = 'BookingDetails.jsp?id=' + bookingId;
 }
 
 function refreshPage() {

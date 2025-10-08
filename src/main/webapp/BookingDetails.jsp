@@ -4,7 +4,7 @@
 <%@page import="com.demo.dao.ShowtimesDao"%>
 <%@page import="com.demo.dao.UserDAO"%>
 <%@page import="com.demo.dao.BookingDao"%>
-<
+
 <%@page import="com.demo.model.Booking"%>
 <%@page import="com.demo.model.User"%>
 <%@page import="com.demo.model.Theater"%>
