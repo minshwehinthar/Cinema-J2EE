@@ -6,37 +6,21 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
-
 import com.demo.dao.BookingDao;
+import com.demo.dao.UserDAO;
 import com.demo.model.User;
+import com.demo.model.Booking;
+import com.demo.util.EmailUtil;
 
-/**
- * Servlet implementation class AdminCancelBookingServlet
- */
 @WebServlet("/AdminCancelBookingServlet")
 public class AdminCancelBookingServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public AdminCancelBookingServlet() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request, response);
     }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
@@ -49,6 +33,17 @@ public class AdminCancelBookingServlet extends HttpServlet {
         try {
             int bookingId = Integer.parseInt(request.getParameter("bookingId"));
             BookingDao bookingDAO = new BookingDao();
+            UserDAO userDAO = new UserDAO();
+            
+            // Get booking details before cancellation
+            Booking booking = bookingDAO.getBookingById(bookingId);
+            if (booking == null) {
+                response.sendRedirect("adminBookings.jsp?error=Booking not found");
+                return;
+            }
+            
+            // Get customer details
+            User customer = userDAO.getUserById(booking.getUserId());
             
             // Debug: Check seat status before cancellation
             System.out.println("=== BEFORE CANCELLATION ===");
@@ -71,6 +66,33 @@ public class AdminCancelBookingServlet extends HttpServlet {
             }
             
             if (success) {
+                // Send cancellation email to customer
+                if (customer != null && customer.getEmail() != null) {
+                    String subject = "Booking Cancelled - CINEZY Cinema";
+                    String body = String.format(
+                        "Dear %s,\n\n" +
+                        "Your booking (#%d) has been cancelled by the administrator.\n\n" +
+                        "Booking Details:\n" +
+                        "- Booking ID: %d\n" +
+                        "- Status: Cancelled\n" +
+                        "- Total Amount: MMK %s\n\n" +
+                        "If you have any questions or believe this was done in error, please contact our support team.\n\n" +
+                        "Best regards,\nCINEZY Cinema Team",
+                        customer.getName(), 
+                        bookingId,
+                        bookingId,
+                        booking.getTotalPrice() != null ? booking.getTotalPrice().toString() : "N/A"
+                    );
+                    
+                    boolean emailSent = EmailUtil.sendEmail(customer.getEmail(), subject, body);
+                    
+                    if (emailSent) {
+                        System.out.println("✅ Cancellation email sent to: " + customer.getEmail());
+                    } else {
+                        System.out.println("⚠️ Failed to send cancellation email to: " + customer.getEmail());
+                    }
+                }
+                
                 response.sendRedirect(redirectPage + "?success=Booking cancelled successfully and seats released");
             } else {
                 response.sendRedirect(redirectPage + "?error=Failed to cancel booking. Please try again.");
