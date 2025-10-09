@@ -147,15 +147,14 @@
         <div class="p-8 max-w-8xl mx-auto">
             
             <!-- Breadcrumb -->
-            <div class="pb-4">
-                <nav class="text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2">
-                        <li><a href="index.jsp" class="hover:underline">Home</a></li>
-                        <li>/</li>
-                        <li class="text-gray-700">Users List</li>
-                    </ol>
-                </nav>
-            </div>
+				<nav class="text-gray-500 text-sm mb-6" aria-label="Breadcrumb">
+					<ol class="list-none p-0 inline-flex">
+						<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+						<li><span class="mx-2">/</span></li>
+
+						<li class="flex items-center text-gray-900 font-semibold">Users Management</li>
+					</ol>
+				</nav>
 
             <!-- Header Section -->
             <div class="flex justify-between items-center mb-6">

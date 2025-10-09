@@ -138,7 +138,17 @@ if("POST".equalsIgnoreCase(request.getMethod()) && ajax){
             
             <!-- Header Section -->
             <div class="flex justify-between items-center mb-6">
+            
                 <div>
+                <!-- Breadcrumb -->
+				<nav class="text-gray-500 text-sm mb-6" aria-label="Breadcrumb">
+					<ol class="list-none p-0 inline-flex">
+						<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+						<li><span class="mx-2">/</span></li>
+
+						<li class="flex items-center text-gray-900 font-semibold">Food Management</li>
+					</ol>
+				</nav>
                     <h1 class="text-2xl font-bold text-gray-900">Food Management</h1>
                     <p class="text-gray-600 mt-1">Manage all food items and their details</p>
                 </div>

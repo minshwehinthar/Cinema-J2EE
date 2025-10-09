@@ -110,7 +110,15 @@
     <div class="flex-1 sm:ml-64">
         <jsp:include page="/layout/AdminHeader.jsp"/>
         <div class="p-8 max-w-8xl mx-auto">
-            
+            <!-- Breadcrumb -->
+				<nav class="text-gray-500 text-sm mb-6" aria-label="Breadcrumb">
+					<ol class="list-none p-0 inline-flex">
+						<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+						<li><span class="mx-2">/</span></li>
+
+						<li class="flex items-center text-gray-900 font-semibold">Movie Management</li>
+					</ol>
+				</nav>
             <!-- Header Section -->
             <div class="flex justify-between items-center mb-6">
                 <div>

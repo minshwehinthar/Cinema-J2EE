@@ -69,6 +69,15 @@
             <div class="p-8">
                 <!-- Page Header -->
                 <div class="mb-8">
+                <!-- Breadcrumb -->
+				<nav class="text-gray-500 text-sm mb-6" aria-label="Breadcrumb">
+					<ol class="list-none p-0 inline-flex">
+						<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+						<li><span class="mx-2">/</span></li>
+
+						<li class="flex items-center text-gray-900 font-semibold">Seat Price Management</li>
+					</ol>
+				</nav>
                     <h1 class="text-3xl font-bold text-gray-900">Seat Price Management</h1>
                     <p class="text-gray-600 mt-2">Manage and update ticket prices for different seat types</p>
                 </div>
@@ -121,9 +130,9 @@
                 
                 <!-- Seat Price Cards -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden red-shadow">
-                    <div class="red-gradient px-6 py-4">
-                        <h2 class="text-xl font-bold text-white">Seat Types & Pricing</h2>
-                        <p class="text-red-100">Update prices for each seat category</p>
+                    <div class="bg-red-50 px-6 py-4">
+                        <h2 class="text-xl font-bold text-red-900">Seat Types & Pricing</h2>
+                        <p class="text-red-700">Update prices for each seat category</p>
                     </div>
                     
                     <form action="UpdateSeatPriceServlet" method="post" class="p-6">

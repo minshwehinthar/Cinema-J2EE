@@ -43,7 +43,7 @@
 						class="mt-2 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white"></textarea>
 				</div>
 				<button type="submit"
-					class="inline-flex justify-center rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-700 transition">
+					class="inline-flex justify-center rounded-md bg-red-700 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-red-900 transition">
 					Send Message</button>
 			</form>
 		</div>
