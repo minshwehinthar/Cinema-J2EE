@@ -87,27 +87,48 @@
             List<Map<String,Object>> pageUsers = (start<end)?allUsers.subList(start,end):List.of();
 
             if(pageUsers.isEmpty()){
-                out.print("<tr><td colspan='6' class='px-6 py-4 text-center text-gray-500'>No users found.</td></tr>");
+                out.print("<tr><td colspan='6' class='px-6 py-8 text-center'><div class='w-16 h-16 mx-auto mb-4 text-gray-300'><svg fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z'/></svg></div><h3 class='text-lg font-medium text-gray-600 mb-2'>No users found</h3><p class='text-gray-500'>Try adjusting your search or filter to find what you're looking for.</p></td></tr>");
             } else {
                 for(Map<String,Object> u:pageUsers){
 %>
-<tr class="hover:bg-gray-50" id="row_<%=u.get("id")%>">
-    <td class="px-6 py-4"><%=u.get("id")%></td>
-    <td class="px-6 py-4 font-medium text-gray-900"><%=u.get("name")%></td>
-    <td class="px-6 py-4"><%=u.get("email")%></td>
-    <td class="px-6 py-4"><%=u.get("phone")%></td>
+<tr class="hover:bg-red-50 transition-colors duration-150" id="row_<%=u.get("id")%>">
     <td class="px-6 py-4">
-        <span class="<%="active".equals(u.get("status"))?"bg-green-500 text-white text-xs px-2 py-1 rounded-full":"bg-red-500 text-white text-xs px-2 py-1 rounded-full"%>">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <span class="text-red-600 font-bold text-sm">#<%=u.get("id")%></span>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="font-medium text-gray-900"><%=u.get("name")%></div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="text-gray-900"><%=u.get("email")%></div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="text-gray-900"><%=u.get("phone")%></div>
+    </td>
+    <td class="px-6 py-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border <%= "active".equals(u.get("status"))?"bg-green-100 text-green-800 border-green-200":"bg-red-100 text-red-800 border-red-200" %>">
             <%=u.get("status")%>
         </span>
     </td>
-    <td class="px-6 py-4 text-center flex justify-center space-x-2">
-        <a href="userDetails.jsp?id=<%=u.get("id")%>" class="p-2 bg-gray-100 rounded hover:bg-gray-200">
-            <i class="fa fa-pencil text-gray-600"></i>
-        </a>
-        <button class="delete-btn p-2 bg-gray-100 rounded hover:bg-red-100" onclick="deleteUser(<%=u.get("id")%>)">
-            <i class="fa fa-trash text-red-600"></i>
-        </button>
+    <td class="px-6 py-4">
+        <div class="flex justify-center space-x-3 min-w-[90px]">
+            <a href="userDetails.jsp?id=<%=u.get("id")%>" 
+               class="inline-flex items-center justify-center w-10 h-10 text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </a>
+            <button onclick="deleteUser(<%=u.get("id")%>)"
+                    class="inline-flex items-center justify-center w-10 h-10 text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
     </td>
 </tr>
 <%
@@ -123,59 +144,147 @@
     <jsp:include page="layout/sidebar.jsp"/>
     <div class="flex-1 sm:ml-64">
         <jsp:include page="/layout/AdminHeader.jsp"/>
-        <div class="p-8">
-        <!-- Breadcrumb -->
-        <div class="max-w-8xl mx-auto pb-4">
-            <nav class="text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-                <ol class="flex items-center space-x-2">
-                    <li><a href="index.jsp" class="hover:underline">Home</a></li>
-                    
-                    <li>/</li>
-                    <li class="text-gray-700">Users List</li>
-                </ol>
-            </nav>
-        </div>
-            <h1 class="text-2xl font-bold mb-6 text-gray-900">Users Management</h1>
+        <div class="p-8 max-w-8xl mx-auto">
+            
+            <!-- Breadcrumb -->
+            <div class="pb-4">
+                <nav class="text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-2">
+                        <li><a href="index.jsp" class="hover:underline">Home</a></li>
+                        <li>/</li>
+                        <li class="text-gray-700">Users List</li>
+                    </ol>
+                </nav>
+            </div>
 
-            <div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
+            <!-- Header Section -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Users Management</h1>
+                    <p class="text-gray-600 mt-1">Manage all user accounts and their status</p>
+                </div>
+            </div>
 
-            <div class="flex justify-between items-center mb-4">
-                <input type="text" id="searchInput" placeholder="Search users..."
-                       class="px-4 py-2 border rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                <a href="createUser.jsp" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            <!-- Search and Filter -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex space-x-4">
+                    <input type="text" id="searchInput" placeholder="Search users..." 
+                           class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none ring-transparent "/>
+                </div>
+                <a href="createUser.jsp" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-sm">
                     + Add New User
                 </a>
             </div>
 
-            <div class="overflow-x-auto bg-white shadow rounded-lg">
-                <table class="min-w-full text-sm text-left">
-                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
-                        <tr>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('id')">ID</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('name')">Name</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('email')">Email</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('phone')">Phone</th>
-                            <th class="px-6 py-3">Status</th>
-                            <th class="px-6 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+            <!-- Users Table -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-red-50 text-gray-900 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('id')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>ID</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('name')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Name</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('email')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Email</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('phone')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Phone</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div id="pagination" class="flex justify-center mt-6 space-x-1"></div>
+            <!-- Pagination -->
+            <div class="flex mt-6 justify-between items-center">
+                <!-- Left Section: Total and Row -->
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-gray-700">
+                        Total <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalUsers">
+                            <%= allUsers.size() %>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-700">Row</span>
+                        <select id="recordsPerPage" onchange="handleLimitChange()"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:border-red-500 block w-full p-2.5"
+                            style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Right Section: Page Info and Navigation -->
+                <div class="flex items-center gap-0">
+                    <div class="text-sm text-gray-700 mr-4">
+                        Page <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="currentPage">1</span> of <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalPages">1</span>
+                    </div>
+                    
+                    <!-- Navigation Buttons - No space between -->
+                    <div class="flex gap-0">
+                        <!-- Previous Button -->
+                        <button id="prevBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg border-r-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Next Button -->
+                        <button id="nextBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-let currentPage=1;
-const pageSize=5;
-let currentSortField='';
-let currentSortOrder='asc';
+<div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
 
-function loadUsers(page=1,query="",sortField=currentSortField,sortOrder=currentSortOrder){
-    currentPage=page;
+<script>
+let currentPage = 1;
+let pageSize = 5;
+let currentSortField = '';
+let currentSortOrder = 'asc';
+
+function loadUsers(page=1, query="", sortField=currentSortField, sortOrder=currentSortOrder){
+    currentPage = page;
     fetch('users.jsp',{
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -224,33 +333,52 @@ searchInput.addEventListener('input',debounce(function(){
 function debounce(func,delay){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>func.apply(this,a),delay);} }
 
 function renderPagination(){
-    const totalUsers=<%=allUsers.size()%>;
-    const totalPages=Math.ceil(totalUsers/pageSize);
-    const c=document.getElementById('pagination');
-    c.innerHTML='';
-
-    const prev=document.createElement('a');
-    prev.href="javascript:void(0)";
-    prev.innerText="Prev";
-    prev.className="px-4 py-2 rounded-md border "+(currentPage===1?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    prev.addEventListener('click',()=>{ if(currentPage>1) loadUsers(currentPage-1,searchInput.value); });
-    c.appendChild(prev);
-
-    for(let i=1;i<=totalPages;i++){
-        const a=document.createElement('a');
-        a.href="javascript:void(0)";
-        a.innerText=i;
-        a.className="px-4 py-2 rounded-md border "+(i===currentPage?"bg-blue-600 text-white":"bg-white text-gray-700 hover:bg-blue-100");
-        a.addEventListener('click',()=>loadUsers(i,searchInput.value));
-        c.appendChild(a);
+    const totalUsers = <%= allUsers.size() %>;
+    const totalPages = Math.ceil(totalUsers / pageSize);
+    
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalUsers').textContent = totalUsers;
+    
+    // Update prev/next buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if(currentPage <= 1) {
+        prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
     }
+    
+    if(currentPage >= totalPages) {
+        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
+    }
+    
+    // Add event listeners
+    prevBtn.onclick = () => {
+        if(currentPage > 1) {
+            loadUsers(currentPage - 1, searchInput.value);
+        }
+    };
+    
+    nextBtn.onclick = () => {
+        if(currentPage < totalPages) {
+            loadUsers(currentPage + 1, searchInput.value);
+        }
+    };
+}
 
-    const next=document.createElement('a');
-    next.href="javascript:void(0)";
-    next.innerText="Next";
-    next.className="px-4 py-2 rounded-md border "+(currentPage===totalPages?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    next.addEventListener('click',()=>{ if(currentPage<totalPages) loadUsers(currentPage+1,searchInput.value); });
-    c.appendChild(next);
+function handleLimitChange() {
+    const select = document.getElementById('recordsPerPage');
+    pageSize = parseInt(select.value);
+    loadUsers(1, searchInput.value);
 }
 
 function sortTable(field){
@@ -263,7 +391,10 @@ function sortTable(field){
     loadUsers(1,searchInput.value,currentSortField,currentSortOrder);
 }
 
-window.onload=function(){ loadUsers(); }
+window.onload=function(){ 
+    loadUsers(); 
+    document.getElementById('recordsPerPage').value = pageSize;
+}
 </script>
 
 <style>

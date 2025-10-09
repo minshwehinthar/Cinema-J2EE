@@ -103,30 +103,47 @@ if(error == null){
                             if(!seatTypesPrinted.contains(s.getSeatType())){
                                 String bgColor = "bg-gray-50";
                                 String borderColor = "border-gray-200";
-                                String svgIcon = "";
+                                String iconColor = "text-gray-600";
 
                                 if(s.getSeatType().equalsIgnoreCase("VIP")) { 
                                     bgColor = "bg-yellow-50"; 
-                                    borderColor = "border-yellow-400";
-                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-armchair-icon lucide-armchair\"><path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\"/><path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M5 18v2\"/><path d=\"M19 18v2\"/></svg>";
+                                    borderColor = "border-yellow-400"; 
+                                    iconColor = "text-yellow-600";
                                 }
                                 else if(s.getSeatType().equalsIgnoreCase("Couple")) { 
                                     bgColor = "bg-pink-50"; 
-                                    borderColor = "border-pink-400";
-                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sofa-icon lucide-sofa\"><path d=\"M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3\"/><path d=\"M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M4 18v2\"/><path d=\"M20 18v2\"/><path d=\"M12 4v9\"/></svg>";
+                                    borderColor = "border-pink-400"; 
+                                    iconColor = "text-pink-600";
                                 }
-                                else if(s.getSeatType().equalsIgnoreCase("Standard") || s.getSeatType().equalsIgnoreCase("Normal")) { 
+                                else if(s.getSeatType().equalsIgnoreCase("Normal")) { 
                                     bgColor = "bg-green-50"; 
-                                    borderColor = "border-green-400";
-                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-armchair-icon lucide-armchair\"><path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\"/><path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M5 18v2\"/><path d=\"M19 18v2\"/></svg>";
+                                    borderColor = "border-green-400"; 
+                                    iconColor = "text-green-600";
                                 }
                     %>
                     <div class="flex flex-col items-center justify-center p-5 rounded-2xl border-2 <%= borderColor %> shadow hover:shadow-lg transition-all duration-300 <%= bgColor %>">
-                        <div class="flex items-center gap-2 mb-2">
-                            <%= svgIcon %>
-                            <span class="text-gray-800 font-semibold text-center text-lg"><%= s.getSeatType() %></span>
+                        <div class="<%= iconColor %> mb-2">
+                            <% if(s.getSeatType().equalsIgnoreCase("Couple")) { %>
+                                <!-- Sofa Icon for Couple Seats -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sofa">
+                                    <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                                    <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/>
+                                    <path d="M4 18v2"/>
+                                    <path d="M20 18v2"/>
+                                    <path d="M12 4v9"/>
+                                </svg>
+                            <% } else { %>
+                                <!-- Armchair Icon for Normal and VIP Seats -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair">
+                                    <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                    <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                    <path d="M5 18v2"/>
+                                    <path d="M19 18v2"/>
+                                </svg>
+                            <% } %>
                         </div>
-                        <span class="text-red-600 font-bold text-center text-lg"><%= s.getPrice() %> MMK</span>
+                        <span class="text-gray-800 font-semibold text-center text-lg"><%= s.getSeatType() %></span>
+                        <span class="text-red-600 font-bold mt-2 text-center text-lg"><%= s.getPrice() %> MMK</span>
                     </div>
                     <%
                                 seatTypesPrinted.add(s.getSeatType());
@@ -207,15 +224,15 @@ if(error == null){
                         %>
                             <div class="seat-rows hidden seats-for-<%= showtimeId %>">
                                 <!-- Screen -->
-                                <div class="mb-10">
-                                    <div class="bg-gray-900 text-white text-center mx-auto max-w-3xl rounded-t-xl font-bold shadow-xl">
+                                <div class="mb-6">
+                                    <div class="bg-gray-900 text-white text-center mx-auto max-w-2xl rounded-t-xl font-bold shadow-xl py-2">
                                         SCREEN
                                     </div>
                                 </div>
 
                                 <!-- Seat Grid -->
                                 <div class="flex justify-center">
-                                    <div class="seat-plan space-y-4 max-w-4xl">
+                                    <div class="seat-plan space-y-2 max-w-4xl">
                                     <%
                                         char lastRow = ' ';
                                         List<ShowtimeSeat> rowSeats = new java.util.ArrayList<>();
@@ -225,21 +242,52 @@ if(error == null){
 
                                             if(rowLetter != lastRow){
                                                 if(!rowSeats.isEmpty()){
-                                                    out.print("<div class='seat-row flex items-center gap-3 justify-center mb-4'>");
-                                                    out.print("<div class='row-label w-9 h-9 flex items-center justify-center font-bold text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm mr-4'>" + lastRow + "</div>");
+                                                    out.print("<div class='seat-row flex items-center gap-1 justify-center mb-2'>");
+                                                    out.print("<div class='row-label w-8 h-8 flex items-center justify-center font-bold text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm mr-2'>" + lastRow + "</div>");
                                                     for(ShowtimeSeat rs : rowSeats){
                                                         Seat seatObj = rs.getSeat();
-                                                        String seatClass = "seat rounded-md flex items-center justify-center font-medium transition-all duration-200 cursor-pointer shadow-sm ";
+                                                        String seatClass = "seat group relative flex items-center justify-center transition-all duration-200 cursor-pointer ";
+                                                        
+                                                        // Base styling
+                                                        if(rs.getStatus().equals("booked")) {
+                                                            seatClass += "opacity-50 cursor-not-allowed ";
+                                                        } else {
+                                                            seatClass += "hover:scale-110 ";
+                                                        }
 
-                                                        if(rs.getStatus().equals("booked")) seatClass += "bg-red-600 text-white cursor-not-allowed ";
-                                                        else if(seatObj.getSeatType().equals("VIP")) seatClass += "border-2 border-yellow-400 bg-transparent hover:bg-blue-500 ";
-                                                        else if(seatObj.getSeatType().equals("Couple")) seatClass += "border-2 border-pink-500 bg-transparent hover:bg-blue-500 ";
-                                                        else seatClass += "border-2 border-gray-400 bg-transparent hover:bg-blue-500 ";
+                                                        // Size based on seat type
+                                                        if(seatObj.getSeatType().equals("Couple")) {
+                                                            seatClass += "w-12 h-12 ";
+                                                        } else {
+                                                            seatClass += "w-10 h-10 ";
+                                                        }
 
-                                                        if(seatObj.getSeatType().equals("Couple")) seatClass += "w-20 h-9 text-xs";
-                                                        else seatClass += "w-9 h-9 text-sm";
-
-                                                        out.print("<button type='button' class='"+seatClass+"' data-seat='"+seatObj.getSeatNumber()+"' data-seatid='"+rs.getId()+"' data-type='"+seatObj.getSeatType()+"' data-price='"+seatObj.getPrice()+"' data-status='"+rs.getStatus()+"'>"+seatObj.getSeatNumber().substring(1)+"</button>");
+                                                        out.print("<button type='button' class='"+seatClass+"' data-seat='"+seatObj.getSeatNumber()+"' data-seatid='"+rs.getId()+"' data-type='"+seatObj.getSeatType()+"' data-price='"+seatObj.getPrice()+"' data-status='"+rs.getStatus()+"'>");
+                                                        
+                                                     // Seat icon with color based on type and status
+                                                        String iconColor = "text-gray-400";
+                                                        if(rs.getStatus().equals("booked")) {
+                                                            iconColor = "text-gray-400";
+                                                        } else if(seatObj.getSeatType().equals("VIP")) {
+                                                            iconColor = "text-yellow-600";
+                                                        } else if(seatObj.getSeatType().equals("Couple")) {
+                                                            iconColor = "text-pink-600";
+                                                        } else {
+                                                            iconColor = "text-green-600";
+                                                        }
+                                                        
+                                                        if(seatObj.getSeatType().equals("Couple")) {
+                                                            out.print("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-sofa "+iconColor+"'><path d='M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3'/><path d='M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z'/><path d='M4 18v2'/><path d='M20 18v2'/><path d='M12 4v9'/></svg>");
+                                                        } else {
+                                                            out.print("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-armchair "+iconColor+"'><path d='M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3'/><path d='M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z'/><path d='M5 18v2'/><path d='M19 18v2'/></svg>");
+                                                        }
+                                                        
+                                                        // Hover tooltip for seat number - positioned closer
+                                                        out.print("<div class='absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 whitespace-nowrap'>");
+                                                        out.print(seatObj.getSeatNumber());
+                                                        out.print("</div>");
+                                                        
+                                                        out.print("</button>");
                                                     }
                                                     out.print("</div>");
                                                 }
@@ -250,21 +298,52 @@ if(error == null){
                                         }
 
                                         if(!rowSeats.isEmpty()){
-                                            out.print("<div class='seat-row flex items-center gap-3 justify-center mb-4'>");
-                                            out.print("<div class='row-label w-9 h-9 flex items-center justify-center font-bold text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm mr-4'>" + lastRow + "</div>");
+                                            out.print("<div class='seat-row flex items-center gap-1 justify-center mb-2'>");
+                                            out.print("<div class='row-label w-8 h-8 flex items-center justify-center font-bold text-gray-700 bg-white rounded-lg border border-gray-300 shadow-sm mr-2'>" + lastRow + "</div>");
                                             for(ShowtimeSeat rs : rowSeats){
                                                 Seat seatObj = rs.getSeat();
-                                                String seatClass = "seat rounded-md flex items-center justify-center font-medium transition-all duration-200 cursor-pointer shadow-sm ";
+                                                String seatClass = "seat group relative flex items-center justify-center transition-all duration-200 cursor-pointer ";
+                                                
+                                                // Base styling
+                                                if(rs.getStatus().equals("booked")) {
+                                                    seatClass += "opacity-50 cursor-not-allowed ";
+                                                } else {
+                                                    seatClass += "hover:scale-110 ";
+                                                }
 
-                                                if(rs.getStatus().equals("booked")) seatClass += "bg-red-600 backdrop-blur-sm cursor-not-allowed ";
-                                                else if(seatObj.getSeatType().equals("VIP")) seatClass += "border-2 border-yellow-400 bg-transparent hover:bg-blue-500 ";
-                                                else if(seatObj.getSeatType().equals("Couple")) seatClass += "border-2 border-pink-500 bg-transparent hover:bg-blue-500 ";
-                                                else seatClass += "border-2 border-gray-400 bg-transparent hover:bg-blue-500 ";
+                                                // Size based on seat type
+                                                if(seatObj.getSeatType().equals("Couple")) {
+                                                    seatClass += "w-14 h-14 ";
+                                                } else {
+                                                    seatClass += "w-10 h-10 ";
+                                                }
 
-                                                if(seatObj.getSeatType().equals("Couple")) seatClass += "w-18 h-9 text-xs";
-                                                else seatClass += "w-9 h-9 text-sm";
-
-                                                out.print("<button type='button' class='"+seatClass+"' data-seat='"+seatObj.getSeatNumber()+"' data-seatid='"+rs.getId()+"' data-type='"+seatObj.getSeatType()+"' data-price='"+seatObj.getPrice()+"' data-status='"+rs.getStatus()+"'>"+seatObj.getSeatNumber().substring(1)+"</button>");
+                                                out.print("<button type='button' class='"+seatClass+"' data-seat='"+seatObj.getSeatNumber()+"' data-seatid='"+rs.getId()+"' data-type='"+seatObj.getSeatType()+"' data-price='"+seatObj.getPrice()+"' data-status='"+rs.getStatus()+"'>");
+                                                
+                                                // Seat icon with color based on type and status
+                                                String iconColor = "text-gray-400";
+                                                if(rs.getStatus().equals("booked")) {
+                                                    iconColor = "text-gray-400";
+                                                } else if(seatObj.getSeatType().equals("VIP")) {
+                                                    iconColor = "text-yellow-600";
+                                                } else if(seatObj.getSeatType().equals("Couple")) {
+                                                    iconColor = "text-pink-600";
+                                                } else {
+                                                    iconColor = "text-green-600";
+                                                }
+                                                
+                                                if(seatObj.getSeatType().equals("Couple")) {
+                                                    out.print("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-sofa "+iconColor+"'><path d='M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3'/><path d='M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z'/><path d='M4 18v2'/><path d='M20 18v2'/><path d='M12 4v9'/></svg>");
+                                                } else {
+                                                    out.print("<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-armchair "+iconColor+"'><path d='M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3'/><path d='M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z'/><path d='M5 18v2'/><path d='M19 18v2'/></svg>");
+                                                }
+                                                
+                                                // Hover tooltip for seat number - positioned closer
+                                                out.print("<div class='absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 whitespace-nowrap'>");
+                                                out.print(seatObj.getSeatNumber());
+                                                out.print("</div>");
+                                                
+                                                out.print("</button>");
                                             }
                                             out.print("</div>");
                                         }
@@ -273,36 +352,61 @@ if(error == null){
                                 </div>
                                 
                                 <!-- Seat Legend -->
-                                <div class="seat-legend grid grid-cols-5 gap-4 mt-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 border-2 border-gray-400 rounded-md shadow-sm"></div>
-                                        <span class="text-gray-700 text-sm font-medium">Available</span>
+                                <div class="seat-legend grid grid-cols-5 gap-4 mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair text-green-600">
+                                                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                                <path d="M5 18v2"/>
+                                                <path d="M19 18v2"/>
+                                            </svg>
+                                        </div>
+                                        <span class="text-gray-700 text-sm font-medium">Normal</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair">
-                                            <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
-                                            <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
-                                            <path d="M5 18v2"/>
-                                            <path d="M19 18v2"/>
-                                        </svg>
-                                        <span class="text-gray-700 text-sm font-medium">Standard/VIP</span>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair text-yellow-600">
+                                                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                                <path d="M5 18v2"/>
+                                                <path d="M19 18v2"/>
+                                            </svg>
+                                        </div>
+                                        <span class="text-gray-700 text-sm font-medium">VIP</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sofa">
-                                            <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
-                                            <path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
-                                            <path d="M4 18v2"/>
-                                            <path d="M20 18v2"/>
-                                            <path d="M12 4v9"/>
-                                        </svg>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-12 h-12 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sofa text-pink-600">
+                                                <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                                                <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/>
+                                                <path d="M4 18v2"/>
+                                                <path d="M20 18v2"/>
+                                                <path d="M12 4v9"/>
+                                            </svg>
+                                        </div>
                                         <span class="text-gray-700 text-sm font-medium">Couple</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 bg-blue-500 rounded-md shadow-sm"></div>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair text-blue-600">
+                                                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                                <path d="M5 18v2"/>
+                                                <path d="M19 18v2"/>
+                                            </svg>
+                                        </div>
                                         <span class="text-gray-700 text-sm font-medium">Selected</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 bg-red-600 backdrop-blur-sm rounded-md shadow-sm"></div>
+                                   <div class="flex flex-col items-center gap-2">
+                                        <div class="w-10 h-10 flex items-center justify-center opacity-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair text-gray-400">
+                                                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                                <path d="M5 18v2"/>
+                                                <path d="M19 18v2"/>
+                                            </svg>
+                                        </div>
                                         <span class="text-gray-700 text-sm font-medium">Booked</span>
                                     </div>
                                 </div>
@@ -372,10 +476,22 @@ function resetSelections() {
     
     document.querySelectorAll('.seat').forEach(seat => {
         if(seat.dataset.status !== 'booked') {
-            seat.classList.remove('bg-blue-500', 'border-blue-500', 'text-white', 'hover:bg-blue-600');
-            if(seat.dataset.type === 'VIP') seat.classList.add('border-2','border-yellow-400','bg-transparent','text-gray-900');
-            else if(seat.dataset.type === 'Couple') seat.classList.add('border-2','border-pink-500','bg-transparent','text-gray-900');
-            else seat.classList.add('border-2','border-gray-400','bg-transparent','text-gray-900');
+            // Reset to original state - no background, just icon color change
+            seat.classList.remove('scale-110');
+            const svg = seat.querySelector('svg');
+            
+            // Restore original colors based on seat type
+            const type = seat.dataset.type;
+            
+            svg.classList.remove('text-blue-600', 'text-white');
+            
+            if(type === 'VIP') {
+                svg.classList.add('text-yellow-600');
+            } else if(type === 'Couple') {
+                svg.classList.add('text-pink-600');
+            } else {
+                svg.classList.add('text-green-600');
+            }
         }
     });
 }
@@ -427,30 +543,37 @@ function attachSeatEvents(container){
     if(!container) return;
     
     container.querySelectorAll('.seat').forEach(seatBtn => {
-        // Skip adding event listeners to booked seats entirely
         if(seatBtn.dataset.status === 'booked') {
-            // Ensure booked seats have the correct styling and are not clickable
             seatBtn.classList.add('cursor-not-allowed');
             seatBtn.style.pointerEvents = 'none';
-            return; // Skip this iteration for booked seats
+            return;
         }
         
         seatBtn.addEventListener('click', () => {
-            // Double-check status (shouldn't be necessary but added for safety)
             if(seatBtn.dataset.status === 'booked') return;
 
-            const isSelected = seatBtn.classList.contains('bg-blue-500');
+            const isSelected = seatBtn.querySelector('svg').classList.contains('text-blue-600');
+            const svg = seatBtn.querySelector('svg');
             
             if(isSelected) {
-                // Deselect
-                seatBtn.classList.remove('bg-blue-500','border-blue-500','text-white','hover:bg-blue-600');
-                if(seatBtn.dataset.type === 'VIP') seatBtn.classList.add('border-2','border-yellow-400','bg-transparent','text-gray-900');
-                else if(seatBtn.dataset.type === 'Couple') seatBtn.classList.add('border-2','border-pink-500','bg-transparent','text-gray-900');
-                else seatBtn.classList.add('border-2','border-gray-400','bg-transparent','text-gray-900');
+                // Deselect - return to original color
+                seatBtn.classList.remove('scale-110');
+                svg.classList.remove('text-blue-600');
+                
+                // Restore original color based on seat type
+                const type = seatBtn.dataset.type;
+                if(type === 'VIP') {
+                    svg.classList.add('text-yellow-600');
+                } else if(type === 'Couple') {
+                    svg.classList.add('text-pink-600');
+                } else {
+                    svg.classList.add('text-green-600');
+                }
             } else {
-                // Select
-                seatBtn.classList.remove('border-gray-400', 'border-yellow-400', 'border-pink-500', 'bg-transparent','text-gray-900');
-                seatBtn.classList.add('bg-blue-500','border-blue-500','text-white','hover:bg-blue-600');
+                // Select - change to blue color
+                seatBtn.classList.add('scale-110');
+                svg.classList.remove('text-yellow-600', 'text-pink-600', 'text-green-600');
+                svg.classList.add('text-blue-600');
             }
 
             updateBookingSummary(container);
@@ -459,9 +582,8 @@ function attachSeatEvents(container){
 }
 
 function updateBookingSummary(container) {
-    // Only select seats that are not booked and are currently selected
-    const selectedSeats = Array.from(container.querySelectorAll('.seat.bg-blue-500'))
-        .filter(seat => seat.dataset.status !== 'booked');
+    const selectedSeats = Array.from(container.querySelectorAll('.seat'))
+        .filter(seat => seat.querySelector('svg').classList.contains('text-blue-600') && seat.dataset.status !== 'booked');
     
     const seatNumbers = selectedSeats.map(s => s.dataset.seat).join(', ');
     const seatIds = selectedSeats.map(s => s.dataset.seatid).join(',');

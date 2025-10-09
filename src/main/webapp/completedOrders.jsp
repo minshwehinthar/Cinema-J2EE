@@ -8,6 +8,7 @@
 <%@ page import="com.demo.model.User" %>
 <%@ page import="com.demo.model.Theater" %>
 
+
 <%
 User loggedInUser = (User) session.getAttribute("user");
 String role = (loggedInUser != null) ? loggedInUser.getRole() : "";
@@ -37,6 +38,37 @@ if ("POST".equalsIgnoreCase(request.getMethod())) {
     if (request.getParameter("pickOrder") != null) {
         int orderId = Integer.parseInt(request.getParameter("orderId"));
         boolean success = orderDAO.pickOrder(orderId);
+
+        // --- SEND EMAIL TO CUSTOMER ---
+        if (success) {
+        	Order completedOrder = orderDAO.getOrderById(orderId);
+            User customer = userDAO.getUserById(completedOrder.getUserId());
+
+            if(customer != null && customer.getEmail() != null && !customer.getEmail().isEmpty()){
+                String to = customer.getEmail();
+                String subject = "Your Order #" + orderId + " has been completed!";
+                
+                StringBuilder body = new StringBuilder();
+                body.append("Dear ").append(customer.getName()).append(",\n\n")
+                    .append("We are happy to inform you that your order #").append(orderId)
+                    .append(" has been successfully completed.\n\n")
+                    .append("Order Summary:\n");
+
+                for(OrderItem item : completedOrder.getItems()){
+                    body.append("- ").append(item.getFood().getName())
+                        .append(" x ").append(item.getQuantity()).append("\n");
+                }
+
+                body.append("\nTotal Amount: MMK ").append(completedOrder.getTotalAmount()).append("\n\n")
+                    .append("Thank you for ordering with us!\n")
+                    .append("Have a great day!\n\n")
+                    .append("Best regards,\nCinezy Cinema Team");
+
+                // Send the email
+                com.demo.util.EmailUtil.sendEmail(to, subject, body.toString());
+            }
+        }
+
         response.setContentType("application/json");
         out.print("{\"success\":" + success + "}");
         return;
@@ -90,51 +122,74 @@ if ("POST".equalsIgnoreCase(request.getMethod())) {
         List<Order> pageOrders = (start < end) ? allCompletedOrders.subList(start, end) : List.of();
 
         if (pageOrders.isEmpty()) {
-            out.print("<tr><td colspan='8' class='px-6 py-4 text-center text-gray-500'>No completed orders.</td></tr>");
+            out.print("<tr><td colspan='8' class='px-6 py-8 text-center'><div class='w-16 h-16 mx-auto mb-4 text-gray-300'><svg fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'/></svg></div><h3 class='text-lg font-medium text-gray-600 mb-2'>No completed orders found</h3><p class='text-gray-500'>All orders are processed or try adjusting your search.</p></td></tr>");
         } else {
             for (Order o : pageOrders) {
                 User user = userDAO.getUserById(o.getUserId());
                 Theater theater = theaterDAO.getTheaterById(o.getTheaterId());
 %>
-<tr id="row-<%= o.getId() %>" class="hover:bg-gray-50">
-    <td class="px-6 py-4"><%= o.getId() %></td>
-    <td class="px-6 py-4 font-medium text-gray-900">
-        <p><%= (user != null ? user.getName() : "Unknown") %></p>
-        <p class="text-sm text-gray-500"><%= (user != null ? user.getEmail() : "") %></p>
-        <p class="text-sm text-gray-500"><%= (user != null ? user.getPhone() : "") %></p>
+<tr class="hover:bg-red-50 transition-colors duration-150" id="row-<%= o.getId() %>">
+    <td class="px-6 py-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <span class="text-red-600 font-bold text-sm">#<%= o.getId() %></span>
+            </div>
+        </div>
     </td>
     <td class="px-6 py-4">
-        <p><%= (theater != null ? theater.getName() : "Unknown") %></p>
-        <p class="text-sm text-gray-500"><%= (theater != null ? theater.getLocation() : "") %></p>
+        <div class="font-medium text-gray-900"><%= (user != null ? user.getName() : "Unknown") %></div>
+        <div class="text-sm text-gray-500"><%= (user != null ? user.getEmail() : "") %></div>
+        <div class="text-sm text-gray-500"><%= (user != null ? user.getPhone() : "") %></div>
     </td>
     <td class="px-6 py-4">
-        <ul class="space-y-1">
+        <div class="font-medium text-gray-900"><%= (theater != null ? theater.getName() : "Unknown") %></div>
+        <div class="text-sm text-gray-500"><%= (theater != null ? theater.getLocation() : "") %></div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="space-y-2 max-w-xs">
         <% for (OrderItem item : o.getItems()) { %>
-            <li class="flex items-center">
-                <img src="<%= item.getFood().getImage() %>" class="w-10 h-10 rounded mr-2"/>
-                <span><%= item.getFood().getName() %> x <%= item.getQuantity() %></span>
-            </li>
+            <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                <img src="<%= item.getFood().getImage() %>" alt="<%= item.getFood().getName() %>"
+                     class="w-8 h-8 rounded object-cover border border-gray-200"/>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate"><%= item.getFood().getName() %></div>
+                    <div class="text-xs text-gray-500">Qty: <%= item.getQuantity() %></div>
+                </div>
+            </div>
         <% } %>
-        </ul>
+        </div>
     </td>
-    <td class="px-6 py-4 font-semibold text-green-600">$<%= o.getTotalAmount() %></td>
-    <td class="px-6 py-4"><%= o.getPaymentMethod() %></td>
     <td class="px-6 py-4">
-        <span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700">
+        <div class="font-semibold text-red-600">$<%= o.getTotalAmount() %></div>
+    </td>
+    <td class="px-6 py-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 capitalize">
+            <%= o.getPaymentMethod() %>
+        </span>
+    </td>
+    <td class="px-6 py-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
             <%= o.getStatus() %>
         </span>
     </td>
-    <td class="px-6 py-4 text-center flex justify-center space-x-2">
-        <button onclick="pickOrder(<%= o.getId() %>)"
-                class="bg-green-300 text-white px-3 py-1 rounded hover:bg-green-400 text-sm">
-            Pick / Confirm
-        </button>
-        <form action="orderDetails.jsp" method="get" style="display:inline-block">
-            <input type="hidden" name="orderId" value="<%= o.getId() %>"/>
-            <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-                View Details
+    <td class="px-6 py-4">
+        <div class="flex justify-center space-x-3 min-w-[90px]">
+            <button onclick="pickOrder(<%= o.getId() %>)"
+                    class="inline-flex items-center justify-center w-10 h-10 text-green-600 bg-white border border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-colors duration-200 shadow-sm cursor-pointer"
+                    title="Pick / Confirm Order">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
             </button>
-        </form>
+            <a href="orderDetails.jsp?orderId=<%= o.getId() %>"
+               class="inline-flex items-center justify-center w-10 h-10 text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 shadow-sm cursor-pointer"
+               title="View Details">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </a>
+        </div>
     </td>
 </tr>
 <%
@@ -150,45 +205,133 @@ if ("POST".equalsIgnoreCase(request.getMethod())) {
     <jsp:include page="layout/sidebar.jsp" />
     <div class="flex-1 sm:ml-64">
         <jsp:include page="/layout/AdminHeader.jsp" />
-        <div class="p-8">
-            <h1 class="text-2xl font-bold mb-6 text-gray-900">Completed Orders</h1>
-
-            <div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
-
-            <!-- Search -->
-            <div class="flex justify-between items-center mb-4">
-                <input type="text" id="searchInput" placeholder="Search by ID, Name, Email, Theater..."
-                       class="px-4 py-2 border rounded-lg w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        <div class="p-8 max-w-8xl mx-auto">
+            
+            <!-- Header Section -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Completed Orders</h1>
+                    <p class="text-gray-600 mt-1">View and manage completed food orders</p>
+                </div>
             </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto bg-white shadow rounded-lg">
-                <table class="min-w-full text-sm text-left">
-                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
-                        <tr>
-                            <th onclick="sortTable('id')" class="px-6 py-3 cursor-pointer">Order ID</th>
-                            <th onclick="sortTable('user')" class="px-6 py-3 cursor-pointer">Customer</th>
-                            <th onclick="sortTable('theater')" class="px-6 py-3 cursor-pointer">Theater</th>
-                            <th class="px-6 py-3">Items</th>
-                            <th onclick="sortTable('total')" class="px-6 py-3 cursor-pointer">Total</th>
-                            <th class="px-6 py-3">Payment</th>
-                            <th class="px-6 py-3">Status</th>
-                            <th class="px-6 py-3 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+            <!-- Search and Filter -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex space-x-4">
+                    <input type="text" id="searchInput" placeholder="Search by ID, Name, Email, Theater..." 
+                           class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none ring-transparent "/>
+                </div>
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium"><%= allCompletedOrders.size() %></span> completed orders
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-red-50 text-gray-900 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('id')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Order ID</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('user')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Customer</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('theater')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Theater</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold">Items</th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('total')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Total</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold">Payment</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Pagination -->
-            <div id="pagination" class="flex justify-center mt-6 space-x-1"></div>
+            <div class="flex mt-6 justify-between items-center">
+                <!-- Left Section: Total and Row -->
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-gray-700">
+                        Total <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalOrders">
+                            <%= allCompletedOrders.size() %>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-700">Row</span>
+                        <select id="recordsPerPage" onchange="handleLimitChange()"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:border-red-500 block w-full p-2.5"
+                            style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Right Section: Page Info and Navigation -->
+                <div class="flex items-center gap-0">
+                    <div class="text-sm text-gray-700 mr-4">
+                        Page <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="currentPage">1</span> of <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalPages">1</span>
+                    </div>
+                    
+                    <!-- Navigation Buttons - No space between -->
+                    <div class="flex gap-0">
+                        <!-- Previous Button -->
+                        <button id="prevBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg border-r-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Next Button -->
+                        <button id="nextBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
+
 <script>
 let currentPage = 1;
-const pageSize = <%= pageSize %>;
+let pageSize = 5;
 let currentSortField = '';
 let currentSortOrder = 'asc';
 
@@ -210,6 +353,8 @@ function loadOrders(page=1, query="", sortField=currentSortField, sortOrder=curr
 }
 
 function pickOrder(orderId){
+    if(!confirm("Are you sure you want to pick/confirm this order?")) return;
+    
     fetch('completedOrders.jsp', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -219,7 +364,6 @@ function pickOrder(orderId){
     .then(data=>{
         if(data.success){
             showToast("Order #"+orderId+" picked successfully!");
-            // reload the current page to fill table
             loadOrders(currentPage, searchInput.value, currentSortField, currentSortOrder);
         } else {
             showToast("Failed to pick order #"+orderId,true);
@@ -227,12 +371,11 @@ function pickOrder(orderId){
     });
 }
 
-
 function showToast(msg,isError=false){
     const container = document.getElementById('toastContainer');
     const div = document.createElement('div');
     div.innerText = msg;
-    div.className = `mb-2 px-4 py-2 rounded shadow text-white ${isError?'bg-red-500':'bg-green-300'} animate-fade`;
+    div.className = `mb-2 px-4 py-2 rounded shadow text-white ${isError?'bg-red-500':'bg-green-500'} animate-fade`;
     container.appendChild(div);
     setTimeout(()=>div.remove(),3000);
 }
@@ -253,31 +396,50 @@ function debounce(func,delay){
 function renderPagination(){
     const totalOrders = <%= allCompletedOrders.size() %>;
     const totalPages = Math.ceil(totalOrders / pageSize);
-    const container = document.getElementById('pagination');
-    container.innerHTML = '';
-
-    const prev = document.createElement('a');
-    prev.href = "javascript:void(0)";
-    prev.innerText = "Prev";
-    prev.className = "px-4 py-2 rounded-md border "+(currentPage===1?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    prev.addEventListener('click',()=>{ if(currentPage>1) loadOrders(currentPage-1,searchInput.value); });
-    container.appendChild(prev);
-
-    for(let i=1;i<=totalPages;i++){
-        const a = document.createElement('a');
-        a.href = "javascript:void(0)";
-        a.innerText = i;
-        a.className = "px-4 py-2 rounded-md border "+(i===currentPage?"bg-blue-600 text-white":"bg-white text-gray-700 hover:bg-blue-100");
-        a.addEventListener('click',()=>loadOrders(i,searchInput.value));
-        container.appendChild(a);
+    
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalOrders').textContent = totalOrders;
+    
+    // Update prev/next buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if(currentPage <= 1) {
+        prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
     }
+    
+    if(currentPage >= totalPages) {
+        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
+    }
+    
+    // Add event listeners
+    prevBtn.onclick = () => {
+        if(currentPage > 1) {
+            loadOrders(currentPage - 1, searchInput.value);
+        }
+    };
+    
+    nextBtn.onclick = () => {
+        if(currentPage < totalPages) {
+            loadOrders(currentPage + 1, searchInput.value);
+        }
+    };
+}
 
-    const next = document.createElement('a');
-    next.href = "javascript:void(0)";
-    next.innerText = "Next";
-    next.className = "px-4 py-2 rounded-md border "+(currentPage===totalPages?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    next.addEventListener('click',()=>{ if(currentPage<totalPages) loadOrders(currentPage+1,searchInput.value); });
-    container.appendChild(next);
+function handleLimitChange() {
+    const select = document.getElementById('recordsPerPage');
+    pageSize = parseInt(select.value);
+    loadOrders(1, searchInput.value);
 }
 
 // --- SORT FUNCTION ---
@@ -291,7 +453,10 @@ function sortTable(field){
     loadOrders(1, searchInput.value, currentSortField, currentSortOrder);
 }
 
-window.onload = function(){ loadOrders(); }
+window.onload = function(){ 
+    loadOrders(); 
+    document.getElementById('recordsPerPage').value = pageSize;
+}
 </script>
 
 <style>

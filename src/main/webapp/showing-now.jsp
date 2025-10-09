@@ -41,16 +41,17 @@
 
 <!-- Full-width Admin Header -->
 <div class="fixed top-0 left-0 w-full z-50">
-    <jsp:include page="layout/AdminHeader.jsp"/>
+    
 </div>
 
 <!-- Page Layout -->
 <div class="flex pt-[64px]">
     <!-- Left Sidebar -->
     <jsp:include page="layout/sidebar.jsp"/>
-
+<jsp:include page="layout/AdminHeader.jsp"/>
     <!-- Main Content -->
     <div class="flex-1 sm:ml-64 sm:mr-64 p-8">
+    
         <h2 class="text-2xl font-bold mb-6">Now Showing</h2>
 
         <!-- Movies Grid -->

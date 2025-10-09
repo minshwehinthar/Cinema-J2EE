@@ -1,4 +1,3 @@
-
 <%@page import="com.demo.dao.BookingDao"%>
 <%@ page import="com.demo.model.Booking" %>
 <%@ page import="com.demo.model.User" %>
@@ -25,6 +24,20 @@
     // Pagination parameters
     int currentPage = 1;
     int recordsPerPage = 5;
+    
+    // Get records per page from request parameter
+    String limitParam = request.getParameter("limit");
+    if (limitParam != null && !limitParam.isEmpty()) {
+        try {
+            recordsPerPage = Integer.parseInt(limitParam);
+            // Validate allowed values
+            if (recordsPerPage != 5 && recordsPerPage != 10 && recordsPerPage != 15 && recordsPerPage != 20) {
+                recordsPerPage = 5;
+            }
+        } catch (NumberFormatException e) {
+            recordsPerPage = 5;
+        }
+    }
     
     // Get current page from request parameter
     String pageParam = request.getParameter("page");
@@ -130,6 +143,9 @@
         request.setAttribute("currentPage", 1);
         request.setAttribute("totalPages", 0);
         request.setAttribute("totalRecords", 0);
+        request.setAttribute("recordsPerPage", recordsPerPage);
+        request.setAttribute("startRecord", 0);
+        request.setAttribute("endRecord", 0);
     }
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
@@ -139,6 +155,7 @@
     int currentPageAttr = (Integer) request.getAttribute("currentPage");
     int totalPages = (Integer) request.getAttribute("totalPages");
     int totalRecords = (Integer) request.getAttribute("totalRecords");
+    int recordsPerPageAttr = (Integer) request.getAttribute("recordsPerPage");
     int startRecord = (Integer) request.getAttribute("startRecord");
     int endRecord = (Integer) request.getAttribute("endRecord");
 %>
@@ -147,232 +164,120 @@
 <jsp:include page="layout/header.jsp"/>
 
 <div class="min-h-screen bg-gray-50 py-8">
-    <div class="container mx-auto px-4 max-w-6xl">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">My Bookings</h1>
-            <div class="w-24 h-1 bg-red-600 mx-auto"></div>
-        </div>
-        <div class="flex justify-between items-center">
-        <!-- Search Bar -->
-        <div class="mb-8">
-            <form method="GET" action="" class="max-w-2xl mx-auto">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <input type="text" 
-                           name="search" 
-                           id="search"
-                           value="<%= searchQuery != null ? searchQuery : "" %>"
-                           placeholder="Search by Booking ID, Movie Title, or Theater Name..." 
-                           class="block w-full pl-10 pr-12 py-4 border border-gray-300 rounded-2xl ring-0 ring-transparent focus:border-red-500 text-sm">
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                        <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
-                        <a href="?" class="text-gray-400 hover:text-gray-600 mr-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </a>
-                        <% } %>
-                    </div>
-                </div>
-                <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
-                <div class="mt-2 text-sm text-gray-600 text-center">
-                    Showing results for: "<%= searchQuery %>"
-                    <% if (filteredBookings != null) { %>
-                    - <%= filteredBookings.size() %> booking(s) found
-                    <% } %>
-                </div>
-                <% } %>
-            </form>
+    <div class="container mx-auto px-4 max-w-8xl">
+    <nav class="text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+			<ol class="list-none p-0 inline-flex">
+				<li><a href="home.jsp" class="hover:text-red-600">Home</a></li>
+            <li><span class="mx-2">/</span></li>
+            
+				<li class="flex items-center text-gray-900 font-semibold">My Bookings
+				</li>
+			</ol>
+		</nav>
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">My Bookings</h1>
+                <p class="text-gray-600 mt-1">Manage and view your movie ticket bookings</p>
+            </div>
         </div>
 
-       <!-- Status Cards - Auto Width Based on Content -->
-<div class="flex flex-wrap gap-4 mb-6">
-    <!-- All Bookings -->
-    <div class="bg-white rounded-xl border border-gray-200 px-6 py-4 cursor-pointer status-card active" data-status="all">
-        <div class="flex items-center space-x-2 text-gray-900 font-medium">
-            <span>All Bookings</span>
-            <span class="font-bold text-red-600"><%= filteredBookings != null ? filteredBookings.size() : 0 %></span>
-        </div>
-    </div>
+        <!-- Search and Filters -->
+        <div class="flex justify-between items-center mb-6">
+            <!-- Status Filter -->
+            <div class="flex gap-2">
+                <button class="statusBtn px-4 py-2 rounded-lg border border-red-500 bg-red-50 text-red-600 font-medium transition-colors duration-200 text-sm" data-status="all">All Bookings</button>
+                <button class="statusBtn px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 text-sm" data-status="confirmed">Confirmed</button>
+                <button class="statusBtn px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 text-sm" data-status="pending">Pending</button>
+                <button class="statusBtn px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 text-sm" data-status="cancelled">Cancelled</button>
+            </div>
 
-    <!-- Confirmed -->
-    <div class="bg-white rounded-xl border border-gray-200 px-6 py-4 cursor-pointer status-card" data-status="confirmed">
-        <%
-            long confirmedBookings = 0;
-            if (filteredBookings != null) {
-                confirmedBookings = filteredBookings.stream()
-                    .filter(b -> b != null && "confirmed".equalsIgnoreCase(b.getStatus()))
-                    .count();
-            }
-        %>
-        <div class="flex items-center space-x-2 text-gray-900 font-medium">
-            <span>Confirmed</span>
-            <span class="font-bold text-green-600"><%= confirmedBookings %></span>
-        </div>
-    </div>
-
-    <!-- Pending -->
-    <div class="bg-white rounded-xl border border-gray-200 px-6 py-4 cursor-pointer status-card" data-status="pending">
-        <%
-            long pendingBookings = 0;
-            if (filteredBookings != null) {
-                pendingBookings = filteredBookings.stream()
-                    .filter(b -> b != null && "pending".equalsIgnoreCase(b.getStatus()))
-                    .count();
-            }
-        %>
-        <div class="flex items-center space-x-2 text-gray-900 font-medium">
-            <span>Pending</span>
-            <span class="font-bold text-yellow-600"><%= pendingBookings %></span>
-        </div>
-    </div>
-
-    <!-- Cancelled -->
-    <div class="bg-white rounded-xl border border-gray-200 px-6 py-4 cursor-pointer status-card" data-status="cancelled">
-        <%
-            long cancelledBookings = 0;
-            if (filteredBookings != null) {
-                cancelledBookings = filteredBookings.stream()
-                    .filter(b -> b != null && "cancelled".equalsIgnoreCase(b.getStatus()))
-                    .count();
-            }
-        %>
-        <div class="flex items-center space-x-2 text-gray-900 font-medium">
-            <span>Cancelled</span>
-            <span class="font-bold text-red-600"><%= cancelledBookings %></span>
-        </div>
-    </div>
-</div>
-
-        
-        </div>
-
-        <!-- Results Count -->
-        <div class="flex justify-between items-center mb-4">
-            <div class="text-sm text-gray-600">
-                Showing <%= startRecord %> to <%= endRecord %> of <%= totalRecords %> bookings
-                <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
-                (filtered from <%= allBookings != null ? allBookings.size() : 0 %> total bookings)
-                <% } %>
+            <!-- Search -->
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search by Booking ID, Movie, Theater..." 
+                       class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none ring-transparent text-sm"/>
             </div>
         </div>
 
         <!-- Bookings Table -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
             <% if (userBookings == null || userBookings.isEmpty()) { %>
-                <div class="text-center py-16 text-gray-500">
-                    <h3 class="text-2xl font-semibold mb-3">
+                <div class="px-6 py-16 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 text-gray-300">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-600 mb-2">
                         <%= allBookings == null ? "Error loading bookings" : 
                            (searchQuery != null && !searchQuery.isEmpty() ? "No bookings found" : "No bookings yet") %>
                     </h3>
-                    <p class="mb-8">
+                    <p class="text-gray-500 mb-6">
                         <%= allBookings == null ? "Please try again later." : 
                            (searchQuery != null && !searchQuery.isEmpty() ? 
                            "No bookings match your search criteria." : "Start booking your first ticket.") %>
                     </p>
                     <% if (allBookings != null && (searchQuery == null || searchQuery.isEmpty())) { %>
-                    <a href="movies.jsp" class="inline-flex items-center px-8 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition shadow-sm">
-                        Book Tickets
+                    <a href="movies.jsp" class="inline-flex items-center px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-sm">
+                        Book Tickets Now
                     </a>
                     <% } %>
                     <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
-                    <a href="?" class="inline-flex items-center px-8 py-3 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition shadow-sm ml-3">
+                    <a href="?limit=<%= recordsPerPageAttr %>" class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-sm ml-3">
                         Clear Search
                     </a>
                     <% } %>
                 </div>
             <% } else { %>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-200">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-red-50 text-gray-900 uppercase text-xs">
                             <tr>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="bookingId">
+                                <th class="px-6 py-4 font-semibold cursor-pointer sortable" data-sort="bookingId">
                                     <div class="flex items-center space-x-1">
                                         <span>Booking Details</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="movieTitle">
+                                <th class="px-6 py-4 font-semibold cursor-pointer sortable" data-sort="movieTitle">
                                     <div class="flex items-center space-x-1">
                                         <span>Movie & Showtime</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="theaterName">
+                                <th class="px-6 py-4 font-semibold cursor-pointer sortable" data-sort="theaterName">
                                     <div class="flex items-center space-x-1">
                                         <span>Theater</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="seatCount">
+                                <th class="px-6 py-4 font-semibold cursor-pointer sortable" data-sort="seatCount">
                                     <div class="flex items-center space-x-1">
                                         <span>Seats</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="totalPrice">
+                                <th class="px-6 py-4 font-semibold cursor-pointer sortable" data-sort="totalPrice">
                                     <div class="flex items-center space-x-1">
                                         <span>Amount</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider cursor-pointer sortable" data-sort="status">
-                                    <div class="flex items-center space-x-1">
-                                        <span>Status</span>
-                                        <div class="sort-icons inline-flex flex-col">
-                                            <svg class="h-3 w-3 text-gray-400 sort-asc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                            </svg>
-                                            <svg class="h-3 w-3 text-gray-400 sort-desc" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="bookingTableBody" class="bg-white divide-y divide-gray-100">
+                        <tbody id="bookingTableBody" class="divide-y divide-gray-100">
                             <% for (Booking booking : userBookings) { 
                                 if (booking == null) continue;
                                 
@@ -413,7 +318,7 @@
                                     }
                                 }
                             %>
-                            <tr class="booking-row" 
+                            <tr class="hover:bg-red-50 transition-colors duration-150 booking-row" 
                                 data-status="<%= booking.getStatus().toLowerCase() %>"
                                 data-booking-id="<%= booking.getBookingId() %>"
                                 data-movie-title="<%= movie != null ? movie.getTitle().toLowerCase() : "" %>"
@@ -422,27 +327,31 @@
                                 data-total-price="<%= booking.getTotalPrice() != null ? booking.getTotalPrice() : 0 %>"
                                 data-booking-date="<%= booking.getBookingTime() != null ? booking.getBookingTime().getTime() : 0 %>">
                                 <!-- Booking Details -->
-                                <td class="px-6 py-5">
-                                    <div class="text-base font-semibold text-gray-900">#<%= booking.getBookingId() %></div>
-                                    <div class="text-sm text-gray-500 mt-1">
-                                        <%= booking.getBookingTime() != null ? dateFormat.format(booking.getBookingTime()) : "N/A" %>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                            <span class="text-red-600 font-bold text-sm">#<%= booking.getBookingId() %></span>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-500">
+                                                <%= booking.getBookingTime() != null ? dateFormat.format(booking.getBookingTime()) : "N/A" %>
+                                            </div>
+                                            <% if (booking.getBookingTime() != null) { %>
+                                            <div class="text-xs text-gray-400">
+                                                <%= timeFormat.format(booking.getBookingTime()) %>
+                                            </div>
+                                            <% } %>
+                                        </div>
                                     </div>
-                                    <% if (booking.getBookingTime() != null) { %>
-                                    <div class="text-xs text-gray-400">
-                                        <%= timeFormat.format(booking.getBookingTime()) %>
-                                    </div>
-                                    <% } %>
                                 </td>
                                 
                                 <!-- Movie & Showtime -->
-                                <td class="px-6 py-5">
+                                <td class="px-6 py-4">
                                     <% if (movie != null) { %>
-                                    <div class="text-sm font-semibold text-gray-900 truncate max-w-xs" title="<%= movie.getTitle() %>">
-                                        <%= movie.getTitle() %>
-                                    </div>
+                                    <div class="font-medium text-gray-900"><%= movie.getTitle() %></div>
                                     <% } %>
                                     <% if (showtime != null) { %>
-                                    <div class="text-xs text-gray-600 mt-1">
+                                    <div class="text-sm text-gray-500 mt-1">
                                         <%= showtime.getShowDate() != null ? dateFormat.format(showtime.getShowDate()) : "N/A" %>
                                     </div>
                                     <div class="text-xs text-gray-500">
@@ -457,10 +366,10 @@
                                 </td>
                                 
                                 <!-- Theater -->
-                                <td class="px-6 py-5">
+                                <td class="px-6 py-4">
                                     <% if (theater != null) { %>
-                                    <div class="text-sm font-medium text-gray-900"><%= theater.getName() %></div>
-                                    <div class="text-xs text-gray-500 truncate max-w-xs" title="<%= theater.getLocation() %>">
+                                    <div class="font-medium text-gray-900"><%= theater.getName() %></div>
+                                    <div class="text-sm text-gray-500 truncate max-w-xs" title="<%= theater.getLocation() %>">
                                         <%= theater.getLocation() %>
                                     </div>
                                     <% } else { %>
@@ -469,12 +378,12 @@
                                 </td>
                                 
                                 <!-- Seats -->
-                                <td class="px-6 py-5">
+                                <td class="px-6 py-4">
                                     <% if (seats != null && !seats.isEmpty()) { %>
-                                    <div class="text-sm font-medium text-gray-900 mb-1">
+                                    <div class="font-medium text-gray-900 mb-1">
                                         <%= seats.size() %> seat<%= seats.size() > 1 ? "s" : "" %>
                                     </div>
-                                    <div class="text-xs text-gray-600 max-w-xs">
+                                    <div class="text-sm text-gray-500 max-w-xs">
                                         <% 
                                             String seatNumbers = seats.stream()
                                                 .map(Seat::getSeatNumber)
@@ -493,8 +402,8 @@
                                 </td>
                                 
                                 <!-- Amount -->
-                                <td class="px-6 py-5">
-                                    <div class="text-base font-bold text-gray-900">
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-red-600">
                                         <%= booking.getTotalPrice() != null ? booking.getTotalPrice() + " MMK" : "N/A" %>
                                     </div>
                                     <% if (seats != null && !seats.isEmpty()) { %>
@@ -505,36 +414,66 @@
                                 </td>
                                 
                                 <!-- Status -->
-                                <td class="px-6 py-5">
+                                <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= statusClass %>">
                                         <%= statusText %>
                                     </span>
                                 </td>
                                 
                                 <!-- Actions -->
-								<td class="px-6 py-5">
-								    <div class="flex justify-center space-x-3">
-								        <% if ("pending".equalsIgnoreCase(booking.getStatus())) { %>
-								        <!-- Pending: Show Cancel + View buttons -->
-								        <button onclick="cancelBooking(<%= booking.getBookingId() %>)" 
-								                class="inline-flex items-center px-4 py-2 bg-white text-red-700 border border-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
-								            Cancel
-								        </button>
-								        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
-								           class="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">
-								            View
-								        </a>
-								        <% } else if ("confirmed".equalsIgnoreCase(booking.getStatus())) { %>
-								        <!-- Confirmed: Show Only View button -->
-								        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
-								           class="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">
-								            View Ticket
-								        </a>
-								        <% } else if ("cancelled".equalsIgnoreCase(booking.getStatus())) { %>
-								        <!-- Cancelled: Show nothing (empty) -->
-								        <% } %>
-								    </div>
-								</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex justify-center space-x-3 min-w-[90px]">
+                                        <% if ("pending".equalsIgnoreCase(booking.getStatus())) { %>
+                                        <!-- Pending: Show Cancel + View buttons -->
+                                        <button onclick="cancelBooking(<%= booking.getBookingId() %>)" 
+                                                class="inline-flex items-center justify-center w-10 h-10 text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors duration-200 shadow-sm cursor-pointer"
+                                                title="Cancel Booking">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
+                                           class="inline-flex items-center justify-center w-10 h-10 text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 shadow-sm cursor-pointer"
+                                           title="View Ticket">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </a>
+                                        <% } else if ("confirmed".equalsIgnoreCase(booking.getStatus())) { %>
+                                        <!-- Confirmed: Show Only View button -->
+                                        <button class="inline-flex items-center justify-center w-10 h-10 text-red-300 bg-gray-50 border border-red-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90"
+                                                title="Cannot Cancel Confirmed Booking">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
+                                           class="inline-flex items-center justify-center w-10 h-10 text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 shadow-sm cursor-pointer"
+                                           title="View Ticket">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </a>
+                                        <% } else if ("cancelled".equalsIgnoreCase(booking.getStatus())) { %>
+                                        <!-- Cancelled: Show all buttons but disabled -->
+                                        <button class="inline-flex items-center justify-center w-10 h-10 text-red-300 bg-gray-50 border border-red-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90"
+                                                title="Booking Already Cancelled">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <a class="inline-flex items-center justify-center w-10 h-10 text-gray-300 bg-gray-50 border border-gray-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90"
+                                           title="Cannot View Cancelled Ticket">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </a>
+                                        <% } %>
+                                    </div>
+                                </td>
                             </tr>
                             <% } %>
                         </tbody>
@@ -544,75 +483,57 @@
         </div>
 
         <!-- Pagination -->
-        <% if (totalPages > 1) { %>
-        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-2xl shadow-sm">
-            <!-- Mobile view -->
-            <div class="flex flex-1 justify-between sm:hidden">
-                <% if (currentPageAttr > 1) { %>
-                <a href="?page=<%= currentPageAttr - 1 %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
-                <% } %>
-                <% if (currentPageAttr < totalPages) { %>
-                <a href="?page=<%= currentPageAttr + 1 %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
-                <% } %>
+        <% if (totalPages > 0) { %>
+        <div class="flex mt-6 justify-between items-center">
+            <!-- Left Section: Total and Row -->
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-gray-700">
+                    Total <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                        <%=totalRecords%>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-700">Row</span>
+                    <select id="recordsPerPage" onchange="handleLimitChange()"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:border-red-500 block w-full p-2.5"
+                        style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+                        <option value="5" <%=recordsPerPageAttr == 5 ? "selected" : ""%>>5</option>
+                        <option value="10" <%=recordsPerPageAttr == 10 ? "selected" : ""%>>10</option>
+                        <option value="15" <%=recordsPerPageAttr == 15 ? "selected" : ""%>>15</option>
+                        <option value="20" <%=recordsPerPageAttr == 20 ? "selected" : ""%>>20</option>
+                    </select>
+                </div>
             </div>
             
-            <!-- Desktop view -->
-            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm text-gray-700">
-                        Showing <span class="font-medium"><%= startRecord %></span> to <span class="font-medium"><%= endRecord %></span> of <span class="font-medium"><%= totalRecords %></span> results
-                    </p>
+            <!-- Right Section: Page Info and Navigation -->
+            <div class="flex items-center gap-0">
+                <div class="text-sm text-gray-700 mr-4">
+                    Page <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                        <%=currentPageAttr%>
+                    </span> of <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                        <%=totalPages%>
+                    </span>
                 </div>
-                <div>
-                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                        <!-- Previous Page -->
-                        <% if (currentPageAttr > 1) { %>
-                        <a href="?page=<%= currentPageAttr - 1 %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            <span class="sr-only">Previous</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                        <% } %>
-
-                        <!-- Page Numbers -->
-                        <% 
-                            int startPage = Math.max(1, currentPageAttr - 2);
-                            int endPage = Math.min(totalPages, currentPageAttr + 2);
-                            
-                            if (startPage > 1) { 
-                        %>
-                        <a href="?page=1<%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">1</a>
-                        <% if (startPage > 2) { %>
-                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">...</span>
-                        <% } }
-                        
-                        for (int i = startPage; i <= endPage; i++) { 
-                            if (i == currentPageAttr) { 
-                        %>
-                        <a href="?page=<%= i %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" aria-current="page" class="relative z-10 inline-flex items-center bg-red-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"><%= i %></a>
-                        <% } else { %>
-                        <a href="?page=<%= i %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"><%= i %></a>
-                        <% } 
-                        } 
-                        
-                        if (endPage < totalPages) { 
-                            if (endPage < totalPages - 1) { %>
-                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">...</span>
-                        <% } %>
-                        <a href="?page=<%= totalPages %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"><%= totalPages %></a>
-                        <% } %>
-
-                        <!-- Next Page -->
-                        <% if (currentPageAttr < totalPages) { %>
-                        <a href="?page=<%= currentPageAttr + 1 %><%= searchQuery != null ? "&search=" + java.net.URLEncoder.encode(searchQuery, "UTF-8") : "" %>" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            <span class="sr-only">Next</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                        <% } %>
-                    </nav>
+                
+                <!-- Navigation Buttons - No space between -->
+                <div class="flex gap-0">
+                    <!-- Previous Button -->
+                    <button onclick="handlePrev()"
+                        <%=currentPageAttr <= 1 ? "disabled" : ""%>
+                        class="flex <%=currentPageAttr <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"%> items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg border-r-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Next Button -->
+                    <button onclick="handleNext()"
+                        <%=currentPageAttr >= totalPages ? "disabled" : ""%>
+                        class="flex <%=currentPageAttr >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"%> items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -628,33 +549,21 @@
 // Sorting state
 let currentSort = {
     field: 'bookingId',
-    direction: 'desc' // 'asc' or 'desc'
+    direction: 'desc'
 };
-
-// All bookings data
-let allBookingsData = [];
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    initializeBookingsData();
     setupSorting();
     setupStatusFilter();
     setupSearch();
+    
+    // Initialize records per page selector
+    const recordsSelect = document.getElementById('recordsPerPage');
+    if (recordsSelect) {
+        recordsSelect.value = '<%= recordsPerPageAttr %>';
+    }
 });
-
-function initializeBookingsData() {
-    const bookingRows = document.querySelectorAll('.booking-row');
-    allBookingsData = Array.from(bookingRows).map(row => ({
-        element: row,
-        bookingId: parseInt(row.dataset.bookingId),
-        status: row.dataset.status,
-        movieTitle: row.dataset.movieTitle || '',
-        theaterName: row.dataset.theaterName || '',
-        seatCount: parseInt(row.dataset.seatCount) || 0,
-        totalPrice: parseFloat(row.dataset.totalPrice) || 0,
-        bookingDate: parseInt(row.dataset.bookingDate) || 0
-    }));
-}
 
 function setupSorting() {
     document.querySelectorAll('.sortable').forEach(header => {
@@ -684,66 +593,51 @@ function handleSort(field) {
 function updateSortHeaders() {
     // Reset all headers
     document.querySelectorAll('.sortable').forEach(header => {
-        const ascIcon = header.querySelector('.sort-asc');
-        const descIcon = header.querySelector('.sort-desc');
-        
-        ascIcon.classList.remove('text-red-600');
-        ascIcon.classList.add('text-gray-400');
-        descIcon.classList.remove('text-red-600');
-        descIcon.classList.add('text-gray-400');
+        const icon = header.querySelector('svg');
+        icon.classList.remove('text-red-600');
+        icon.classList.add('text-gray-600');
     });
     
     // Highlight current sort header
     const currentHeader = document.querySelector(`[data-sort="${currentSort.field}"]`);
     if (currentHeader) {
-        const ascIcon = currentHeader.querySelector('.sort-asc');
-        const descIcon = currentHeader.querySelector('.sort-desc');
-        
-        if (currentSort.direction === 'asc') {
-            ascIcon.classList.remove('text-gray-400');
-            ascIcon.classList.add('text-red-600');
-        } else {
-            descIcon.classList.remove('text-gray-400');
-            descIcon.classList.add('text-red-600');
-        }
+        const icon = currentHeader.querySelector('svg');
+        icon.classList.remove('text-gray-600');
+        icon.classList.add('text-red-600');
     }
 }
 
 function sortAndDisplayBookings() {
-    const filteredRows = getFilteredRows();
+    const tableBody = document.getElementById('bookingTableBody');
+    const rows = Array.from(tableBody.querySelectorAll('.booking-row'));
     
-    // Sort the rows
-    filteredRows.sort((a, b) => {
+    rows.sort((a, b) => {
         let aValue, bValue;
         
         switch (currentSort.field) {
             case 'bookingId':
-                aValue = a.bookingId;
-                bValue = b.bookingId;
+                aValue = parseInt(a.dataset.bookingId);
+                bValue = parseInt(b.dataset.bookingId);
                 break;
             case 'movieTitle':
-                aValue = a.movieTitle;
-                bValue = b.movieTitle;
+                aValue = a.dataset.movieTitle;
+                bValue = b.dataset.movieTitle;
                 break;
             case 'theaterName':
-                aValue = a.theaterName;
-                bValue = b.theaterName;
+                aValue = a.dataset.theaterName;
+                bValue = b.dataset.theaterName;
                 break;
             case 'seatCount':
-                aValue = a.seatCount;
-                bValue = b.seatCount;
+                aValue = parseInt(a.dataset.seatCount);
+                bValue = parseInt(b.dataset.seatCount);
                 break;
             case 'totalPrice':
-                aValue = a.totalPrice;
-                bValue = b.totalPrice;
-                break;
-            case 'status':
-                aValue = a.status;
-                bValue = b.status;
+                aValue = parseFloat(a.dataset.totalPrice);
+                bValue = parseFloat(b.dataset.totalPrice);
                 break;
             default:
-                aValue = a.bookingDate;
-                bValue = b.bookingDate;
+                aValue = parseInt(a.dataset.bookingDate);
+                bValue = parseInt(b.dataset.bookingDate);
         }
         
         // Handle string comparison
@@ -760,26 +654,23 @@ function sortAndDisplayBookings() {
     });
     
     // Update table
-    const tableBody = document.getElementById('bookingTableBody');
     tableBody.innerHTML = '';
-    
-    filteredRows.forEach(booking => {
-        tableBody.appendChild(booking.element.cloneNode(true));
-    });
-    
-    updateStats();
+    rows.forEach(row => tableBody.appendChild(row));
 }
 
 function setupStatusFilter() {
-    document.querySelectorAll('.status-card').forEach(card => {
+    document.querySelectorAll('.statusBtn').forEach(card => {
         card.addEventListener('click', () => {
             const status = card.dataset.status;
             
             // Update active card
-            document.querySelectorAll('.status-card').forEach(c => {
-                c.classList.remove('active', 'ring-2', 'ring-red-500');
+            document.querySelectorAll('.statusBtn').forEach(c => {
+                c.classList.remove('border-red-500', 'bg-red-50', 'text-red-600');
+                c.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
             });
-            card.classList.add('active', 'ring-2', 'ring-red-500');
+            
+            card.classList.add('border-red-500', 'bg-red-50', 'text-red-600');
+            card.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
             
             // Apply filter
             applyStatusFilter(status);
@@ -798,13 +689,10 @@ function applyStatusFilter(status) {
             row.style.display = 'none';
         }
     });
-    
-    updateStats();
-    updateSortHeaders();
 }
 
 function setupSearch() {
-    const searchInput = document.getElementById('search');
+    const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', debounce(function() {
         const searchTerm = this.value.toLowerCase().trim();
         filterBySearch(searchTerm);
@@ -827,27 +715,56 @@ function filterBySearch(searchTerm) {
         
         row.style.display = matches ? '' : 'none';
     });
-    
-    updateStats();
 }
 
-function getFilteredRows() {
-    const tableBody = document.getElementById('bookingTableBody');
-    const visibleRows = Array.from(tableBody.querySelectorAll('.booking-row:not([style*="display: none"])'));
-    
-    return visibleRows.map(row => {
-        return allBookingsData.find(booking => booking.bookingId === parseInt(row.dataset.bookingId));
-    }).filter(booking => booking !== undefined);
+// Pagination functions
+function handlePrev() {
+    <% if (currentPageAttr > 1) { %>
+        const prevPage = <%= currentPageAttr - 1 %>;
+        navigateToPage(prevPage);
+    <% } %>
 }
 
-function updateStats() {
-    const visibleRows = getFilteredRows();
+function handleNext() {
+    <% if (currentPageAttr < totalPages) { %>
+        const nextPage = <%= currentPageAttr + 1 %>;
+        navigateToPage(nextPage);
+    <% } %>
+}
+
+function handleLimitChange() {
+    const select = document.getElementById('recordsPerPage');
+    const newLimit = select.value;
     
-    // Update counts
-    document.getElementById('totalBookings').textContent = visibleRows.length;
-    document.getElementById('confirmedBookings').textContent = visibleRows.filter(b => b.status === 'confirmed').length;
-    document.getElementById('pendingBookings').textContent = visibleRows.filter(b => b.status === 'pending').length;
-    document.getElementById('cancelledBookings').textContent = visibleRows.filter(b => b.status === 'cancelled').length;
+    // Create URL with new limit
+    let url = '?limit=' + newLimit;
+    
+    // Keep search parameter if exists
+    const searchQuery = '<%= searchQuery != null ? searchQuery : "" %>';
+    if (searchQuery) {
+        url += '&search=' + encodeURIComponent(searchQuery);
+    }
+    
+    // Reset to first page when changing limit
+    url += '&page=1';
+    
+    window.location.href = url;
+}
+
+function navigateToPage(page) {
+    let url = '?page=' + page;
+    
+    // Add search parameter if exists
+    const searchQuery = '<%= searchQuery != null ? searchQuery : "" %>';
+    if (searchQuery) {
+        url += '&search=' + encodeURIComponent(searchQuery);
+    }
+    
+    // Add limit parameter
+    const currentLimit = <%= recordsPerPageAttr %>;
+    url += '&limit=' + currentLimit;
+    
+    window.location.href = url;
 }
 
 function cancelBooking(bookingId) {
@@ -864,53 +781,7 @@ function debounce(func, delay) {
         timer = setTimeout(() => func.apply(this, args), delay);
     };
 }
-
-// Auto-focus search input
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search');
-    if (searchInput) {
-        searchInput.focus();
-        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-    }
-});
 </script>
-
-<style>
-.sortable:hover {
-    background-color: #f9fafb;
-}
-
-.sort-icons {
-    opacity: 0.6;
-}
-
-.sortable:hover .sort-icons {
-    opacity: 1;
-}
-
-.status-card.active {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.status-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.status-card:hover:not(.active) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.booking-row {
-    transition: all 0.3s ease;
-}
-
-.booking-row:hover {
-    background-color: #f9fafb;
-}
-</style>
 
 <jsp:include page="layout/footer.jsp"/>
 <jsp:include page="layout/JSPFooter.jsp"/>

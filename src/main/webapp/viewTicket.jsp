@@ -77,7 +77,16 @@ else if ("cancelled".equalsIgnoreCase(booking.getStatus()))
 
 <div class="min-h-screen bg-gradient-to-br from-red-50 to-rose-50 py-8">
 	<div class="container mx-auto px-4 max-w-6xl">
-
+<nav class="text-gray-500 text-sm mb-4" aria-label="Breadcrumb">
+			<ol class="list-none p-0 inline-flex">
+				<li><a href="home.jsp" class="hover:text-red-600">Home</a></li>
+            <li><span class="mx-2">/</span></li>
+            <li><a href="user-orders.jsp" class="hover:text-red-600">My Bookings</a></li>
+            <li><span class="mx-2">/</span></li>
+				<li class="flex items-center text-gray-900 font-semibold">Booking Details
+				</li>
+			</ol>
+		</nav>
 		<!-- Header -->
 		<div class="text-center mb-8">
 			<h1 class="text-4xl font-bold text-gray-900 mb-3">Booking

@@ -20,12 +20,12 @@
 <jsp:include page="JSPHeader.jsp"/>
 
 <!-- Top Navbar -->
-<div class="bg-white shadow-sm border-b border-gray-200 px-6 py-3 flex justify-between items-center">
+<div class="bg-white shadow-sm border-b border-gray-200 px-6 py-3 flex justify-end items-center">
     <!-- Logo / Branding -->
-    <div class="flex items-center gap-2">
+    <!-- <div class="flex items-center gap-2">
         <img src="assets/img/cinema-logo.jpg" alt="Logo" class="w-10 h-10">
         <span class="text-lg font-semibold text-gray-700">CINEZY</span>
-    </div>
+    </div> -->
 
     <!-- Right Section -->
     <div class="flex items-center gap-6 relative">
