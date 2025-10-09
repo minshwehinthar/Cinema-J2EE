@@ -103,14 +103,30 @@ if(error == null){
                             if(!seatTypesPrinted.contains(s.getSeatType())){
                                 String bgColor = "bg-gray-50";
                                 String borderColor = "border-gray-200";
+                                String svgIcon = "";
 
-                                if(s.getSeatType().equalsIgnoreCase("VIP")) { bgColor = "bg-yellow-50"; borderColor = "border-yellow-400"; }
-                                else if(s.getSeatType().equalsIgnoreCase("Couple")) { bgColor = "bg-pink-50"; borderColor = "border-pink-400"; }
-                                else if(s.getSeatType().equalsIgnoreCase("Normal")) { bgColor = "bg-green-50"; borderColor = "border-green-400"; }
+                                if(s.getSeatType().equalsIgnoreCase("VIP")) { 
+                                    bgColor = "bg-yellow-50"; 
+                                    borderColor = "border-yellow-400";
+                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-armchair-icon lucide-armchair\"><path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\"/><path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M5 18v2\"/><path d=\"M19 18v2\"/></svg>";
+                                }
+                                else if(s.getSeatType().equalsIgnoreCase("Couple")) { 
+                                    bgColor = "bg-pink-50"; 
+                                    borderColor = "border-pink-400";
+                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sofa-icon lucide-sofa\"><path d=\"M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3\"/><path d=\"M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M4 18v2\"/><path d=\"M20 18v2\"/><path d=\"M12 4v9\"/></svg>";
+                                }
+                                else if(s.getSeatType().equalsIgnoreCase("Standard") || s.getSeatType().equalsIgnoreCase("Normal")) { 
+                                    bgColor = "bg-green-50"; 
+                                    borderColor = "border-green-400";
+                                    svgIcon = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-armchair-icon lucide-armchair\"><path d=\"M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3\"/><path d=\"M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"/><path d=\"M5 18v2\"/><path d=\"M19 18v2\"/></svg>";
+                                }
                     %>
                     <div class="flex flex-col items-center justify-center p-5 rounded-2xl border-2 <%= borderColor %> shadow hover:shadow-lg transition-all duration-300 <%= bgColor %>">
-                        <span class="text-gray-800 font-semibold text-center text-lg"><%= s.getSeatType() %></span>
-                        <span class="text-red-600 font-bold mt-2 text-center text-lg"><%= s.getPrice() %> MMK</span>
+                        <div class="flex items-center gap-2 mb-2">
+                            <%= svgIcon %>
+                            <span class="text-gray-800 font-semibold text-center text-lg"><%= s.getSeatType() %></span>
+                        </div>
+                        <span class="text-red-600 font-bold text-center text-lg"><%= s.getPrice() %> MMK</span>
                     </div>
                     <%
                                 seatTypesPrinted.add(s.getSeatType());
@@ -257,17 +273,28 @@ if(error == null){
                                 </div>
                                 
                                 <!-- Seat Legend -->
-                                <div class="seat-legend grid  grid-cols-5 gap-4 mt-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="seat-legend grid grid-cols-5 gap-4 mt-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
                                     <div class="flex items-center gap-3">
                                         <div class="w-7 h-7 border-2 border-gray-400 rounded-md shadow-sm"></div>
                                         <span class="text-gray-700 text-sm font-medium">Available</span>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <div class="w-7 h-7 border-2 border-yellow-400 rounded-md shadow-sm"></div>
-                                        <span class="text-gray-700 text-sm font-medium">VIP</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-armchair">
+                                            <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/>
+                                            <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                            <path d="M5 18v2"/>
+                                            <path d="M19 18v2"/>
+                                        </svg>
+                                        <span class="text-gray-700 text-sm font-medium">Standard/VIP</span>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-7 border-2 border-pink-500 rounded-md shadow-sm"></div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sofa">
+                                            <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                                            <path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/>
+                                            <path d="M4 18v2"/>
+                                            <path d="M20 18v2"/>
+                                            <path d="M12 4v9"/>
+                                        </svg>
                                         <span class="text-gray-700 text-sm font-medium">Couple</span>
                                     </div>
                                     <div class="flex items-center gap-3">

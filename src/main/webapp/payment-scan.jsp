@@ -75,7 +75,7 @@
         }
     }
 %>
-
+<jsp:include page="layout/JSPHeader.jsp"/>
 <jsp:include page="layout/header.jsp"/>
 
 <div class="bg-gray-50 min-h-screen font-sans flex flex-col items-center py-12">

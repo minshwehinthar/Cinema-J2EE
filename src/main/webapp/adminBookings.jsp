@@ -1,6 +1,6 @@
 <%@page import="com.demo.dao.TheaterDAO"%>
 <%@page import="com.demo.dao.BookingDao"%>
-
+<%@ page import="java.util.ArrayList" %>
 <%@ page import="com.demo.model.Booking" %>
 <%@ page import="com.demo.model.User" %>
 <%@ page import="com.demo.model.Theater" %>
@@ -18,7 +18,7 @@
 
     // Get theater info for theater admin
     Theater userTheater = null;
-    if ("theater_admin".equals(adminUser.getRole())) {
+    if ("theateradmin".equals(adminUser.getRole())) {
         TheaterDAO theaterDao = new TheaterDAO();
         userTheater = theaterDao.getTheaterByUserId(adminUser.getUserId());
     }
@@ -28,11 +28,20 @@
     List<Booking> allBookings = null;
     String errorMessage = null;
     
+    // Load all theaters for admin
+    TheaterDAO theaterDao = new TheaterDAO();
+    ArrayList<Theater> theaters = new ArrayList<>();
+    if ("admin".equals(adminUser.getRole())) {
+        theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
+    }
+    
     try {
-        if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) {
+        if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) {
             allBookings = bookingDAO.getBookingsByTheaterId(userTheater.getTheaterId());
-        } else {
+        } else if ("admin".equals(adminUser.getRole())) {
             allBookings = bookingDAO.getAllBookings();
+        } else {
+            allBookings = new java.util.ArrayList<>();
         }
     } catch (Exception e) {
         errorMessage = "Error loading bookings: " + e.getMessage();
@@ -42,7 +51,6 @@
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
     SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 %>
-
 
 <div class="flex">
     <jsp:include page="layout/sidebar.jsp" />
@@ -55,7 +63,7 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Booking Management</h1>
                     <p class="text-gray-600 mt-1">
-                        <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
+                        <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
                             Managing bookings for <span class="font-semibold text-red-600"><%= userTheater.getName() %></span>
                         <% } else { %>
                             Manage all customer bookings and seat availability
@@ -68,8 +76,96 @@
                 </button>
             </div>
 
+            <!-- Right Sidebar (Admin Theater Filter) -->
+            <% if ("admin".equals(adminUser.getRole())) { %>
+            <!-- Sidebar Toggle Button -->
+            <button id="sidebar-toggle"
+                class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg hover:bg-red-700 transition">
+                ☰
+            </button>
+
+            <aside id="right-sidebar"
+                class="fixed top-[64px] right-0 w-64 h-[calc(100vh-64px)] bg-white border-l border-gray-200 overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">Theater</h3>
+                    <button id="sidebar-close"
+                        class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
+                </div>
+
+                <ul class="space-y-1">
+                    <!-- All Button -->
+                    <li class="theater-filter px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold"
+                        data-theater-id="all">Show All</li>
+
+                    <% for (Theater t : theaters) { %>
+                    <li class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition"
+                        data-theater-id="<%=t.getTheaterId()%>">
+                        <span class="block font-medium"><%=t.getName()%></span>
+                    </li>
+                    <% } %>
+                </ul>
+            </aside>
+
+            <script>
+                const sidebarToggle = document.getElementById('sidebar-toggle');
+                const rightSidebar = document.getElementById('right-sidebar');
+                const sidebarClose = document.getElementById('sidebar-close');
+
+                sidebarToggle.addEventListener('click', () => {
+                    const isOpen = !rightSidebar.classList.contains('translate-x-full');
+                    rightSidebar.classList.toggle('translate-x-full');
+                    sidebarToggle.textContent = isOpen ? '☰' : '✕';
+                });
+
+                sidebarClose.addEventListener('click', () => {
+                    rightSidebar.classList.add('translate-x-full');
+                    sidebarToggle.textContent = '☰';
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
+                        rightSidebar.classList.add('translate-x-full');
+                        sidebarToggle.textContent = '☰';
+                    }
+                });
+
+                // =============================
+                // THEATER FILTER FOR BOOKINGS
+                // =============================
+                const theaterFilters = document.querySelectorAll('.theater-filter');
+                
+                theaterFilters.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const theaterId = item.getAttribute('data-theater-id');
+
+                        // Reset all to inactive
+                        theaterFilters.forEach(i => {
+                            i.classList.remove('bg-red-100', 'text-red-700', 'font-semibold');
+                            i.classList.add('text-gray-700');
+                        });
+
+                        // Set active
+                        item.classList.remove('text-gray-700');
+                        item.classList.add('bg-red-100', 'text-red-700', 'font-semibold');
+
+                        // Show all if "all" selected
+                        if (theaterId === "all") {
+                            document.querySelectorAll('#tableBody tr').forEach(row => row.style.display = '');
+                            return;
+                        }
+
+                        // Filter bookings by theater ID
+                        document.querySelectorAll('#tableBody tr').forEach(row => {
+                            const rowTheaterId = row.getAttribute('data-theater-id');
+                            row.style.display = (rowTheaterId === theaterId) ? '' : 'none';
+                        });
+                    });
+                });
+            </script>
+            <% } %>
+
             <!-- Theater Admin Info Card -->
-            <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
+            <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
             <div class="bg-gradient-to-r from-red-50 to-white border border-red-200 rounded-lg p-6 mb-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
@@ -89,8 +185,6 @@
                 </div>
             </div>
             <% } %>
-
-            
 
             <!-- Search and Filter -->
             <div class="flex justify-between items-center mb-6">
@@ -151,7 +245,7 @@
                                         </div>
                                         <h3 class="text-lg font-medium text-gray-600 mb-2">No bookings found</h3>
                                         <p class="text-gray-500">
-                                            <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
+                                            <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
                                                 No bookings for <%= userTheater.getName() %> yet.
                                             <% } else { %>
                                                 There are no bookings in the system yet.
@@ -165,29 +259,56 @@
                                     String statusText = "";
                                     String statusIcon = "";
                                     
-                                    switch(booking.getStatus().toLowerCase()) {
-                                        case "pending":
-                                            statusClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
-                                            statusText = "Pending";
-                                            statusIcon = "⏳";
-                                            break;
-                                        case "confirmed":
-                                            statusClass = "bg-green-100 text-green-800 border-green-200";
-                                            statusText = "Confirmed";
-                                            statusIcon = "✅";
-                                            break;
-                                        case "cancelled":
-                                            statusClass = "bg-red-100 text-red-800 border-red-200";
-                                            statusText = "Cancelled";
-                                            statusIcon = "❌";
-                                            break;
-                                        default:
-                                            statusClass = "bg-gray-100 text-gray-800 border-gray-200";
-                                            statusText = booking.getStatus();
-                                            statusIcon = "❓";
+                                    // Get theater ID for this booking
+                                    int theaterId = 0;
+                                    try {
+                                        TheaterDAO theaterDaoForBooking = new TheaterDAO();
+                                        // You need to implement this method in BookingDao to get theater ID for a booking
+                                        theaterId = bookingDAO.getTheaterIdByBookingId(booking.getBookingId());
+                                    } catch (Exception e) {
+                                        theaterId = 0;
                                     }
+                                    
+                                    switch(booking.getStatus().toLowerCase()) {
+                                    case "pending":
+                                        statusClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                                        statusText = "Pending";
+                                        statusIcon = "<i class=\"fa-regular fa-hourglass-half\"></i>";
+                                        break;
+                                    case "confirmed":
+                                        statusClass = "bg-green-100 text-green-800 border-green-200";
+                                        statusText = "Confirmed";
+                                        statusIcon = "<i class=\"fa-solid fa-circle-check\"></i>";
+                                        break;
+                                    case "cancelled":
+                                        statusClass = "bg-red-100 text-red-800 border-red-200";
+                                        statusText = "Cancelled";
+                                        statusIcon = "<i class=\"fa-solid fa-xmark\"></i>";
+                                        break;
+                                    case "completed":
+                                        statusClass = "bg-blue-100 text-blue-800 border-blue-200";
+                                        statusText = "Completed";
+                                        statusIcon = "<i class=\"fa-solid fa-flag-checkered\"></i>";
+                                        break;
+                                    case "refunded":
+                                        statusClass = "bg-purple-100 text-purple-800 border-purple-200";
+                                        statusText = "Refunded";
+                                        statusIcon = "<i class=\"fa-solid fa-rotate-left\"></i>";
+                                        break;
+                                    case "expired":
+                                        statusClass = "bg-gray-100 text-gray-800 border-gray-200";
+                                        statusText = "Expired";
+                                        statusIcon = "<i class=\"fa-regular fa-clock\"></i>";
+                                        break;
+                                    default:
+                                        statusClass = "bg-gray-100 text-gray-800 border-gray-200";
+                                        statusText = booking.getStatus();
+                                        statusIcon = "<i class=\"fa-solid fa-question\"></i>";
+                                }
                             %>
-                            <tr class="hover:bg-red-50 transition-colors duration-150" id="bookingRow<%= booking.getBookingId() %>">
+                            <tr class="hover:bg-red-50 transition-colors duration-150" 
+                                id="bookingRow<%= booking.getBookingId() %>"
+                                data-theater-id="<%= theaterId %>">
                                 <!-- Booking ID -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-3">
@@ -247,7 +368,6 @@
                                         <% if ("confirmed".equals(booking.getStatus())) { %>
                                             <button onclick="adminCancelBooking(<%= booking.getBookingId() %>)" 
                                                     class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                                
                                                 <span>Cancel</span>
                                             </button>
                                         <% } %>
@@ -255,7 +375,6 @@
                                         <!-- View Details Button -->
                                         <button onclick="viewBookingDetails(<%= booking.getBookingId() %>)" 
                                                 class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                            
                                             <span>View</span>
                                         </button>
                                         
@@ -263,7 +382,6 @@
                                         <% if ("cancelled".equals(booking.getStatus())) { %>
                                             <button onclick="deleteBooking(<%= booking.getBookingId() %>)" 
                                                     class="w-full px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                                
                                                 <span>Delete</span>
                                             </button>
                                         <% } %>
@@ -406,13 +524,10 @@ function sortTable(field) {
 
 // Initialize pagination
 function initPagination() {
-    // Simple pagination implementation
     const rows = document.querySelectorAll('#tableBody tr');
     const itemsPerPage = 10;
     const totalPages = Math.ceil(rows.length / itemsPerPage);
-    
-    // For now, we'll just show all rows
-    // You can implement proper pagination similar to your order history page
+    // You can implement proper pagination later
 }
 
 // Initialize on load

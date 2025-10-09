@@ -59,8 +59,8 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
         <img src="https://images.unsplash.com/photo-1731004270606-d39d246c1e01?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                alt="Slide 1" class="object-cover w-full h-[800px] overflow-hidden">
           
-          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Experience the Magic of Cinema</h2>
+          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-20 text-white">
+            <h2 class="text-5xl font-bold mb-8">Experience the Magic of Cinema</h2>
             <h3 class="text-xl mb-2">Blockbuster Movies Await</h3>
             <p class="mb-4 max-w-lg">Book your tickets now and enjoy the latest blockbusters in our premium theaters with state-of-the-art sound and projection.</p>
             <div class="flex gap-3">
@@ -74,8 +74,8 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
         <div class="swiper-slide relative">
           <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                alt="Slide 2" class="object-cover w-full h-[800px] overflow-hidden">
-          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Premium Cinema Experience</h2>
+          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-20 text-white">
+            <h2 class="text-5xl font-bold mb-8">Premium Cinema Experience</h2>
             <h3 class="text-xl mb-2">Comfort & Luxury Combined</h3>
             <p class="mb-4 max-w-lg">Enjoy our recliner seats, Dolby Atmos sound, and crystal-clear 4K projection for an unforgettable movie experience.</p>
             <div class="flex gap-3">
@@ -88,8 +88,8 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
         <div class="swiper-slide relative">
           <img src="https://plus.unsplash.com/premium_photo-1681487691813-347cdd6f453c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8" 
                alt="Slide 3" class="object-cover w-full h-[800px] overflow-hidden">
-          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-6 text-white">
-            <h2 class="text-3xl font-bold mb-2">Delicious Snacks & Drinks</h2>
+          <div class="absolute inset-0 bg-black/30 flex flex-col justify-center p-20 text-white">
+            <h2 class="text-5xl font-bold mb-8">Delicious Snacks & Drinks</h2>
             <h3 class="text-xl mb-2">Complete Your Movie Night</h3>
             <p class="mb-4 max-w-lg">From classic popcorn to gourmet snacks, we have everything you need to make your movie experience perfect.</p>
             <div class="flex gap-3">
@@ -165,13 +165,9 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
       %>
     </div>
     
-    <% if (!nowShowingMovies.isEmpty() && nowShowingMovies.size() > 4) { %>
-    <div class="text-center mt-8">
-      <a href="movies.jsp?filter=now-showing" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-300 inline-block">
-        View All Now Showing Movies
-      </a>
-    </div>
-    <% } %>
+    <div class="text-center mx-auto mt-6 text-red-600 font-bold hover:text-red-700">
+      -<a href="movies.jsp" class="underline duration-500 px-4 py-2 rounded inline-block"> View All </a>-
+     </div>
   </div>
 </section>
 
@@ -223,13 +219,9 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
       %>
     </div>
     
-    <% if (!comingSoonMoviesList.isEmpty() && comingSoonMoviesList.size() > 4) { %>
-    <div class="text-center mt-8">
-      <a href="movies.jsp?filter=coming-soon" class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-lg font-semibold transition duration-300 inline-block">
-        View All Coming Soon
-      </a>
-    </div>
-    <% } %>
+    <div class="text-center mx-auto mt-6 text-red-600 font-bold hover:text-red-700">
+      -<a href="movies.jsp" class="underline duration-500 px-4 py-2 rounded inline-block"> View All </a>-
+     </div>
   </div>
 </section>
 
@@ -580,31 +572,37 @@ System.out.println("Coming soon count: " + comingSoonMoviesList.size());
     <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
       <div class="flex justify-center mb-4">
         <span class="w-16 h-16 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-2xl">
-          🚚
+         <i class="fa-regular fa-address-card"></i>
         </span>
       </div>
-      <h3 class="text-xl font-semibold text-gray-800 mb-3">Free Delivery</h3>
-      <p class="text-gray-600">Get your favorite snacks delivered right to your seat without any extra charges.</p>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Easy Booking</h3>
+      <p class="text-gray-600">Quick and hassle-free online ticket booking with instant confirmation and secure payment.</p>
     </div>
     
     <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
       <div class="flex justify-center mb-4">
         <span class="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
-          💵
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z" />
+</svg>
+          
         </span>
       </div>
-      <h3 class="text-xl font-semibold text-gray-800 mb-3">Best Prices</h3>
-      <p class="text-gray-600">Enjoy competitive ticket prices and special discounts for students and seniors.</p>
+      <h3 class="text-xl font-semibold text-gray-800 mb-3">Multiple Showtimes</h3>
+      <p class="text-gray-600">Flexible scheduling with showtimes throughout the day to fit your busy schedule.</p>
     </div>
     
     <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
       <div class="flex justify-center mb-4">
         <span class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-2xl">
-          🎧
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0 1 18 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0 1 18 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 0 1 6 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5m14.25 0h1.5" />
+</svg>
+          
         </span>
       </div>
       <h3 class="text-xl font-semibold text-gray-800 mb-3">Premium Experience</h3>
-      <p class="text-gray-600">State-of-the-art sound systems, comfortable seating, and crystal-clear projection.</p>
+      <p class="text-gray-600">State-of-the-art sound systems, comfortable seating, and crystal-clear projection quality.</p>
     </div>
   </div>
 </section>

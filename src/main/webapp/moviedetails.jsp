@@ -49,7 +49,7 @@ boolean isNowShowing = "now-showing".equalsIgnoreCase(status);
 			<div class="lg:w-7/12 w-full flex flex-col justify-between">
 				<div class="mb-8">
 					<h1
-						class="mb-6 text-4xl md:text-5xl font-bold leading-tight text-gray-900">
+						class="mb-6 text-3xl  font-bold leading-tight text-red-900">
 						<%=movie.getTitle()%>
 					</h1>
 

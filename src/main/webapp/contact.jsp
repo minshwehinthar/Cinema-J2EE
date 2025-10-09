@@ -12,17 +12,15 @@
 			<div class="space-y-4">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Email</p>
-					<p class="text-lg font-semibold text-gray-800">consulting@gmail.com</p>
+					<p class="text-lg font-semibold text-gray-800">cinezy17@gmail.com</p>
 				</div>
 				<div>
 					<p class="text-sm font-medium text-gray-500">Phone</p>
-					<p class="text-lg font-semibold text-gray-800">+1 (123)
-						456-7890</p>
+					<p class="text-lg font-semibold text-gray-800">+959780865174</p>
 				</div>
 				<div>
 					<p class="text-sm font-medium text-gray-500">Office</p>
-					<p class="text-lg font-semibold text-gray-800">456 Business
-						Ave, New York</p>
+					<p class="text-lg font-semibold text-gray-800">University of Computer Stuides, Hpa-an, Kayin State</p>
 				</div>
 			</div>
 			<!-- Contact Form -->

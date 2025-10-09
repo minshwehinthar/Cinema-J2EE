@@ -19,7 +19,7 @@
 
             <!-- Brand -->
             <div>
-                <h2 class="text-2xl font-bold tracking-tight"><img src="assets/img/cinema-logo.jpg" alt="Logo" class="w-12 h-12">J-Seven</h2>
+                <h2 class="text-2xl font-bold tracking-tight"><img src="assets/img/cinema-logo.jpg" alt="Logo" class="w-12 h-12">CINEZY</h2>
                 <p class="mt-4 text-sm text-gray-600 leading-relaxed">
                     Your ultimate movie companion — discover films, share reviews, and connect with cinema lovers worldwide.
                 </p>
@@ -37,6 +37,7 @@
                 <ul class="space-y-3 text-sm">
                     <li><a href="index.jsp" class="hover:text-indigo-600 transition">Home</a></li>
                     <li><a href="movies.jsp" class="hover:text-indigo-600 transition">Movies</a></li>
+                    <li><a href="movie-list-user.jsp" class="hover:text-indigo-600 transition">Movie Lists</a></li>
                     <li><a href="cinemas.jsp" class="hover:text-indigo-600 transition">Cinemas</a></li>
                     <li><a href="food.jsp" class="hover:text-indigo-600 transition">Food</a></li>
                     <li><a href="faq.jsp" class="hover:text-indigo-600 transition">FAQ</a></li>
@@ -52,7 +53,6 @@
                     <%
                         if (user != null) { // show links only for logged-in users
                     %>
-                        <li><a href="chat.jsp" class="hover:text-indigo-600 transition">Chat</a></li>
                         <li><a href="profile.jsp" class="hover:text-indigo-600 transition">My Profile</a></li>
                         <li><a href="logout" class="text-red-600 hover:text-red-800 transition">Logout</a></li>
                     <%
@@ -70,8 +70,8 @@
             <div>
                 <h3 class="text-base font-semibold mb-4">Contact</h3>
                 <ul class="space-y-3 text-sm">
-                    <li>Email: <a href="mailto:support@cineflow.com" class="hover:text-indigo-600 transition">support@cineflow.com</a></li>
-                    <li>Phone: +95 912 345 678</li>
+                    <li>Email: <a href="mailto:support@cineflow.com" class="hover:text-indigo-600 transition">cinezy17@gmail.com</a></li>
+                    <li>Phone: +95 9780865174</li>
                     <li><a href="contact.jsp" class="hover:text-indigo-600 transition">Contact Form</a></li>
                 </ul>
             </div>

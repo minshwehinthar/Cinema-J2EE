@@ -1,3 +1,4 @@
+
 <%@page import="com.demo.dao.BookingDao"%>
 <%@ page import="com.demo.model.Booking" %>
 <%@ page import="com.demo.model.User" %>
@@ -511,20 +512,29 @@
                                 </td>
                                 
                                 <!-- Actions -->
-                                <td class="px-6 py-5">
-                                    <div class="flex space-x-3">
-                                        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
-                                           class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition shadow-sm">
-                                            View Ticket
-                                        </a>
-                                        <% if ("confirmed".equalsIgnoreCase(booking.getStatus()) || "pending".equalsIgnoreCase(booking.getStatus())) { %>
-                                        <button onclick="UserCancelBookingServlet(<%= booking.getBookingId() %>)" 
-                                                class="inline-flex items-center px-4 py-2 border border-red-600 text-red-600 text-sm font-medium rounded-lg hover:bg-red-600 hover:text-white transition">
-                                            Cancel
-                                        </button>
-                                        <% } %>
-                                    </div>
-                                </td>
+								<td class="px-6 py-5">
+								    <div class="flex justify-center space-x-3">
+								        <% if ("pending".equalsIgnoreCase(booking.getStatus())) { %>
+								        <!-- Pending: Show Cancel + View buttons -->
+								        <button onclick="cancelBooking(<%= booking.getBookingId() %>)" 
+								                class="inline-flex items-center px-4 py-2 bg-white text-red-700 border border-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
+								            Cancel
+								        </button>
+								        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
+								           class="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">
+								            View
+								        </a>
+								        <% } else if ("confirmed".equalsIgnoreCase(booking.getStatus())) { %>
+								        <!-- Confirmed: Show Only View button -->
+								        <a href="viewTicket.jsp?bookingId=<%= booking.getBookingId() %>" 
+								           class="inline-flex items-center px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">
+								            View Ticket
+								        </a>
+								        <% } else if ("cancelled".equalsIgnoreCase(booking.getStatus())) { %>
+								        <!-- Cancelled: Show nothing (empty) -->
+								        <% } %>
+								    </div>
+								</td>
                             </tr>
                             <% } %>
                         </tbody>

@@ -90,7 +90,7 @@
                     <div class="bg-white rounded-xl shadow p-6 border-l-4 border-red-500">
                         <div class="flex items-center">
                             <div class="rounded-full bg-red-100 p-3 mr-4">
-                                <i class="fas fa-dollar-sign text-red-600 text-xl"></i>
+                                <i class="fas fa-money-bill-wave text-red-600 text-xl"></i>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Average Price</p>
@@ -101,7 +101,7 @@
                                     }
                                     double avgPrice = total / prices.size();
                                 %>
-                                <p class="text-2xl font-bold text-gray-900">$<%= String.format("%.2f", avgPrice) %></p>
+                                <p class="text-2xl font-bold text-gray-900"><%= String.format("%,.0f", avgPrice) %> MMK</p>
                             </div>
                         </div>
                     </div>
@@ -143,15 +143,15 @@
                                 </div>
                                 
                                 <div class="mt-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Price (MMK)</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                            <span class="text-gray-500 sm:text-sm">MMK</span>
                                         </div>
                                         <input type="hidden" name="priceId" value="<%= sp.getPriceId() %>">
-                                        <input type="number" step="0.01" name="price_<%= sp.getPriceId() %>" 
-                                               value="<%= sp.getPrice() %>" 
-                                               class="price-input pl-7 border border-gray-300 rounded-lg py-2 px-3 block w-full focus:ring-red-500 focus:border-red-500">
+                                        <input type="number" name="price_<%= sp.getPriceId() %>" 
+                                               value="<%= sp.getPrice().intValue() %>" 
+                                               class="price-input pl-16 border border-gray-300 rounded-lg py-2 px-3 block w-full focus:ring-red-500 focus:border-red-500">
                                     </div>
                                 </div>
                                 
@@ -189,6 +189,7 @@
                                 <p>• Consider market rates and competitor pricing when updating seat prices</p>
                                 <p>• Premium seats should be priced 20-50% higher than standard seats</p>
                                 <p>• Changes will take effect immediately for new bookings</p>
+                                <p>• Prices should be in whole MMK amounts (no decimals)</p>
                             </div>
                         </div>
                     </div>

@@ -48,7 +48,7 @@
     if(customerEmail == null) customerEmail = "Not provided";
     if(customerPhone == null) customerPhone = "Not provided";
 %>
-
+<jsp:include page="layout/JSPHeader.jsp"/>
 <jsp:include page="layout/header.jsp"/>
 
 <div class="bg-gray-100 py-12 font-sans">
