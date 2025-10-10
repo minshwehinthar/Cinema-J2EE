@@ -44,7 +44,7 @@
                     <input type="text" name="email" id="email"
                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
                     <p class="text-red-600 text-sm mt-1 hidden" id="emailEmptyError">⚠ Email is required.</p>
-                    <p class="text-red-600 text-sm mt-1 hidden" id="emailInvalidError">⚠ Email must include @</p>
+                    <p class="text-red-600 text-sm mt-1 hidden" id="emailInvalidError">⚠ Email must include @gmail.com</p>
                 </div>
 
                 <!-- Phone -->
@@ -204,34 +204,37 @@ function validateForm() {
         valid = false;
     }
 
-    // Email validation
+    // Email validation (use proper Gmail RegExp)
+    const emailRegExp = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (email.value.trim() === '') {
         emailEmptyError.classList.remove('hidden');
         email.classList.add('border-red-500');
         valid = false;
-    } else if (!email.value.includes('@')) {
+    } else if (!emailRegExp.test(email.value.trim())) {
         emailInvalidError.classList.remove('hidden');
         email.classList.add('border-red-500');
         valid = false;
     }
 
-    // Phone validation
+    // Phone validation (only digits)
     if (phone.value.trim() === '') {
         phoneEmptyError.classList.remove('hidden');
         phone.classList.add('border-red-500');
         valid = false;
-    } else if (!/^\d+$/.test(phone.value.trim())) {
+    } else if (!/^[0-9]+$/.test(phone.value.trim())) {
         phoneInvalidError.classList.remove('hidden');
         phone.classList.add('border-red-500');
         valid = false;
     }
 
-    // Password validation
+    // Password validation (min 6 chars + at least 1 letter and 1 number)
+    const passwordRegExp = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
     if (password.value.trim() === '') {
         passwordEmptyError.classList.remove('hidden');
         password.classList.add('border-red-500');
         valid = false;
-    } else if (password.value.length < 6) {
+    } else if (!passwordRegExp.test(password.value)) {
+        passwordLengthError.textContent = "⚠ Password must be at least 6 characters, include letters, numbers and special characters.";
         passwordLengthError.classList.remove('hidden');
         password.classList.add('border-red-500');
         valid = false;

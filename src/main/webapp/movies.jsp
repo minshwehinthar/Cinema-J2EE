@@ -33,7 +33,7 @@
 
     <!-- Sidebar Toggle Button -->
     <button id="sidebar-toggle"
-        class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">
+        class="fixed top-[80px] right-0 z-100 bg-red-600 text-white px-3 py-1 rounded-l-lg shadow-lg hover:bg-red-700 transition">
         =
     </button>
 
@@ -43,7 +43,7 @@
         ArrayList<Theater> theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
     %>
     <aside id="right-sidebar"
-        class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full z-100 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
+        class="fixed top-[64px] right-0 w-64 h-[600px] bg-white border-l border-gray-200 rounded-md shadow-md overflow-y-auto p-5 transform translate-x-full z-90 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
         <div class="flex justify-between items-center mb-3">
             <h3 class="text-lg font-semibold text-gray-800">Filter by Theater</h3>
             <button id="sidebar-close"

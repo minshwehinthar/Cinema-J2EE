@@ -111,7 +111,7 @@ String currentPage = request.getRequestURI();
                 </div>
                 <% } else { %>
                 <div class=" lg:flex items-center gap-2">
-                    <a href="login.jsp" class="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-300 rounded hover:bg-gray-100 hover:text-black transition">Login</a>
+                    <a href="login.jsp" class="px-4 py-2 text-sm font-medium text-red-900 border border-red-900 rounded hover:bg-red-100 hover:text-black transition">Login</a>
                     <a href="register.jsp" class="px-4 py-2 text-sm font-medium text-white bg-black rounded hover:bg-gray-800 transition">Get Started</a>
                 </div>
                 <% } %>

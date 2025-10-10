@@ -8,9 +8,19 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 
 <%
+    // Debug: Print all session attributes
+    System.out.println("=== CONFIRMBOOKING.JSP SESSION DEBUG ===");
+    java.util.Enumeration<String> sessionAttributes = session.getAttributeNames();
+    while (sessionAttributes.hasMoreElements()) {
+        String attrName = sessionAttributes.nextElement();
+        Object attrValue = session.getAttribute(attrName);
+        System.out.println(attrName + " = " + attrValue);
+    }
+
     // Get user from session
     User user = (User) session.getAttribute("user");
     if (user == null) {
+        System.out.println("No user found in session, redirecting to login");
         response.sendRedirect("login.jsp");
         return;
     }
@@ -24,8 +34,18 @@
     String[] seatIds = (String[]) session.getAttribute("bookingSelectedSeatIds");
     Double totalPrice = (Double) session.getAttribute("bookingTotalPrice");
 
+    System.out.println("Booking data:");
+    System.out.println("movieId: " + movieId);
+    System.out.println("theaterId: " + theaterId);
+    System.out.println("showtimeId: " + showtimeId);
+    System.out.println("showDate: " + showDate);
+    System.out.println("selectedSeats: " + selectedSeats);
+    System.out.println("seatIds: " + (seatIds != null ? java.util.Arrays.toString(seatIds) : "null"));
+    System.out.println("totalPrice: " + totalPrice);
+
     if (movieId == null || theaterId == null || showtimeId == null || seatIds == null) {
-        out.println("<h2 class='text-red-600 text-center mt-10'>Booking data not found!</h2>");
+        System.out.println("Missing booking data, redirecting to home");
+        out.println("<script>alert('Booking data not found. Please start over.'); window.location='home.jsp';</script>");
         return;
     }
 
@@ -62,7 +82,7 @@
                 Movie Details
               </a>
             </li>
-                        <li><span class="mx-2">/</span></li>
+            <li><span class="mx-2">/</span></li>
             <li>
               <a href="GetMovieTheatersServlet?movie_id=<%= movieId %>" class="hover:text-red-600">
                 Available Theaters
@@ -71,22 +91,15 @@
             <li><span class="mx-2">/</span></li>
             <li><a href="selectShowtimes.jsp?movie_id=<%= movieId %>&theater_id=<%= theaterId %>" class="hover:text-red-600">Seat</a></li>
             <li><span class="mx-2">/</span></li>
-				<li class="flex items-center text-gray-900 font-semibold">Booking
-				</li>
-			</ol>
+            <li class="flex items-center text-gray-900 font-semibold">Booking</li>
           </ol>
         </nav>
         
    
         <!-- Header -->
         <div class="text-center mb-12">
-            <!-- <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4 border-2 border-red-200">
-                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-            </div> -->
             <h1 class="text-4xl font-bold text-gray-900 mb-3">Complete Your Booking</h1>
-            <p class="text-lg text-gray-700  mx-auto">Review your details and proceed to secure payment</p>
+            <p class="text-lg text-gray-700 mx-auto">Review your details and proceed to secure payment</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -95,12 +108,12 @@
                 <!-- Movie & Showtime Card -->
                 <div class="bg-white rounded-2xl border-2 border-red-100 overflow-hidden">
                     <div class="bg-gradient-to-r from-red-600 to-rose-700 pt-6 px-6 pb-3">
-                        <h2 class="text-2xl font-bold">Showtime Details</h2>
+                        <h2 class="text-2xl font-bold text-white">Showtime Details</h2>
                     </div>
                     <div class="px-6 pb-6">
                         <div class="flex items-start space-x-6">
                             <div class="flex-1">
-                                <h3 class="text-lg font-bold text-red-900 mb-2">Movie Title - <%= movieTitle %></h3>
+                                <h3 class="text-lg font-bold text-red-900 mb-2">Movie: <%= movieTitle %></h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                     <div class="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-100">
                                         <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center border border-red-200">
@@ -142,8 +155,8 @@
                         </h3>
                         <div class="bg-red-50 rounded-xl p-4 border border-red-100">
                             <div class="text-center">
-                                <p class="text-2xl font-bold text-red-700"><%= selectedSeats %></p>
-                                <p class="text-sm text-red-600 mt-1"><%= seatIds.length %> seats selected</p>
+                                <p class="text-2xl font-bold text-red-700"><%= selectedSeats != null ? selectedSeats : "No seats selected" %></p>
+                                <p class="text-sm text-red-600 mt-1"><%= seatIds != null ? seatIds.length : 0 %> seats selected</p>
                             </div>
                         </div>
                     </div>
@@ -167,7 +180,7 @@
                             </div>
                             <div class="p-2 bg-red-50 rounded-lg border border-red-100">
                                 <p class="text-sm text-gray-600">Phone</p>
-                                <p class="font-semibold text-gray-900"><%= user.getPhone() %></p>
+                                <p class="font-semibold text-gray-900"><%= user.getPhone() != null ? user.getPhone() : "Not provided" %></p>
                             </div>
                         </div>
                     </div>
@@ -225,8 +238,10 @@
                     <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full -mr-6 -mt-6"></div>
                     <div class="relative z-10">
                         <h3 class="text-lg font-semibold mb-2 text-red-900">Total Amount</h3>
-                        <p class="text-3xl text-red-700 font-bold mb-2" id="total-price-display"><%= totalPrice %> MMK</p>
-                        <div class="text-red-900 text-sm">
+                        <p class="text-3xl text-red-900 font-bold mb-2" id="total-price-display">
+                            <%= totalPrice != null ? totalPrice : 0 %> MMK
+                        </p>
+                        <div class="text-red-700 text-sm">
                             <p>Including all taxes and service fees</p>
                         </div>
                     </div>
@@ -242,7 +257,7 @@
                         <label class="payment-option group flex flex-col items-center p-4 border-2 border-red-200 rounded-xl w-full cursor-pointer transition-all hover:border-red-500 hover:bg-red-50">
                             <input type="radio" name="paymentMethod" value="kbzpay" class="hidden" required>
                             <div class="w-12 h-12 bg-blue-800 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform border border-white">
-                                 <img class="rounded-lg" src="assets/img/kpay.png"/>
+                                 <img class="rounded-lg w-10 h-10" src="assets/img/kpay.png" alt="KBZ Pay"/>
                             </div>
                             <span class="text-gray-700 text-sm font-medium group-hover:text-gray-900">KBZ Pay</span>
                         </label>
@@ -251,7 +266,7 @@
                         <label class="payment-option group flex flex-col items-center p-4 border-2 border-red-200 rounded-xl w-full cursor-pointer transition-all hover:border-red-500 hover:bg-red-50">
                             <input type="radio" name="paymentMethod" value="wavepay" class="hidden">
                             <div class="w-12 h-12 bg-yellow-400 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform border border-white">
-                                <img class="rounded-lg" src="assets/img/wavepay.jpeg"/>
+                                <img class="rounded-lg w-10 h-10" src="assets/img/wavepay.jpeg" alt="Wave Pay"/>
                             </div>
                             <span class="text-gray-700 text-sm font-medium group-hover:text-gray-900">Wave Pay</span>
                         </label>
@@ -260,7 +275,7 @@
                         <label class="payment-option group flex flex-col items-center p-4 border-2 border-red-200 rounded-xl w-full cursor-pointer transition-all hover:border-red-500 hover:bg-red-50">
                             <input type="radio" name="paymentMethod" value="cash" class="hidden">
                             <div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform border border-white">
-                                 <img class="rounded-lg" src="assets/img/cash.png"/>
+                                 <img class="rounded-lg w-10 h-10" src="assets/img/cash.png" alt="Cash"/>
                             </div>
                             <span class="text-gray-700 text-sm font-medium group-hover:text-gray-900">Cash</span>
                         </label>
@@ -272,25 +287,29 @@
                     <!-- Hidden form for digital payments -->
                     <form id="paymentForm" action="PaymentScanForBooking.jsp" method="post" class="hidden">
                         <input type="hidden" name="showtimeId" value="<%= showtimeId %>">
-                        <input type="hidden" name="totalPrice" value="<%= totalPrice %>">
+                        <input type="hidden" name="totalPrice" value="<%= totalPrice != null ? totalPrice : 0 %>">
                         <input type="hidden" name="paymentMethod" id="selectedPaymentMethodInput" value="">
-                        <% for(String seatId : seatIds) { %>
+                        <% if (seatIds != null) { 
+                            for(String seatId : seatIds) { %>
                             <input type="hidden" name="seatIds" value="<%= seatId %>">
-                        <% } %>
+                        <%   }
+                        } %>
                     </form>
 
                     <!-- Hidden form for cash payments -->
                     <form id="cashForm" action="BookTicketServlet" method="post" class="hidden">
                         <input type="hidden" name="showtimeId" value="<%= showtimeId %>">
-                        <input type="hidden" name="totalPrice" value="<%= totalPrice %>">
+                        <input type="hidden" name="totalPrice" value="<%= totalPrice != null ? totalPrice : 0 %>">
                         <input type="hidden" name="paymentMethod" value="cash">
-                        <% for(String seatId : seatIds) { %>
+                        <% if (seatIds != null) { 
+                            for(String seatId : seatIds) { %>
                             <input type="hidden" name="seatIds" value="<%= seatId %>">
-                        <% } %>
+                        <%   }
+                        } %>
                     </form>
 
                     <button type="button" id="proceedToPaymentBtn" 
-                            class="w-full bg-red-700  py-4 px-6 rounded-xl font-semibold text-lg transition-all transform hover:bg-red-800 text-white hover:border-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none border-2 border-red-600" 
+                            class="w-full bg-red-700 py-4 px-6 rounded-xl font-semibold text-lg transition-all transform hover:bg-red-800 text-white hover:border-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none border-2 border-red-600" 
                             disabled>
                         <div class="flex items-center justify-center gap-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,8 +319,15 @@
                         </div>
                     </button>
 
-                   
-
+                    <a href="selectShowtimes.jsp?movie_id=<%= movieId %>&theater_id=<%= theaterId %>" 
+                       class="w-full bg-white py-4 px-6 rounded-xl font-semibold text-lg transition-all transform hover:bg-gray-50 text-red-600 border-2 border-red-600 hover:border-red-700 text-center block">
+                        <div class="flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            <span>Back to Seats</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -339,7 +365,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== Payment Script Loaded ===');
     console.log('Seats:', '<%= selectedSeats %>');
-    console.log('Number of seats:', <%= seatIds.length %>);
+    console.log('Number of seats:', <%= seatIds != null ? seatIds.length : 0 %>);
+    console.log('Total Price:', <%= totalPrice != null ? totalPrice : 0 %>);
     
     const paymentOptions = document.querySelectorAll('.payment-option');
     const proceedBtn = document.getElementById('proceedToPaymentBtn');

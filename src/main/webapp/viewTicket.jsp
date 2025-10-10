@@ -81,7 +81,7 @@ else if ("cancelled".equalsIgnoreCase(booking.getStatus()))
 			<ol class="list-none p-0 inline-flex">
 				<li><a href="home.jsp" class="hover:text-red-600">Home</a></li>
             <li><span class="mx-2">/</span></li>
-            <li><a href="user-orders.jsp" class="hover:text-red-600">My Bookings</a></li>
+            <li><a href="myBookings.jsp" class="hover:text-red-600">My Bookings</a></li>
             <li><span class="mx-2">/</span></li>
 				<li class="flex items-center text-gray-900 font-semibold">Booking Details
 				</li>

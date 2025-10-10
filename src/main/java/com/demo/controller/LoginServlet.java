@@ -33,8 +33,32 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
-            // Get saved redirect URL (if any)
+            // Check if there's a pending booking redirect from CheckOutBookingServlet
             String redirectURL = (String) session.getAttribute("redirectAfterLogin");
+            
+            // Debug logging
+            System.out.println("=== LOGIN SERVLET DEBUG ===");
+            System.out.println("redirectAfterLogin from session: " + redirectURL);
+            
+            // Check if there are pending booking attributes
+            boolean hasPendingBooking = session.getAttribute("pendingBookingMovieId") != null;
+            System.out.println("Has pending booking: " + hasPendingBooking);
+            
+            // If coming from booking flow, redirect back to CheckOutBookingServlet
+            if (redirectURL != null && redirectURL.equals("CheckOutBookingServlet")) {
+                System.out.println("Redirecting back to CheckOutBookingServlet for booking processing");
+                session.removeAttribute("redirectAfterLogin"); // clear it after use
+                response.sendRedirect("CheckOutBookingServlet");
+                return;
+            }
+            
+            // If no specific redirect, check for pending booking data
+            if (hasPendingBooking && redirectURL == null) {
+                System.out.println("Found pending booking data, redirecting to CheckOutBookingServlet");
+                response.sendRedirect("CheckOutBookingServlet");
+                return;
+            }
+            
             session.removeAttribute("redirectAfterLogin"); // clear it after use
 
             // Determine role-based default if no redirect URL
@@ -51,6 +75,7 @@ public class LoginServlet extends HttpServlet {
                 }
             }
 
+            System.out.println("Final redirect URL: " + redirectURL);
             // Redirect to saved or default page
             response.sendRedirect(redirectURL);
 
