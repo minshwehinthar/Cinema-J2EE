@@ -50,32 +50,51 @@
         List<Movies> pageMovies = (start<end)?allMovies.subList(start,end):List.of();
 
         if(pageMovies.isEmpty()){
-            out.print("<tr><td colspan='7' class='px-6 py-4 text-center text-gray-500'>No movies found.</td></tr>");
+            out.print("<tr><td colspan='7' class='px-6 py-8 text-center'><div class='w-16 h-16 mx-auto mb-4 text-gray-300'><svg fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1' d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'/></svg></div><h3 class='text-lg font-medium text-gray-600 mb-2'>No movies found</h3><p class='text-gray-500'>Try adjusting your search or filter to find what you're looking for.</p></td></tr>");
         } else {
             for(Movies m : pageMovies){
 %>
-<tr class="hover:bg-gray-50" id="movieRow_<%=m.getMovie_id()%>">
-    <td class="px-6 py-4"><%=m.getMovie_id()%></td>
-    <td class="px-6 py-4 font-medium text-gray-900">
-        <p><%= m.getTitle() %></p>
-        <p class="text-sm text-gray-500"><%= m.getDuration() %></p>
+<tr class="hover:bg-red-50 transition-colors duration-150" id="movieRow_<%=m.getMovie_id()%>">
+    <td class="px-6 py-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <span class="text-red-600 font-bold text-sm">#<%=m.getMovie_id()%></span>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4">
+        <div class="font-medium text-gray-900"><%= m.getTitle() %></div>
+        <div class="text-sm text-gray-500"><%= m.getDuration() %></div>
     </td>
     <td class="px-6 py-4"><%= (m.getDirector()!=null?m.getDirector():"") %></td>
     <td class="px-6 py-4"><%= (m.getGenres()!=null?m.getGenres():"") %></td>
     <td class="px-6 py-4">
-        <span class="px-2 py-1 rounded text-xs font-semibold <%= "now-showing".equals(m.getStatus())?"bg-green-100 text-green-700":"bg-yellow-100 text-yellow-700" %>">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border <%= "now-showing".equals(m.getStatus())?"bg-green-100 text-green-800 border-green-200":"bg-yellow-100 text-yellow-800 border-yellow-200" %>">
             <%= m.getStatus() %>
         </span>
     </td>
-    <td class="px-6 py-4 text-center flex justify-center space-x-2">
-    <a href="MoviesDetails.jsp?id=<%= m.getMovie_id() %>" 
-       class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm">Detail</a>
-    <a href="editMovie.jsp?movieId=<%=m.getMovie_id()%>" 
-           class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">Edit</a>
-        <button onclick="deleteMovie(<%= m.getMovie_id() %>)"
-                class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
-            Delete
-        </button>
+    <td class="px-6 py-4">
+        <div class="flex justify-center space-x-3 min-w-[90px]">
+            <a href="MoviesDetails.jsp?id=<%= m.getMovie_id() %>" 
+               class="inline-flex items-center justify-center w-10 h-10 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </a>
+            <a href="editMovie.jsp?movieId=<%=m.getMovie_id()%>" 
+               class="inline-flex items-center justify-center w-10 h-10 text-blue-600 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                </svg>
+            </a>
+            <button onclick="deleteMovie(<%= m.getMovie_id() %>)"
+                    class="inline-flex items-center justify-center w-10 h-10 text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
     </td>
 </tr>
 <%
@@ -90,41 +109,137 @@
     <jsp:include page="layout/sidebar.jsp"/>
     <div class="flex-1 sm:ml-64">
         <jsp:include page="/layout/AdminHeader.jsp"/>
-        <div class="p-8">
-            <h1 class="text-2xl font-bold mb-6 text-gray-900">Movies List</h1>
+        <div class="p-8 max-w-8xl mx-auto">
+            <!-- Breadcrumb -->
+				<nav class="text-gray-500 text-sm mb-6" aria-label="Breadcrumb">
+					<ol class="list-none p-0 inline-flex">
+						<li><a href="index.jsp" class="hover:text-red-600">Home</a></li>
+						<li><span class="mx-2">/</span></li>
 
-            <div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
-
-            <div class="flex justify-between items-center mb-4">
-                <input type="text" id="searchInput" placeholder="Search by Title, Director, Genre..."
-                       class="px-4 py-2 border rounded-lg w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                <a href="addMovies.jsp" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">+ Add Movie</a>
+						<li class="flex items-center text-gray-900 font-semibold">Movie Management</li>
+					</ol>
+				</nav>
+            <!-- Header Section -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Movies Management</h1>
+                    <p class="text-gray-600 mt-1">Manage all movies and their details</p>
+                </div>
             </div>
 
-            <div class="overflow-x-auto bg-white shadow rounded-lg">
-                <table class="min-w-full text-sm text-left">
-                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
-                        <tr>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('id')">ID</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('title')">Title</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('director')">Director</th>
-                            <th class="px-6 py-3">Genres</th>
-                            <th class="px-6 py-3 cursor-pointer" onclick="sortTable('status')">Status</th>
-                            <th class="px-6 py-3 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+            <!-- Search and Filter -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex space-x-4">
+                    <input type="text" id="searchInput" placeholder="Search by Title, Director, Genre..." 
+                           class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none ring-transparent "/>
+                </div>
+                <a href="addMovies.jsp" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-sm">+ Add Movie</a>
             </div>
 
-            <div id="pagination" class="flex justify-center mt-6 space-x-1"></div>
+            <!-- Movies Table -->
+            <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-red-50 text-gray-900 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('id')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>ID</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('title')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Title</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('director')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Director</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold">Genres</th>
+                                <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('status')">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Status</span>
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 font-semibold text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex mt-6 justify-between items-center">
+                <!-- Left Section: Total and Row -->
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-gray-700">
+                        Total <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalMovies">
+                            <%= allMovies.size() %>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-700">Row</span>
+                        <select id="recordsPerPage" onchange="handleLimitChange()"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:border-red-500 block w-full p-2.5"
+                            style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Right Section: Page Info and Navigation -->
+                <div class="flex items-center gap-0">
+                    <div class="text-sm text-gray-700 mr-4">
+                        Page <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="currentPage">1</span> of <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2" id="totalPages">1</span>
+                    </div>
+                    
+                    <!-- Navigation Buttons - No space between -->
+                    <div class="flex gap-0">
+                        <!-- Previous Button -->
+                        <button id="prevBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg border-r-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Next Button -->
+                        <button id="nextBtn"
+                            class="flex opacity-50 cursor-not-allowed items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
+
 <script>
 let currentPage = 1;
-const pageSize = 5;
+let pageSize = 5;
 let currentSortField = '';
 let currentSortOrder = 'asc';
 
@@ -188,31 +303,50 @@ function debounce(func,delay){
 function renderPagination(){
     const totalMovies = <%= allMovies.size() %>;
     const totalPages = Math.ceil(totalMovies / pageSize);
-    const container = document.getElementById('pagination');
-    container.innerHTML = '';
-
-    const prev = document.createElement('a');
-    prev.href = "javascript:void(0)";
-    prev.innerText = "Prev";
-    prev.className = "px-4 py-2 rounded-md border "+(currentPage===1?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    prev.addEventListener('click',()=>{ if(currentPage>1) loadMovies(currentPage-1,searchInput.value); });
-    container.appendChild(prev);
-
-    for(let i=1;i<=totalPages;i++){
-        const a = document.createElement('a');
-        a.href = "javascript:void(0)";
-        a.innerText = i;
-        a.className = "px-4 py-2 rounded-md border "+(i===currentPage?"bg-blue-600 text-white":"bg-white text-gray-700 hover:bg-blue-100");
-        a.addEventListener('click',()=>loadMovies(i,searchInput.value));
-        container.appendChild(a);
+    
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalMovies').textContent = totalMovies;
+    
+    // Update prev/next buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if(currentPage <= 1) {
+        prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
     }
+    
+    if(currentPage >= totalPages) {
+        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.remove('hover:bg-gray-100', 'hover:text-gray-700');
+    } else {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.add('hover:bg-gray-100', 'hover:text-gray-700');
+    }
+    
+    // Add event listeners
+    prevBtn.onclick = () => {
+        if(currentPage > 1) {
+            loadMovies(currentPage - 1, searchInput.value);
+        }
+    };
+    
+    nextBtn.onclick = () => {
+        if(currentPage < totalPages) {
+            loadMovies(currentPage + 1, searchInput.value);
+        }
+    };
+}
 
-    const next = document.createElement('a');
-    next.href = "javascript:void(0)";
-    next.innerText = "Next";
-    next.className = "px-4 py-2 rounded-md border "+(currentPage===totalPages?"bg-gray-200 text-gray-500":"bg-white text-gray-700 hover:bg-blue-100");
-    next.addEventListener('click',()=>{ if(currentPage<totalPages) loadMovies(currentPage+1,searchInput.value); });
-    container.appendChild(next);
+function handleLimitChange() {
+    const select = document.getElementById('recordsPerPage');
+    pageSize = parseInt(select.value);
+    loadMovies(1, searchInput.value);
 }
 
 // --- SORT FUNCTION ---
@@ -226,7 +360,10 @@ function sortTable(field){
     loadMovies(1, searchInput.value, currentSortField, currentSortOrder);
 }
 
-window.onload = function(){ loadMovies(); }
+window.onload = function(){ 
+    loadMovies(); 
+    document.getElementById('recordsPerPage').value = pageSize;
+}
 </script>
 
 <style>

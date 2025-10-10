@@ -71,17 +71,14 @@
 
       <!-- Buttons -->
       <div class="flex gap-4 pt-4">
-        <a href="<%= ctaHref %>" 
+        <a href="movies.jsp" 
            class="inline-flex items-center px-6 py-3 rounded-xl bg-red-600 text-white font-semibold shadow hover:bg-red-700 transition">
           Book Tickets
           <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </a>
-        <a href="${pageContext.request.contextPath}/movies"
-           class="inline-flex items-center px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-800 font-semibold shadow hover:bg-gray-100 transition">
-          View Movies
-        </a>
+        
       </div>
     </div>
 

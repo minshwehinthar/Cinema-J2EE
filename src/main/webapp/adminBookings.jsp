@@ -1,9 +1,14 @@
 <%@page import="com.demo.dao.TheaterDAO"%>
 <%@page import="com.demo.dao.BookingDao"%>
-<%@ page import="java.util.ArrayList" %>
+<%@page import="com.demo.dao.UserDAO"%>
+<%@page import="com.demo.dao.MoviesDao"%>
+<%@page import="com.demo.dao.ShowtimesDao"%>
+
 <%@ page import="com.demo.model.Booking" %>
 <%@ page import="com.demo.model.User" %>
 <%@ page import="com.demo.model.Theater" %>
+<%@ page import="com.demo.model.Movies" %>
+<%@ page import="com.demo.model.Showtime" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -16,41 +21,114 @@
         return;
     }
 
+    // Pagination parameters
+    int currentPage = 1;
+    int recordsPerPage = 5;
+    
+    // Get records per page from request parameter
+    String limitParam = request.getParameter("limit");
+    if (limitParam != null && !limitParam.isEmpty()) {
+        try {
+            recordsPerPage = Integer.parseInt(limitParam);
+            // Validate allowed values
+            if (recordsPerPage != 5 && recordsPerPage != 10 && recordsPerPage != 15 && recordsPerPage != 20) {
+                recordsPerPage = 10;
+            }
+        } catch (NumberFormatException e) {
+            recordsPerPage = 10;
+        }
+    }
+    
+    // Get current page from request parameter
+    String pageParam = request.getParameter("page");
+    if (pageParam != null && !pageParam.isEmpty()) {
+        try {
+            currentPage = Integer.parseInt(pageParam);
+        } catch (NumberFormatException e) {
+            currentPage = 1;
+        }
+    }
+    
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+
     // Get theater info for theater admin
     Theater userTheater = null;
-    if ("theateradmin".equals(adminUser.getRole())) {
+    if ("theater_admin".equals(adminUser.getRole())) {
         TheaterDAO theaterDao = new TheaterDAO();
         userTheater = theaterDao.getTheaterByUserId(adminUser.getUserId());
     }
 
-    // Get bookings based on user role
+    // Initialize DAOs for additional data
     BookingDao bookingDAO = new BookingDao();
+    UserDAO userDAO = new UserDAO();
+    MoviesDao movieDAO = new MoviesDao();
+    TheaterDAO theaterDAO = new TheaterDAO();
+    ShowtimesDao showtimeDAO = new ShowtimesDao();
+    
+    // Get bookings based on user role
     List<Booking> allBookings = null;
+    List<Booking> userBookings = null;
     String errorMessage = null;
     
-    // Load all theaters for admin
-    TheaterDAO theaterDao = new TheaterDAO();
-    ArrayList<Theater> theaters = new ArrayList<>();
-    if ("admin".equals(adminUser.getRole())) {
-        theaters = (ArrayList<Theater>) theaterDao.getAllTheaters();
-    }
-    
     try {
-        if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) {
+        if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) {
             allBookings = bookingDAO.getBookingsByTheaterId(userTheater.getTheaterId());
-        } else if ("admin".equals(adminUser.getRole())) {
-            allBookings = bookingDAO.getAllBookings();
         } else {
-            allBookings = new java.util.ArrayList<>();
+            allBookings = bookingDAO.getAllBookings();
         }
+        
+        // Calculate pagination
+        int totalRecords = allBookings.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        
+        // Get sublist for current page
+        int start = (currentPage - 1) * recordsPerPage;
+        int end = Math.min(start + recordsPerPage, totalRecords);
+        
+        if (totalRecords > 0) {
+            userBookings = allBookings.subList(start, end);
+        } else {
+            userBookings = new java.util.ArrayList<>();
+        }
+        
+        // Set pagination attributes for use in JSP
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        request.setAttribute("recordsPerPage", recordsPerPage);
+        request.setAttribute("startRecord", totalRecords > 0 ? start + 1 : 0);
+        request.setAttribute("endRecord", Math.min(end, totalRecords));
+        
     } catch (Exception e) {
         errorMessage = "Error loading bookings: " + e.getMessage();
         allBookings = new java.util.ArrayList<>();
+        userBookings = new java.util.ArrayList<>();
+        request.setAttribute("currentPage", 1);
+        request.setAttribute("totalPages", 0);
+        request.setAttribute("totalRecords", 0);
+        request.setAttribute("recordsPerPage", recordsPerPage);
+        request.setAttribute("startRecord", 0);
+        request.setAttribute("endRecord", 0);
     }
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
     SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+    
+    // Get pagination attributes
+    int currentPageAttr = (Integer) request.getAttribute("currentPage");
+    int totalPages = (Integer) request.getAttribute("totalPages");
+    int totalRecords = (Integer) request.getAttribute("totalRecords");
+    int recordsPerPageAttr = (Integer) request.getAttribute("recordsPerPage");
+    int startRecord = (Integer) request.getAttribute("startRecord");
+    int endRecord = (Integer) request.getAttribute("endRecord");
 %>
+
 
 <div class="flex">
     <jsp:include page="layout/sidebar.jsp" />
@@ -63,109 +141,18 @@
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Booking Management</h1>
                     <p class="text-gray-600 mt-1">
-                        <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
+                        <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
                             Managing bookings for <span class="font-semibold text-red-600"><%= userTheater.getName() %></span>
                         <% } else { %>
                             Manage all customer bookings and seat availability
                         <% } %>
                     </p>
                 </div>
-                <button onclick="refreshPage()" 
-                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm font-medium">
-                    Refresh
-                </button>
+                
             </div>
 
-            <!-- Right Sidebar (Admin Theater Filter) -->
-            <% if ("admin".equals(adminUser.getRole())) { %>
-            <!-- Sidebar Toggle Button -->
-            <button id="sidebar-toggle"
-                class="fixed top-[80px] right-0 z-50 bg-red-600 text-white px-3 py-1 rounded-l-lg hover:bg-red-700 transition">
-                ☰
-            </button>
-
-            <aside id="right-sidebar"
-                class="fixed top-[64px] right-0 w-64 h-[calc(100vh-64px)] bg-white border-l border-gray-200 overflow-y-auto p-5 transform translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:block">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Theater</h3>
-                    <button id="sidebar-close"
-                        class="lg:hidden text-gray-600 hover:text-red-600 text-xl font-bold">✕</button>
-                </div>
-
-                <ul class="space-y-1">
-                    <!-- All Button -->
-                    <li class="theater-filter px-3 py-2 text-red-700 bg-red-100 rounded-lg cursor-pointer font-semibold"
-                        data-theater-id="all">Show All</li>
-
-                    <% for (Theater t : theaters) { %>
-                    <li class="theater-filter px-3 py-2 text-gray-700 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-700 transition"
-                        data-theater-id="<%=t.getTheaterId()%>">
-                        <span class="block font-medium"><%=t.getName()%></span>
-                    </li>
-                    <% } %>
-                </ul>
-            </aside>
-
-            <script>
-                const sidebarToggle = document.getElementById('sidebar-toggle');
-                const rightSidebar = document.getElementById('right-sidebar');
-                const sidebarClose = document.getElementById('sidebar-close');
-
-                sidebarToggle.addEventListener('click', () => {
-                    const isOpen = !rightSidebar.classList.contains('translate-x-full');
-                    rightSidebar.classList.toggle('translate-x-full');
-                    sidebarToggle.textContent = isOpen ? '☰' : '✕';
-                });
-
-                sidebarClose.addEventListener('click', () => {
-                    rightSidebar.classList.add('translate-x-full');
-                    sidebarToggle.textContent = '☰';
-                });
-
-                document.addEventListener('click', (e) => {
-                    if (!rightSidebar.contains(e.target) && !sidebarToggle.contains(e.target) && !rightSidebar.classList.contains('translate-x-full')) {
-                        rightSidebar.classList.add('translate-x-full');
-                        sidebarToggle.textContent = '☰';
-                    }
-                });
-
-                // =============================
-                // THEATER FILTER FOR BOOKINGS
-                // =============================
-                const theaterFilters = document.querySelectorAll('.theater-filter');
-                
-                theaterFilters.forEach(item => {
-                    item.addEventListener('click', () => {
-                        const theaterId = item.getAttribute('data-theater-id');
-
-                        // Reset all to inactive
-                        theaterFilters.forEach(i => {
-                            i.classList.remove('bg-red-100', 'text-red-700', 'font-semibold');
-                            i.classList.add('text-gray-700');
-                        });
-
-                        // Set active
-                        item.classList.remove('text-gray-700');
-                        item.classList.add('bg-red-100', 'text-red-700', 'font-semibold');
-
-                        // Show all if "all" selected
-                        if (theaterId === "all") {
-                            document.querySelectorAll('#tableBody tr').forEach(row => row.style.display = '');
-                            return;
-                        }
-
-                        // Filter bookings by theater ID
-                        document.querySelectorAll('#tableBody tr').forEach(row => {
-                            const rowTheaterId = row.getAttribute('data-theater-id');
-                            row.style.display = (rowTheaterId === theaterId) ? '' : 'none';
-                        });
-                    });
-                });
-            </script>
-            <% } %>
-
             <!-- Theater Admin Info Card -->
-            <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
+            <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
             <div class="bg-gradient-to-r from-red-50 to-white border border-red-200 rounded-lg p-6 mb-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
@@ -189,20 +176,20 @@
             <!-- Search and Filter -->
             <div class="flex justify-between items-center mb-6">
                 <div class="flex space-x-4">
-                    <input type="text" id="searchInput" placeholder="Search by ID, User, Showtime..." 
-                           class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"/>
+                    <input type="text" id="searchInput" placeholder="Search by ID, User, Movie, Theater..." 
+                           class="px-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none ring-transparent "/>
                     
-                    <select id="statusFilter" onchange="filterTable()" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                    
                 </div>
-                
-                <div class="text-sm text-gray-600">
-                    Total: <span class="font-semibold text-red-600"><%= allBookings.size() %></span> bookings
+                <div>
+                <select id="statusFilter" onchange="filterTable()" 
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg ring-transprent block w-full p-2.5"
+        style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+    <option value="">All Status</option>
+    <option value="pending">Pending</option>
+    <option value="confirmed">Confirmed</option>
+    <option value="cancelled">Cancelled</option>
+</select>
                 </div>
             </div>
 
@@ -210,22 +197,22 @@
             <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left">
-                        <thead class="bg-red-50 text-red-700 uppercase text-xs border-b border-red-100">
+                        <thead class="bg-red-50 text-gray-900 uppercase text-xs">
                             <tr>
                                 <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('id')">
                                     <div class="flex items-center space-x-1">
                                         <span>Booking ID</span>
-                                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                         </svg>
                                     </div>
                                 </th>
                                 <th class="px-6 py-4 font-semibold">Customer Info</th>
-                                <th class="px-6 py-4 font-semibold">Show Details</th>
+                                <th class="px-6 py-4 font-semibold">Movie & Theater</th>
                                 <th class="px-6 py-4 font-semibold cursor-pointer" onclick="sortTable('price')">
                                     <div class="flex items-center space-x-1">
                                         <span>Payment</span>
-                                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                         </svg>
                                     </div>
@@ -235,7 +222,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-gray-100">
-                            <% if (allBookings.isEmpty()) { %>
+                            <% if (userBookings.isEmpty()) { %>
                                 <tr>
                                     <td colspan="6" class="px-6 py-8 text-center">
                                         <div class="w-16 h-16 mx-auto mb-4 text-gray-300">
@@ -245,7 +232,7 @@
                                         </div>
                                         <h3 class="text-lg font-medium text-gray-600 mb-2">No bookings found</h3>
                                         <p class="text-gray-500">
-                                            <% if ("theateradmin".equals(adminUser.getRole()) && userTheater != null) { %>
+                                            <% if ("theater_admin".equals(adminUser.getRole()) && userTheater != null) { %>
                                                 No bookings for <%= userTheater.getName() %> yet.
                                             <% } else { %>
                                                 There are no bookings in the system yet.
@@ -254,61 +241,40 @@
                                     </td>
                                 </tr>
                             <% } else { 
-                                for (Booking booking : allBookings) { 
-                                    String statusClass = "";
-                                    String statusText = "";
-                                    String statusIcon = "";
+                                for (Booking booking : userBookings) { 
+                                    // Get additional data for each booking
+                                    User customer = userDAO.getUserById(booking.getUserId());
+                                    Showtime showtime = showtimeDAO.getShowtimeDetails(booking.getShowtimeId());
+                                    Movies movie = null;
+                                    Theater theater = null;
                                     
-                                    // Get theater ID for this booking
-                                    int theaterId = 0;
-                                    try {
-                                        TheaterDAO theaterDaoForBooking = new TheaterDAO();
-                                        // You need to implement this method in BookingDao to get theater ID for a booking
-                                        theaterId = bookingDAO.getTheaterIdByBookingId(booking.getBookingId());
-                                    } catch (Exception e) {
-                                        theaterId = 0;
+                                    if (showtime != null) {
+                                        movie = movieDAO.getMovieById(showtime.getMovieId());
+                                        theater = theaterDAO.getTheaterById(showtime.getTheaterId());
                                     }
                                     
+                                    String statusClass = "";
+                                    String statusText = "";
+                                    
                                     switch(booking.getStatus().toLowerCase()) {
-                                    case "pending":
-                                        statusClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
-                                        statusText = "Pending";
-                                        statusIcon = "<i class=\"fa-regular fa-hourglass-half\"></i>";
-                                        break;
-                                    case "confirmed":
-                                        statusClass = "bg-green-100 text-green-800 border-green-200";
-                                        statusText = "Confirmed";
-                                        statusIcon = "<i class=\"fa-solid fa-circle-check\"></i>";
-                                        break;
-                                    case "cancelled":
-                                        statusClass = "bg-red-100 text-red-800 border-red-200";
-                                        statusText = "Cancelled";
-                                        statusIcon = "<i class=\"fa-solid fa-xmark\"></i>";
-                                        break;
-                                    case "completed":
-                                        statusClass = "bg-blue-100 text-blue-800 border-blue-200";
-                                        statusText = "Completed";
-                                        statusIcon = "<i class=\"fa-solid fa-flag-checkered\"></i>";
-                                        break;
-                                    case "refunded":
-                                        statusClass = "bg-purple-100 text-purple-800 border-purple-200";
-                                        statusText = "Refunded";
-                                        statusIcon = "<i class=\"fa-solid fa-rotate-left\"></i>";
-                                        break;
-                                    case "expired":
-                                        statusClass = "bg-gray-100 text-gray-800 border-gray-200";
-                                        statusText = "Expired";
-                                        statusIcon = "<i class=\"fa-regular fa-clock\"></i>";
-                                        break;
-                                    default:
-                                        statusClass = "bg-gray-100 text-gray-800 border-gray-200";
-                                        statusText = booking.getStatus();
-                                        statusIcon = "<i class=\"fa-solid fa-question\"></i>";
-                                }
+                                        case "pending":
+                                            statusClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                                            statusText = "Pending";
+                                            break;
+                                        case "confirmed":
+                                            statusClass = "bg-green-100 text-green-800 border-green-200";
+                                            statusText = "Confirmed";
+                                            break;
+                                        case "cancelled":
+                                            statusClass = "bg-red-100 text-red-800 border-red-200";
+                                            statusText = "Cancelled";
+                                            break;
+                                        default:
+                                            statusClass = "bg-gray-100 text-gray-800 border-gray-200";
+                                            statusText = booking.getStatus();
+                                    }
                             %>
-                            <tr class="hover:bg-red-50 transition-colors duration-150" 
-                                id="bookingRow<%= booking.getBookingId() %>"
-                                data-theater-id="<%= theaterId %>">
+                            <tr class="hover:bg-red-50 transition-colors duration-150" id="bookingRow<%= booking.getBookingId() %>">
                                 <!-- Booking ID -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-3">
@@ -323,19 +289,28 @@
                                 
                                 <!-- Customer Info -->
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">User #<%= booking.getUserId() %></div>
-                                    <div class="text-sm text-gray-500 capitalize">
-                                        <%= booking.getPaymentMethod() != null ? booking.getPaymentMethod() : "Unknown" %>
+                                    <div class="font-medium text-gray-900">
+                                        <%= customer != null ? customer.getName() : "User #" + booking.getUserId() %>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        <%= customer != null && customer.getEmail() != null ? customer.getEmail() : "No email" %>
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1">
+                                        User ID: #<%= booking.getUserId() %>
                                     </div>
                                 </td>
                                 
-                                <!-- Show Details -->
+                                <!-- Movie & Theater Details -->
                                 <td class="px-6 py-4">
-                                    <div class="text-gray-900">
-                                        <span class="font-medium">Showtime #<%= booking.getShowtimeId() %></span>
+                                    <div class="font-medium text-gray-900">
+                                        <%= movie != null ? movie.getTitle() : "Movie #" + (showtime != null ? showtime.getMovieId() : "N/A") %>
                                     </div>
-                                    <div class="text-sm text-gray-500">
-                                        <%= booking.getSelectedSeatIds() != null ? booking.getSelectedSeatIds().size() + " seats" : "No seats" %>
+                                    <div class="text-sm text-gray-600">
+                                        <%= theater != null ? theater.getName() : "Theater #" + (showtime != null ? showtime.getTheaterId() : "N/A") %>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Showtime #<%= booking.getShowtimeId() %>
+                                        • <%= booking.getSelectedSeatIds() != null ? booking.getSelectedSeatIds().size() + " seats" : "No seats" %>
                                     </div>
                                 </td>
                                 
@@ -344,45 +319,75 @@
                                     <div class="font-semibold text-red-600">
                                         <%= booking.getTotalPrice() != null ? "MMK " + booking.getTotalPrice() : "N/A" %>
                                     </div>
+                                    <div class="text-xs text-gray-500 capitalize mt-1">
+                                        <%= booking.getPaymentMethod() != null ? booking.getPaymentMethod() : "Unknown" %>
+                                    </div>
                                 </td>
                                 
                                 <!-- Status -->
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border <%= statusClass %>">
-                                        <%= statusIcon %> <%= statusText %>
+                                         <%= statusText %>
                                     </span>
                                 </td>
                                 
                                 <!-- Actions -->
                                 <td class="px-6 py-4">
-                                    <div class="flex flex-col space-y-2 min-w-[120px]">
-                                        <!-- Status-based actions -->
+                                    <div class="flex justify-center space-x-3 min-w-[90px]">
+                                        <!-- Approve Button -->
                                         <% if ("pending".equals(booking.getStatus())) { %>
                                             <button onclick="approveBooking(<%= booking.getBookingId() %>)" 
-                                                    class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                                <span>✓</span>
-                                                <span>Approve</span>
+                                                    class="inline-flex items-center justify-center w-10 h-10 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                </svg>
+                                            </button>
+                                        <% } else { %>
+                                            <button class="inline-flex items-center justify-center w-10 h-10 text-gray-300 bg-gray-50 border border-gray-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90" disabled>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                </svg>
                                             </button>
                                         <% } %>
-                                        
-                                        <% if ("confirmed".equals(booking.getStatus())) { %>
-                                            <button onclick="adminCancelBooking(<%= booking.getBookingId() %>)" 
-                                                    class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                                <span>Cancel</span>
-                                            </button>
-                                        <% } %>
-                                        
-                                        <!-- View Details Button -->
+
+                                        <!-- Details Button -->
                                         <button onclick="viewBookingDetails(<%= booking.getBookingId() %>)" 
-                                                class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                            <span>View</span>
+                                                class="inline-flex items-center justify-center w-10 h-10 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
                                         </button>
-                                        
-                                        <!-- Delete for cancelled bookings -->
+
+                                        <!-- Cancel Button -->
+                                        <% if ("pending".equals(booking.getStatus()) || "confirmed".equals(booking.getStatus())) { %>
+                                            <button onclick="adminCancelBooking(<%= booking.getBookingId() %>)" 
+                                                    class="inline-flex items-center justify-center w-10 h-10 text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        <% } else { %>
+                                            <button class="inline-flex items-center justify-center w-10 h-10 text-red-300 bg-gray-50 border border-red-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90" disabled>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        <% } %>
+
+                                        <!-- Delete Button -->
                                         <% if ("cancelled".equals(booking.getStatus())) { %>
                                             <button onclick="deleteBooking(<%= booking.getBookingId() %>)" 
-                                                    class="w-full px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition text-xs font-medium flex items-center justify-center space-x-1">
-                                                <span>Delete</span>
+                                                    class="inline-flex items-center justify-center w-10 h-10 text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 hover:border-red-400 transition-colors duration-200 shadow-sm cursor-pointer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                </svg>
+                                            </button>
+                                        <% } else { %>
+                                            <button class="inline-flex items-center justify-center w-10 h-10 text-red-300 bg-gray-50 border border-red-200 rounded-lg transition-colors duration-200 shadow-sm cursor-not-allowed opacity-90" disabled>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                </svg>
                                             </button>
                                         <% } %>
                                     </div>
@@ -396,9 +401,62 @@
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-center items-center space-x-2 mt-6" id="pagination">
-                <!-- Pagination will be populated by JavaScript -->
-            </div>
+            <% if (totalPages > 0) { %>
+            <!-- Page Info and Records Per Page -->
+<div class="flex mt-6 justify-between items-center">
+    <!-- Left Section: Total and Row -->
+    <div class="flex items-center gap-4">
+        <div class="text-sm text-gray-700">
+            Total <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                <%=totalRecords%>
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-700">Row</span>
+            <select id="recordsPerPage" onchange="handleLimitChange()"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:border-red-500 block w-full p-2.5"
+                style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;">
+                <option value="5" <%=recordsPerPageAttr == 5 ? "selected" : ""%>>5</option>
+                <option value="10" <%=recordsPerPageAttr == 10 ? "selected" : ""%>>10</option>
+                <option value="15" <%=recordsPerPageAttr == 15 ? "selected" : ""%>>15</option>
+                <option value="20" <%=recordsPerPageAttr == 20 ? "selected" : ""%>>20</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Right Section: Page Info and Navigation -->
+    <div class="flex items-center gap-0">
+        <div class="text-sm text-gray-700 mr-4">
+            Page <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                <%=currentPageAttr%>
+            </span> of <span class="shadow-sm px-3 py-2 rounded border border-gray-200 mx-2">
+                <%=totalPages%>
+            </span>
+        </div>
+        
+        <!-- Navigation Buttons - No space between -->
+        <div class="flex gap-0">
+            <!-- Previous Button -->
+            <button onclick="handlePrev()"
+                <%=currentPageAttr <= 1 ? "disabled" : ""%>
+                class="flex <%=currentPageAttr <= 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"%> items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg border-r-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            
+            <!-- Next Button -->
+            <button onclick="handleNext()"
+                <%=currentPageAttr >= totalPages ? "disabled" : ""%>
+                class="flex <%=currentPageAttr >= totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"%> items-center justify-center px-4 h-10 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+            <% } %>
 
         </div>
     </div>
@@ -448,6 +506,68 @@ function refreshPage() {
     window.location.reload();
 }
 
+// Pagination functions
+function handlePrev() {
+    <% if (currentPageAttr > 1) { %>
+        const prevPage = <%= currentPageAttr - 1 %>;
+        navigateToPage(prevPage);
+    <% } %>
+}
+
+function handleNext() {
+    <% if (currentPageAttr < totalPages) { %>
+        const nextPage = <%= currentPageAttr + 1 %>;
+        navigateToPage(nextPage);
+    <% } %>
+}
+
+function handleLimitChange() {
+    const select = document.getElementById('recordsPerPage');
+    const newLimit = select.value;
+    
+    // Create URL with new limit
+    let url = '?limit=' + newLimit;
+    
+    // Keep search parameter if exists
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput.value) {
+        url += '&search=' + encodeURIComponent(searchInput.value);
+    }
+    
+    if (statusFilter.value) {
+        url += '&status=' + encodeURIComponent(statusFilter.value);
+    }
+    
+    // Reset to first page when changing limit
+    url += '&page=1';
+    
+    window.location.href = url;
+}
+
+function navigateToPage(page) {
+    let url = '?page=' + page;
+    
+    // Add limit parameter
+    const currentLimit = <%= recordsPerPageAttr %>;
+    url += '&limit=' + currentLimit;
+    
+    // Add search parameter if exists
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput.value) {
+        url += '&search=' + encodeURIComponent(searchInput.value);
+    }
+    
+    if (statusFilter.value) {
+        url += '&status=' + encodeURIComponent(statusFilter.value);
+    }
+    
+    window.location.href = url;
+}
+
 // Search and Filter functionality
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
@@ -463,13 +583,15 @@ function filterTable() {
         
         const bookingId = row.cells[0].textContent.toLowerCase();
         const customerInfo = row.cells[1].textContent.toLowerCase();
-        const showDetails = row.cells[2].textContent.toLowerCase();
+        const movieTheaterInfo = row.cells[2].textContent.toLowerCase();
+        const paymentInfo = row.cells[3].textContent.toLowerCase();
         const statusCell = row.cells[4];
         const status = statusCell.textContent.toLowerCase();
         
         const matchesSearch = bookingId.includes(searchTerm) || 
                              customerInfo.includes(searchTerm) || 
-                             showDetails.includes(searchTerm);
+                             movieTheaterInfo.includes(searchTerm) ||
+                             paymentInfo.includes(searchTerm);
         
         const matchesStatus = statusValue === '' || status.includes(statusValue);
         
@@ -522,16 +644,30 @@ function sortTable(field) {
     rows.forEach(row => tbody.appendChild(row));
 }
 
-// Initialize pagination
-function initPagination() {
-    const rows = document.querySelectorAll('#tableBody tr');
-    const itemsPerPage = 10;
-    const totalPages = Math.ceil(rows.length / itemsPerPage);
-    // You can implement proper pagination later
-}
-
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
-    initPagination();
+    // Initialize records per page selector
+    const recordsSelect = document.getElementById('recordsPerPage');
+    if (recordsSelect) {
+        recordsSelect.value = '<%= recordsPerPageAttr %>';
+    }
+    
+    // Set initial values for search and filter from URL parameters if they exist
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const statusParam = urlParams.get('status');
+    
+    if (searchParam) {
+        searchInput.value = searchParam;
+    }
+    
+    if (statusParam) {
+        statusFilter.value = statusParam;
+    }
+    
+    // Apply initial filter if parameters exist
+    if (searchParam || statusParam) {
+        filterTable();
+    }
 });
 </script>

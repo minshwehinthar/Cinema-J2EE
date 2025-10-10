@@ -16,8 +16,7 @@ public class CheckOutBookingServlet extends HttpServlet {
         Object userObj = session.getAttribute("user");
 
         if (userObj == null) {
-            // Save booking info for after login
-            session.setAttribute("redirectAfterLogin", true);
+            // Save ALL booking parameters to session
             session.setAttribute("pendingBookingMovieId", request.getParameter("movieId"));
             session.setAttribute("pendingBookingTheaterId", request.getParameter("theaterId"));
             session.setAttribute("pendingBookingShowtimeId", request.getParameter("showtimeId"));
@@ -25,42 +24,34 @@ public class CheckOutBookingServlet extends HttpServlet {
             session.setAttribute("pendingBookingSelectedSeats", request.getParameter("selectedSeats"));
             session.setAttribute("pendingBookingSelectedSeatIds", request.getParameter("selectedSeatIds"));
             session.setAttribute("pendingBookingTotalPrice", request.getParameter("totalPrice"));
+            session.setAttribute("redirectAfterLogin", "CheckOutBookingServlet");
 
             response.sendRedirect("login.jsp");
             return;
         }
 
-        // 1️⃣ Restore parameters from request OR session
-        String movieIdStr = request.getParameter("movieId");
-        String theaterIdStr = request.getParameter("theaterId");
-        String showtimeIdStr = request.getParameter("showtimeId");
-        String showDate = request.getParameter("showDate");
-        String selectedSeats = request.getParameter("selectedSeats");
-        String selectedSeatIdsStr = request.getParameter("selectedSeatIds");
-        String totalPriceStr = request.getParameter("totalPrice");
+        // User is logged in - process booking
+        processBooking(request, response);
+    }
 
-        if (movieIdStr == null) {
-            // Coming from login redirect → get pending booking from session
-            movieIdStr = (String) session.getAttribute("pendingBookingMovieId");
-            theaterIdStr = (String) session.getAttribute("pendingBookingTheaterId");
-            showtimeIdStr = (String) session.getAttribute("pendingBookingShowtimeId");
-            showDate = (String) session.getAttribute("pendingBookingShowDate");
-            selectedSeats = (String) session.getAttribute("pendingBookingSelectedSeats");
-            selectedSeatIdsStr = (String) session.getAttribute("pendingBookingSelectedSeatIds");
-            totalPriceStr = (String) session.getAttribute("pendingBookingTotalPrice");
+    private void processBooking(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        
+        // Get parameters from request OR from session (if coming from login)
+        String movieIdStr = getParameterOrAttribute(request, session, "movieId", "pendingBookingMovieId");
+        String theaterIdStr = getParameterOrAttribute(request, session, "theaterId", "pendingBookingTheaterId");
+        String showtimeIdStr = getParameterOrAttribute(request, session, "showtimeId", "pendingBookingShowtimeId");
+        String showDate = getParameterOrAttribute(request, session, "showDate", "pendingBookingShowDate");
+        String selectedSeats = getParameterOrAttribute(request, session, "selectedSeats", "pendingBookingSelectedSeats");
+        String selectedSeatIdsStr = getParameterOrAttribute(request, session, "selectedSeatIds", "pendingBookingSelectedSeatIds");
+        String totalPriceStr = getParameterOrAttribute(request, session, "totalPrice", "pendingBookingTotalPrice");
 
-            // Clear session
-            session.removeAttribute("pendingBookingMovieId");
-            session.removeAttribute("pendingBookingTheaterId");
-            session.removeAttribute("pendingBookingShowtimeId");
-            session.removeAttribute("pendingBookingShowDate");
-            session.removeAttribute("pendingBookingSelectedSeats");
-            session.removeAttribute("pendingBookingSelectedSeatIds");
-            session.removeAttribute("pendingBookingTotalPrice");
-            session.removeAttribute("redirectAfterLogin");
-        }
+        // Clear pending booking data
+        clearPendingBooking(session);
 
-        // 2️⃣ Validate
+        // Validate and process (your existing code)
         if (movieIdStr == null || theaterIdStr == null || showtimeIdStr == null
                 || showDate == null || selectedSeats == null
                 || selectedSeatIdsStr == null || totalPriceStr == null) {
@@ -68,14 +59,13 @@ public class CheckOutBookingServlet extends HttpServlet {
             return;
         }
 
-        // 3️⃣ Convert to proper types
+        // Convert and store in session for confirmbooking.jsp
         int movieId = Integer.parseInt(movieIdStr);
         int theaterId = Integer.parseInt(theaterIdStr);
         int showtimeId = Integer.parseInt(showtimeIdStr);
         double totalPrice = Double.parseDouble(totalPriceStr);
         String[] seatIdsArray = selectedSeatIdsStr.split(",");
 
-        // 4️⃣ Store booking info in session
         session.setAttribute("bookingMovieId", movieId);
         session.setAttribute("bookingTheaterId", theaterId);
         session.setAttribute("bookingShowtimeId", showtimeId);
@@ -84,10 +74,29 @@ public class CheckOutBookingServlet extends HttpServlet {
         session.setAttribute("bookingSelectedSeatIds", seatIdsArray);
         session.setAttribute("bookingTotalPrice", totalPrice);
 
-        // 5️⃣ Redirect to bookingConfirmation.jsp
+        // Redirect to confirmbooking.jsp
         response.sendRedirect("bookingConfirmation.jsp");
     }
 
+    private String getParameterOrAttribute(HttpServletRequest request, HttpSession session, 
+                                         String paramName, String attrName) {
+        String value = request.getParameter(paramName);
+        if (value == null) {
+            value = (String) session.getAttribute(attrName);
+        }
+        return value;
+    }
+
+    private void clearPendingBooking(HttpSession session) {
+        session.removeAttribute("pendingBookingMovieId");
+        session.removeAttribute("pendingBookingTheaterId");
+        session.removeAttribute("pendingBookingShowtimeId");
+        session.removeAttribute("pendingBookingShowDate");
+        session.removeAttribute("pendingBookingSelectedSeats");
+        session.removeAttribute("pendingBookingSelectedSeatIds");
+        session.removeAttribute("pendingBookingTotalPrice");
+        session.removeAttribute("redirectAfterLogin");
+    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

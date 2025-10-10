@@ -38,7 +38,7 @@
 
           <!-- Price -->
           <p class="text-gray-600 text-sm mb-1">
-            From <span class="font-semibold text-gray-900">$<%=f.getPrice()%></span>
+            From <span class="font-semibold text-gray-900"><%=f.getPrice()%> MMK</span>
           </p>
 
           <!-- Food Name -->

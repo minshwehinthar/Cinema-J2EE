@@ -103,7 +103,7 @@ for (LocalDate date : moviesByDate.keySet()) {
 	<jsp:include page="layout/sidebar.jsp" />
 
 	<!-- Main content -->
-	<div class="flex-1 sm:ml-64">
+	<div class="flex-1 sm:ml-64 max-w-8xl">
 		<!-- Admin Header -->
 		<jsp:include page="layout/AdminHeader.jsp" />
 

@@ -35,7 +35,7 @@
                     <input type="text" name="email" id="email"
                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
                     <p class="text-red-600 text-sm mt-1 hidden" id="emailEmptyError">⚠ Email is required.</p>
-                    <p class="text-red-600 text-sm mt-1 hidden" id="emailInvalidError">⚠ Email must include @</p>
+                    <p class="text-red-600 text-sm mt-1 hidden" id="emailInvalidError">⚠ Email must include @gmail.com</p>
                 </div>
 
                 <!-- Password -->
@@ -151,7 +151,7 @@ function validateForm() {
         emailEmptyError.classList.remove('hidden');
         email.classList.add('border-red-500');
         valid = false;
-    } else if (!email.value.includes('@')) {
+    } else if (!email.value.includes('@gmail.com')) {
         emailInvalidError.classList.remove('hidden');
         email.classList.add('border-red-500');
         valid = false;

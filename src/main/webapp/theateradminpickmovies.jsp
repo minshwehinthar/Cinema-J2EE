@@ -73,7 +73,7 @@
                 
                	</div>
                	<div>
-                	<a href="addTimeslots.jsp" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Add Timeslot</a>
+                	<a href="addTimeslots.jsp" class="text-white bg-red-700 hover:bg-red-900  font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add Timeslot</a>
                 	
                 </div>
             </div>
@@ -88,11 +88,7 @@
                      data-movie-id="<%= m.getMovie_id() %>"
                      data-movie-status="<%= movieStatus %>"
                      data-movie-title="<%= m.getTitle() %>"
-                     data-movie-desc="<%= m.getSynopsis() != null ? m.getSynopsis() : "" %>"
-                     data-movie-cast="<%= m.getCasts() != null ? m.getCasts() : "" %>"
-                     data-movie-duration="<%= m.getDuration() != null ? m.getDuration() : "" %>"
-                     data-movie-director="<%= m.getDirector() != null ? m.getDirector() : "" %>"
-                     data-movie-genres="<%= m.getGenres() != null ? m.getGenres() : "" %>">
+                     data-movie-desc="<%= m.getSynopsis() != null ? m.getSynopsis() : "" %>">
 
                     <img src="GetMoviesPosterServlet?movie_id=<%= m.getMovie_id() %>" 
                          alt="<%= m.getTitle() %> Poster" 
@@ -120,10 +116,6 @@
                 <div class="flex flex-col justify-start gap-2">
                     <h2 id="detailTitle" class="text-2xl font-bold text-indigo-700"></h2>
                     <p id="detailDesc" class="text-gray-700"></p>
-                    <p class="text-gray-800"><span class="font-semibold">Director:</span> <span id="detailDirector"></span></p>
-                    <p class="text-gray-800"><span class="font-semibold">Cast:</span> <span id="detailCast"></span></p>
-                    <p class="text-gray-800"><span class="font-semibold">Genres:</span> <span id="detailGenres"></span></p>
-                    <p class="text-gray-800"><span class="font-semibold">Duration:</span> <span id="detailDuration"></span></p>
 
                     <%-- Trailer Section --%>
                     <div class="mt-4">
@@ -156,7 +148,7 @@
                                    max="<%= java.time.LocalDate.now().plusWeeks(4) %>">
                         </div>
 
-                        <button type="submit" class="mt-2 py-2 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition font-semibold">
+                        <button type="submit" class="mt-2 py-2 bg-red-700 text-white rounded-2xl hover:bg-red-900 transition font-semibold">
                             Pick Movie
                         </button>
                     </form>
@@ -179,10 +171,6 @@
     const detailPosterImg = document.getElementById('detailPosterImg');
     const detailTitle = document.getElementById('detailTitle');
     const detailDesc = document.getElementById('detailDesc');
-    const detailDirector = document.getElementById('detailDirector');
-    const detailCast = document.getElementById('detailCast');
-    const detailGenres = document.getElementById('detailGenres');
-    const detailDuration = document.getElementById('detailDuration');
     const detailTrailer = document.getElementById('detailTrailer');
     const formMovieId = document.getElementById('formMovieId');
     const formMovieStatus = document.getElementById('formMovieStatus');
@@ -224,10 +212,6 @@
             detailPosterImg.src = card.querySelector('img').src;
             detailTitle.textContent = card.dataset.movieTitle;
             detailDesc.textContent = card.dataset.movieDesc;
-            detailDirector.textContent = card.dataset.movieDirector;
-            detailCast.textContent = card.dataset.movieCast;
-            detailGenres.textContent = card.dataset.movieGenres;
-            detailDuration.textContent = card.dataset.movieDuration;
 
             const trailerSrc = "GetMoviesTrailerServlet?movie_id=" + card.dataset.movieId;
             detailTrailer.querySelector('source').src = trailerSrc;

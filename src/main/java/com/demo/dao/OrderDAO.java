@@ -432,12 +432,8 @@ public class OrderDAO {
             rs.close();
             ps.close();
 
-            // 5. Delete from orders and order_items
-            ps = conn.prepareStatement("DELETE FROM orders WHERE id=?");
-            ps.setInt(1, orderId);
-            ps.executeUpdate();
-            ps.close();
-
+            // 5. Removed the DELETE operations to keep data in orders and order_items tables
+            
             conn.commit();
             return true;
 
